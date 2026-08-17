@@ -1,0 +1,6854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Личный кабинет партнёра — Магнит Франшиза</title>
+<link href="https://fonts.cdnfonts.com/css/inter" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+  html,body{margin:0;padding:0;height:100%;font-family:'Inter','Segoe UI',sans-serif;}
+  #root{min-height:100vh;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {
+  useState,
+  useEffect,
+  useRef,
+  useCallback
+} = React;
+const C = {
+  red: "#E30613",
+  redDark: "#B0040F",
+  redLight: "#FFE8E9",
+  yellow: "#FFB800",
+  yellowLight: "#FFF8E1",
+  green: "#2ECC71",
+  greenLight: "#E8F8F0",
+  blue: "#2980B9",
+  blueLight: "#E8F4FD",
+  orange: "#F39C12",
+  orangeLight: "#FEF9E7",
+  teal: "#0D9488",
+  tealLight: "#F0FDFA",
+  violet: "#7C3AED",
+  violetLight: "#F5F3FF",
+  g50: "#F8F9FA",
+  g100: "#F1F3F5",
+  g200: "#E9ECEF",
+  g300: "#DEE2E6",
+  g400: "#CED4DA",
+  g500: "#ADB5BD",
+  g600: "#6C757D",
+  g700: "#495057",
+  g800: "#343A40",
+  white: "#FFFFFF"
+};
+
+// ── ЮЛ + STORES STRUCTURE ────────────────────────────────────
+const LEGAL_ENTITIES = [{
+  id: "le1",
+  name: 'ООО "Магнит-Партнёр"',
+  stores: [{
+    id: 0,
+    name: "Магнит #1247",
+    address: "ул. Ленина, 42"
+  }, {
+    id: 1,
+    name: "Магнит #1381",
+    address: "пр. Мира, 15"
+  }]
+}, {
+  id: "le2",
+  name: 'ИП Иванов А.В.',
+  stores: [{
+    id: 2,
+    name: "Магнит #2204",
+    address: "ул. Садовая, 7"
+  }]
+}];
+const ALL_STORES = LEGAL_ENTITIES.flatMap(le => le.stores);
+const STORES = ALL_STORES.map(s => `${s.name} — ${s.address}`);
+const kpiData = {
+  0: {
+    grossIncome: "847 320 ₽",
+    grossDelta: +12.4,
+    agentRevenue: "683 400 ₽",
+    alcoholRevenue: "163 920 ₽",
+    revenue: "4 218 500 ₽",
+    rate: 18.3,
+    prevRate: 19.1,
+    sqm: "2 840 ₽",
+    sqmDelta: +5.2,
+    avgCheck: "642 ₽",
+    avgCheckDelta: +4.1,
+    traffic: "6 570 чел.",
+    trafficDelta: +8.2,
+    rto: "4 218 500 ₽",
+    rtoDelta: +11.3
+  },
+  1: {
+    grossIncome: "1 124 780 ₽",
+    grossDelta: -3.1,
+    agentRevenue: "910 200 ₽",
+    alcoholRevenue: "214 580 ₽",
+    revenue: "6 043 200 ₽",
+    rate: 21.7,
+    prevRate: 20.8,
+    sqm: "3 120 ₽",
+    sqmDelta: +8.7,
+    avgCheck: "814 ₽",
+    avgCheckDelta: -1.8,
+    traffic: "7 420 чел.",
+    trafficDelta: +2.5,
+    rto: "6 043 200 ₽",
+    rtoDelta: +9.7
+  },
+  2: {
+    grossIncome: "562 100 ₽",
+    grossDelta: +2.8,
+    agentRevenue: "447 300 ₽",
+    alcoholRevenue: "114 800 ₽",
+    revenue: "2 890 000 ₽",
+    rate: 16.5,
+    prevRate: 17.2,
+    sqm: "2 450 ₽",
+    sqmDelta: -1.2,
+    avgCheck: "478 ₽",
+    avgCheckDelta: +6.7,
+    traffic: "6 045 чел.",
+    trafficDelta: -3.1,
+    rto: "2 890 000 ₽",
+    rtoDelta: +3.4
+  }
+};
+
+// Weekly/monthly breakdown data per store
+const breakdownData = {
+  0: {
+    checkWeeks: [{
+      w: "1–7 июн",
+      v: 598
+    }, {
+      w: "8–14 июн",
+      v: 621
+    }, {
+      w: "15–21 июн",
+      v: 667
+    }, {
+      w: "22–30 июн",
+      v: 684
+    }],
+    checkMonths: [{
+      m: "Янв",
+      v: 582
+    }, {
+      m: "Фев",
+      v: 601
+    }, {
+      m: "Мар",
+      v: 615
+    }, {
+      m: "Апр",
+      v: 629
+    }, {
+      m: "Май",
+      v: 617
+    }, {
+      m: "Июн",
+      v: 642
+    }],
+    trafficWeeks: [{
+      w: "1–7 июн",
+      v: 1420
+    }, {
+      w: "8–14 июн",
+      v: 1680
+    }, {
+      w: "15–21 июн",
+      v: 1730
+    }, {
+      w: "22–30 июн",
+      v: 1740
+    }],
+    trafficMonths: [{
+      m: "Янв",
+      v: 5890
+    }, {
+      m: "Фев",
+      v: 5600
+    }, {
+      m: "Мар",
+      v: 6100
+    }, {
+      m: "Апр",
+      v: 6300
+    }, {
+      m: "Май",
+      v: 6080
+    }, {
+      m: "Июн",
+      v: 6570
+    }],
+    rtoWeeks: [{
+      w: "1–7 июн",
+      v: 848900
+    }, {
+      w: "8–14 июн",
+      v: 1042600
+    }, {
+      w: "15–21 июн",
+      v: 1156700
+    }, {
+      w: "22–30 июн",
+      v: 1170300
+    }],
+    rtoMonths: [{
+      m: "Янв",
+      v: 3540000
+    }, {
+      m: "Фев",
+      v: 3120000
+    }, {
+      m: "Мар",
+      v: 3890000
+    }, {
+      m: "Апр",
+      v: 4010000
+    }, {
+      m: "Май",
+      v: 3790000
+    }, {
+      m: "Июн",
+      v: 4218500
+    }]
+  },
+  1: {
+    checkWeeks: [{
+      w: "1–7 июн",
+      v: 780
+    }, {
+      w: "8–14 июн",
+      v: 808
+    }, {
+      w: "15–21 июн",
+      v: 831
+    }, {
+      w: "22–30 июн",
+      v: 838
+    }],
+    checkMonths: [{
+      m: "Янв",
+      v: 760
+    }, {
+      m: "Фев",
+      v: 771
+    }, {
+      m: "Мар",
+      v: 789
+    }, {
+      m: "Апр",
+      v: 801
+    }, {
+      m: "Май",
+      v: 822
+    }, {
+      m: "Июн",
+      v: 814
+    }],
+    trafficWeeks: [{
+      w: "1–7 июн",
+      v: 1710
+    }, {
+      w: "8–14 июн",
+      v: 1830
+    }, {
+      w: "15–21 июн",
+      v: 1940
+    }, {
+      w: "22–30 июн",
+      v: 1940
+    }],
+    trafficMonths: [{
+      m: "Янв",
+      v: 6800
+    }, {
+      m: "Фев",
+      v: 6500
+    }, {
+      m: "Мар",
+      v: 7100
+    }, {
+      m: "Апр",
+      v: 7200
+    }, {
+      m: "Май",
+      v: 7250
+    }, {
+      m: "Июн",
+      v: 7420
+    }],
+    rtoWeeks: [{
+      w: "1–7 июн",
+      v: 1334800
+    }, {
+      w: "8–14 июн",
+      v: 1478400
+    }, {
+      w: "15–21 июн",
+      v: 1612000
+    }, {
+      w: "22–30 июн",
+      v: 1618000
+    }],
+    rtoMonths: [{
+      m: "Янв",
+      v: 5170000
+    }, {
+      m: "Фев",
+      v: 4990000
+    }, {
+      m: "Мар",
+      v: 5640000
+    }, {
+      m: "Апр",
+      v: 5770000
+    }, {
+      m: "Май",
+      v: 5930000
+    }, {
+      m: "Июн",
+      v: 6043200
+    }]
+  },
+  2: {
+    checkWeeks: [{
+      w: "1–7 июн",
+      v: 440
+    }, {
+      w: "8–14 июн",
+      v: 465
+    }, {
+      w: "15–21 июн",
+      v: 491
+    }, {
+      w: "22–30 июн",
+      v: 516
+    }],
+    checkMonths: [{
+      m: "Янв",
+      v: 421
+    }, {
+      m: "Фев",
+      v: 435
+    }, {
+      m: "Мар",
+      v: 448
+    }, {
+      m: "Апр",
+      v: 461
+    }, {
+      m: "Май",
+      v: 448
+    }, {
+      m: "Июн",
+      v: 478
+    }],
+    trafficWeeks: [{
+      w: "1–7 июн",
+      v: 1380
+    }, {
+      w: "8–14 июн",
+      v: 1510
+    }, {
+      w: "15–21 июн",
+      v: 1570
+    }, {
+      w: "22–30 июн",
+      v: 1585
+    }],
+    trafficMonths: [{
+      m: "Янв",
+      v: 5720
+    }, {
+      m: "Фев",
+      v: 5430
+    }, {
+      m: "Мар",
+      v: 6200
+    }, {
+      m: "Апр",
+      v: 6100
+    }, {
+      m: "Май",
+      v: 6310
+    }, {
+      m: "Июн",
+      v: 6045
+    }],
+    rtoWeeks: [{
+      w: "1–7 июн",
+      v: 607200
+    }, {
+      w: "8–14 июн",
+      v: 701500
+    }, {
+      w: "15–21 июн",
+      v: 770300
+    }, {
+      w: "22–30 июн",
+      v: 811000
+    }],
+    rtoMonths: [{
+      m: "Янв",
+      v: 2410000
+    }, {
+      m: "Фев",
+      v: 2290000
+    }, {
+      m: "Мар",
+      v: 2640000
+    }, {
+      m: "Апр",
+      v: 2730000
+    }, {
+      m: "Май",
+      v: 2800000
+    }, {
+      m: "Июн",
+      v: 2890000
+    }]
+  }
+};
+
+// Category fill % per store (наполняемость магазина категориями)
+const categoryFillData = {
+  0: [{
+    cat: "Молочная",
+    fill: 82,
+    color: "#4E9AF1"
+  }, {
+    cat: "Хлеб и выпечка",
+    fill: 91,
+    color: "#F4A261"
+  }, {
+    cat: "Мясо и птица",
+    fill: 54,
+    color: "#E76F51"
+  }, {
+    cat: "Напитки",
+    fill: 78,
+    color: "#2DD4BF"
+  }, {
+    cat: "Бакалея",
+    fill: 66,
+    color: "#A78BFA"
+  }, {
+    cat: "FMCG",
+    fill: 88,
+    color: "#FCD34D"
+  }, {
+    cat: "Свежее",
+    fill: 43,
+    color: "#34D399"
+  }, {
+    cat: "Алкоголь",
+    fill: 70,
+    color: "#F87171"
+  }],
+  1: [{
+    cat: "Молочная",
+    fill: 95,
+    color: "#4E9AF1"
+  }, {
+    cat: "Хлеб и выпечка",
+    fill: 72,
+    color: "#F4A261"
+  }, {
+    cat: "Мясо и птица",
+    fill: 88,
+    color: "#E76F51"
+  }, {
+    cat: "Напитки",
+    fill: 61,
+    color: "#2DD4BF"
+  }, {
+    cat: "Бакалея",
+    fill: 79,
+    color: "#A78BFA"
+  }, {
+    cat: "FMCG",
+    fill: 55,
+    color: "#FCD34D"
+  }, {
+    cat: "Свежее",
+    fill: 83,
+    color: "#34D399"
+  }, {
+    cat: "Алкоголь",
+    fill: 90,
+    color: "#F87171"
+  }],
+  2: [{
+    cat: "Молочная",
+    fill: 60,
+    color: "#4E9AF1"
+  }, {
+    cat: "Хлеб и выпечка",
+    fill: 48,
+    color: "#F4A261"
+  }, {
+    cat: "Мясо и птица",
+    fill: 75,
+    color: "#E76F51"
+  }, {
+    cat: "Напитки",
+    fill: 92,
+    color: "#2DD4BF"
+  }, {
+    cat: "Бакалея",
+    fill: 51,
+    color: "#A78BFA"
+  }, {
+    cat: "FMCG",
+    fill: 67,
+    color: "#FCD34D"
+  }, {
+    cat: "Свежее",
+    fill: 38,
+    color: "#34D399"
+  }, {
+    cat: "Алкоголь",
+    fill: 84,
+    color: "#F87171"
+  }]
+};
+const trendData = [820, 750, 900, 860, 980, 847];
+const trendLabels = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн"];
+const supplyData = {
+  labels: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн"],
+  food: [320, 290, 350, 310, 380, 340],
+  fmcg: [180, 160, 200, 190, 220, 200],
+  fresh: [140, 130, 160, 150, 180, 160]
+};
+const topCategories = [{
+  name: "Молочная продукция",
+  sku: 142,
+  sold: 8420,
+  delta: +12,
+  revenue: "1 240 000 ₽",
+  topSku: ["Молоко 3.2% 1л", "Кефир 1% 1л", "Сметана 15% 400г"],
+  chart: [420, 380, 460, 410, 490, 442]
+}, {
+  name: "Хлеб и выпечка",
+  sku: 67,
+  sold: 6310,
+  delta: +5,
+  revenue: "756 000 ₽",
+  topSku: ["Хлеб белый нарезной", "Батон 400г", "Хлеб ржаной"],
+  chart: [310, 290, 340, 300, 360, 331]
+}, {
+  name: "Мясо и птица",
+  sku: 89,
+  sold: 4890,
+  delta: -3,
+  revenue: "2 100 000 ₽",
+  topSku: ["Курица охл. 1кг", "Фарш говяжий 500г", "Грудка куриная"],
+  chart: [510, 480, 440, 420, 400, 389]
+}, {
+  name: "Напитки",
+  sku: 211,
+  sold: 7230,
+  delta: +18,
+  revenue: "870 000 ₽",
+  topSku: ["Вода питьевая 1.5л", "Сок яблочный 1л", "Газировка 1.5л"],
+  chart: [300, 320, 380, 400, 450, 423]
+}, {
+  name: "Бакалея",
+  sku: 178,
+  sold: 5670,
+  delta: +7,
+  revenue: "680 000 ₽",
+  topSku: ["Масло подсолнечное 1л", "Гречка 1кг", "Рис 1кг"],
+  chart: [260, 240, 280, 270, 310, 297]
+}];
+// Managers per district
+const MANAGERS = {
+  "САО": {
+    name: "Морозова Е.В.",
+    district: "Северный АО"
+  },
+  "ЦАО": {
+    name: "Ковалёв А.Р.",
+    district: "Центральный АО"
+  },
+  "ЮАО": {
+    name: "Смирнова А.В.",
+    district: "Южный АО"
+  },
+  "СВАО": {
+    name: "Петров И.С.",
+    district: "Северо-Восточный АО"
+  },
+  "ЮЗАО": {
+    name: "Зайцева Н.Д.",
+    district: "Юго-Западный АО"
+  },
+  "ЮВАО": {
+    name: "Орлов П.М.",
+    district: "Юго-Восточный АО"
+  },
+  "find": {
+    name: "Ульяна Захарова",
+    district: "Подбор объектов"
+  }
+};
+// shopName appears after stage 5 (Бриф+Контур+ОЛ)
+const applications = [{
+  id: "#00341",
+  city: "Москва",
+  district: "ЮАО",
+  address: "ул. Советская, 88",
+  status: "Открыт",
+  date: "12.01.2025",
+  format: "ММ",
+  shopName: "Магнит Советский",
+  stageReached: 10,
+  manager: "Смирнова А.В.",
+  managerDistrict: "Южный АО",
+  comment: "Магазин успешно открыт.",
+  docs: ["Договор аренды", "Акт ввода в эксплуатацию"],
+  history: [{
+    date: "10.01.2025",
+    event: "Заявка подана"
+  }, {
+    date: "11.01.2025",
+    event: "Одобрено менеджером"
+  }, {
+    date: "12.01.2025",
+    event: "Магазин открыт"
+  }]
+}, {
+  id: "#00298",
+  city: "Москва",
+  district: "СВАО",
+  address: "пр. Победы, 33",
+  status: "На согласовании",
+  date: "28.03.2025",
+  format: "МК",
+  shopName: "Магнит Победа",
+  stageReached: 5,
+  manager: "Петров И.С.",
+  managerDistrict: "Северо-Восточный АО",
+  comment: "Ожидается проверка планограммы менеджером.",
+  docs: ["Планограмма", "Фото фасада"],
+  history: [{
+    date: "28.03.2025",
+    event: "Заявка подана"
+  }, {
+    date: "30.03.2025",
+    event: "Передана менеджеру"
+  }]
+}, {
+  id: "#00412",
+  city: "Москва",
+  district: "ЦАО",
+  address: "ул. Гагарина, 17",
+  status: "Черновик",
+  date: "05.05.2025",
+  format: "Мини",
+  shopName: null,
+  stageReached: 1,
+  manager: "Ковалёв А.Р.",
+  managerDistrict: "Центральный АО",
+  comment: "Заявка не завершена.",
+  docs: [],
+  history: [{
+    date: "05.05.2025",
+    event: "Черновик создан"
+  }]
+}, {
+  id: "#00187",
+  city: "Москва",
+  district: "ЮАО",
+  address: "ул. Кирова, 55",
+  status: "Отклонен",
+  date: "14.11.2024",
+  format: "ММ",
+  shopName: null,
+  stageReached: 2,
+  manager: "Смирнова А.В.",
+  managerDistrict: "Южный АО",
+  comment: "Площадь менее допустимой (100 м²).",
+  docs: ["Планограмма"],
+  history: [{
+    date: "12.11.2024",
+    event: "Заявка подана"
+  }, {
+    date: "14.11.2024",
+    event: "Отклонено"
+  }]
+}];
+const documents = [{
+  id: "D-001",
+  name: "Договор аренды 2025.pdf",
+  type: "Договор",
+  date: "10.04.2025",
+  status: "Согласован",
+  comment: ""
+}, {
+  id: "D-002",
+  name: "Акт приемки оборудования.pdf",
+  type: "Акт",
+  date: "22.04.2025",
+  status: "На согласовании",
+  comment: "Ожидается подпись куратора"
+}, {
+  id: "D-003",
+  name: "Смета ремонта.docx",
+  type: "Смета",
+  date: "01.05.2025",
+  status: "Загружен",
+  comment: ""
+}, {
+  id: "D-004",
+  name: "Доп соглашение №3.pdf",
+  type: "Договор",
+  date: "08.05.2025",
+  status: "Не согласован",
+  comment: "Ошибка в реквизитах ИНН. Исправьте и загрузите повторно."
+}];
+const debtRows = [{
+  date: "01.06",
+  category: "Молочная продукция",
+  amount: "124 500 ₽",
+  status: "Оплачено"
+}, {
+  date: "02.06",
+  category: "Напитки",
+  amount: "87 300 ₽",
+  status: "В пути"
+}, {
+  date: "03.06",
+  category: "Хлеб",
+  amount: "43 100 ₽",
+  status: "Оплачено"
+}, {
+  date: "04.06",
+  category: "Мясо",
+  amount: "198 700 ₽",
+  status: "Просрочено"
+}, {
+  date: "05.06",
+  category: "Бакалея",
+  amount: "66 400 ₽",
+  status: "В пути"
+}, {
+  date: "06.06",
+  category: "FMCG",
+  amount: "112 900 ₽",
+  status: "Оплачено"
+}];
+const goodsRows = [{
+  category: "Молочная продукция",
+  units: 1240,
+  cost: "312 000 ₽",
+  turnover: 8
+}, {
+  category: "Напитки",
+  units: 870,
+  cost: "174 000 ₽",
+  turnover: 12
+}, {
+  category: "Хлеб",
+  units: 430,
+  cost: "64 500 ₽",
+  turnover: 3
+}, {
+  category: "Мясо",
+  units: 560,
+  cost: "392 000 ₽",
+  turnover: 5
+}, {
+  category: "Бакалея",
+  units: 1870,
+  cost: "224 400 ₽",
+  turnover: 14
+}];
+const allTickets = [{
+  id: "#T-081",
+  title: "Не синхронизируется касса #3",
+  status: "В работе",
+  date: "28.05.2025",
+  category: "Техническая",
+  priority: "Высокий",
+  messages: [{
+    from: "partner",
+    text: "Касса #3 не синхронизируется с системой с 27 мая.",
+    time: "28.05 10:14"
+  }, {
+    from: "support",
+    text: "Проблема зафиксирована, передана инженеру.",
+    time: "28.05 10:42"
+  }, {
+    from: "partner",
+    text: "Хорошо, жду.",
+    time: "28.05 10:45"
+  }]
+}, {
+  id: "#T-079",
+  title: "Ошибка в акте за апрель",
+  status: "Решено",
+  date: "19.05.2025",
+  category: "Документы",
+  priority: "Средний",
+  messages: [{
+    from: "partner",
+    text: "В акте за апрель неверно указана сумма.",
+    time: "19.05 09:30"
+  }, {
+    from: "support",
+    text: "Исправлено, повторный акт загружен в ЭДО.",
+    time: "19.05 14:15"
+  }]
+}, {
+  id: "#T-074",
+  title: "Вопрос по агентской ставке Q2",
+  status: "Решено",
+  date: "03.05.2025",
+  category: "Финансы",
+  priority: "Низкий",
+  messages: [{
+    from: "partner",
+    text: "Почему агентская ставка за Q2 снизилась?",
+    time: "03.05 11:00"
+  }, {
+    from: "support",
+    text: "Снижение связано с недовыполнением плана по категории Свежее.",
+    time: "03.05 15:22"
+  }]
+}, {
+  id: "#T-088",
+  title: "Запрос доступа для нового сотрудника",
+  status: "Открыт",
+  date: "01.06.2025",
+  category: "Доступы",
+  priority: "Низкий",
+  messages: [{
+    from: "partner",
+    text: "Прошу создать доступ для нового управляющего — Козлова Д.Р.",
+    time: "01.06 08:55"
+  }]
+}];
+const knowledgeBase = [{
+  title: "Стандарты мерчандайзинга 2025",
+  type: "PDF",
+  size: "4.2 МБ",
+  desc: "Актуальные требования к выкладке и зонированию"
+}, {
+  title: "Инструкция по работе с ЛК",
+  type: "PDF",
+  size: "1.8 МБ",
+  desc: "Полное руководство пользователя"
+}, {
+  title: "Советы по увеличению чека",
+  type: "PPTX",
+  size: "7.1 МБ",
+  desc: "Механики увеличения среднего чека на 15-30%"
+}, {
+  title: "Регламент открытия магазина",
+  type: "PDF",
+  size: "3.4 МБ",
+  desc: "Пошаговый чеклист от заявки до открытия"
+}, {
+  title: "Нормативы по выкладке товара",
+  type: "PDF",
+  size: "5.6 МБ",
+  desc: "Планограммы по всем товарным категориям"
+}];
+
+// ── 10-STAGE APPLICATION WORKFLOW ──────────────────────────────
+// Group A (upload): 1,2,4,10  |  Group B (approve): 5,6,7,8,9  |  Group C (wait): 3
+// Generate stages dynamically based on app type and format
+function getStages(isFindApp = false, format = "ММ") {
+  const fmt = format || "ММ";
+  if (isFindApp) {
+    // "Find" path: 5 stages, all managed by manager side except last upload
+    return [{
+      n: 1,
+      label: `Планограмма ${fmt}`,
+      group: "B",
+      desc: `Менеджер подготовил планограмму торгового зала для формата ${fmt}. Ознакомьтесь и подтвердите.`,
+      managerFiles: [`Планограмма_${fmt}_v1.pdf`],
+      note: null
+    }, {
+      n: 2,
+      label: `Дизайн-макет ${fmt}`,
+      group: "B",
+      desc: `Ознакомьтесь с дизайн-макетом оформления магазина формата ${fmt}, разработанным менеджером.`,
+      managerFiles: [`Дизайн-макет_${fmt}_финал.pdf`, "Цветовая схема.png"],
+      note: null
+    }, {
+      n: 3,
+      label: `Расчёт оборудования ${fmt}`,
+      group: "B",
+      desc: `Проверьте спецификацию оборудования для формата ${fmt} и расчёт стоимости.`,
+      managerFiles: [`Спецификация_оборудования_${fmt}.xlsx`, `Смета_оборудование_${fmt}.pdf`],
+      note: null
+    }, {
+      n: 4,
+      label: "Подписание договора",
+      group: "B",
+      desc: "Ознакомьтесь с финальной редакцией договора франшизы и подпишите.",
+      managerFiles: ["Договор_франшизы_финал.pdf"],
+      note: null,
+      signMode: true
+    }, {
+      n: 5,
+      label: "Постановка на налоговый учёт",
+      group: "A",
+      desc: "Загрузите свидетельство о постановке на налоговый учёт и ИНН организации.",
+      files: ["Свидетельство о постановке на НУ", "ИНН организации"],
+      note: null
+    }];
+  }
+  // "Own" path: all 10 stages, with format injected into stages 6, 7, 8
+  return [{
+    n: 1,
+    label: "Посадка и фото объекта",
+    group: "A",
+    desc: "Загрузите фотографии объекта: фасад, входная группа, торговый зал, прилегающая территория (мин. 5 фото).",
+    files: ["Фото фасада", "Фото входной группы", "Фото торгового зала"],
+    note: "⚠ Следующий этап откроется после подтверждения фотографий менеджером."
+  }, {
+    n: 2,
+    label: "Технический план",
+    group: "A",
+    desc: "Загрузите технический план помещения в формате PDF или DWG.",
+    files: ["Технический план (PDF/DWG)"],
+    note: null
+  }, {
+    n: 3,
+    label: "Переговоры с собственником",
+    group: "C",
+    desc: "Менеджер проводит переговоры с собственником помещения. Ваше участие не требуется.",
+    completedText: "✓ Переговоры с собственником проведены. Условия согласованы.",
+    note: null
+  }, {
+    n: 4,
+    label: "Выписка из ЕГРН",
+    group: "A",
+    desc: "Загрузите актуальную выписку из ЕГРН на объект (не старше 30 дней).",
+    files: ["Выписка из ЕГРН (PDF)"],
+    note: null
+  }, {
+    n: 5,
+    label: "Бриф + Контур + ОЛ",
+    group: "B",
+    desc: "Менеджер загрузил пакет документов для согласования. Ознакомьтесь и подтвердите.",
+    managerFiles: ["Бриф объекта.pdf", "Контурный план.pdf", "Охранное лицензирование.pdf"],
+    note: null
+  }, {
+    n: 6,
+    label: `Планограмма ${fmt}`,
+    group: "B",
+    desc: `Проверьте планограмму торгового зала для формата ${fmt}, разработанную менеджером.`,
+    managerFiles: [`Планограмма_${fmt}_v2.pdf`],
+    note: null
+  }, {
+    n: 7,
+    label: `Дизайн-макет ${fmt}`,
+    group: "B",
+    desc: `Ознакомьтесь с дизайн-макетом оформления магазина формата ${fmt}.`,
+    managerFiles: [`Дизайн-макет_${fmt}_финал.pdf`, "Цветовая схема.png"],
+    note: null
+  }, {
+    n: 8,
+    label: `Расчёт оборудования ${fmt}`,
+    group: "B",
+    desc: `Проверьте спецификацию оборудования для формата ${fmt} и расчёт стоимости.`,
+    managerFiles: [`Спецификация_оборудования_${fmt}.xlsx`, `Смета_оборудование_${fmt}.pdf`],
+    note: null
+  }, {
+    n: 9,
+    label: "Подписание договора",
+    group: "B",
+    desc: "Ознакомьтесь с финальной редакцией договора франшизы и подпишите.",
+    managerFiles: ["Договор_франшизы_финал.pdf"],
+    note: null,
+    signMode: true
+  }, {
+    n: 10,
+    label: "Постановка на налоговый учёт",
+    group: "A",
+    desc: "Загрузите свидетельство о постановке на налоговый учёт и ИНН организации.",
+    files: ["Свидетельство о постановке на НУ", "ИНН организации"],
+    note: null
+  }];
+}
+// Keep STAGES as default (own path, ММ format) for non-app-specific uses
+const STAGES = getStages(false, "ММ");
+const statusColor = {
+  "Новая": {
+    bg: "#F3EEFF",
+    color: "#7C3AED"
+  },
+  "Согласован": {
+    bg: "#E8F8F0",
+    color: "#1a7a45"
+  },
+  "На согласовании": {
+    bg: "#FFF8E1",
+    color: "#8a5e00"
+  },
+  "Загружен": {
+    bg: "#E8F4FD",
+    color: "#1a5e8a"
+  },
+  "Не согласован": {
+    bg: "#FFE8E9",
+    color: "#b00010"
+  },
+  "Открыт": {
+    bg: "#E8F8F0",
+    color: "#1a7a45"
+  },
+  "Отклонен": {
+    bg: "#FFE8E9",
+    color: "#b00010"
+  },
+  "Черновик": {
+    bg: "#F1F3F5",
+    color: "#495057"
+  },
+  "Оплачено": {
+    bg: "#E8F8F0",
+    color: "#1a7a45"
+  },
+  "В пути": {
+    bg: "#E8F4FD",
+    color: "#1a5e8a"
+  },
+  "Просрочено": {
+    bg: "#FFE8E9",
+    color: "#b00010"
+  },
+  "В работе": {
+    bg: "#FFF8E1",
+    color: "#8a5e00"
+  },
+  "Решено": {
+    bg: "#E8F8F0",
+    color: "#1a7a45"
+  }
+};
+
+// ── SHARED COMPONENTS ──────────────────────────────────────────
+
+function Toast({
+  msg,
+  onClose
+}) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3200);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      bottom: 32,
+      right: 32,
+      background: "#1a1a2e",
+      color: "#fff",
+      padding: "14px 22px",
+      borderRadius: 12,
+      fontSize: 14,
+      zIndex: 9999,
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.22)"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.green,
+      fontSize: 18
+    }
+  }, "✓"), msg);
+}
+function Badge({
+  status
+}) {
+  const s = statusColor[status] || {
+    bg: "#eee",
+    color: "#333"
+  };
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: s.bg,
+      color: s.color,
+      fontSize: 12,
+      fontWeight: 600,
+      padding: "3px 10px",
+      borderRadius: 20,
+      whiteSpace: "nowrap"
+    }
+  }, status);
+}
+function Drawer({
+  open,
+  onClose,
+  title,
+  children,
+  width = 480
+}) {
+  if (!open) return null;
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.35)",
+      zIndex: 900
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width,
+      background: C.white,
+      zIndex: 901,
+      boxShadow: "-8px 0 40px rgba(0,0,0,0.15)",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px 24px",
+      borderBottom: `1px solid ${C.g200}`,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, title), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      background: "none",
+      border: "none",
+      fontSize: 22,
+      cursor: "pointer",
+      color: C.g400,
+      lineHeight: 1
+    }
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "20px 24px"
+    }
+  }, children)));
+}
+function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  width = 520
+}) {
+  if (!open) return null;
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.4)",
+      zIndex: 950
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%,-50%)",
+      width,
+      maxHeight: "85vh",
+      background: C.white,
+      borderRadius: 16,
+      zIndex: 951,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px 24px",
+      borderBottom: `1px solid ${C.g200}`,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, title), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      background: "none",
+      border: "none",
+      fontSize: 22,
+      cursor: "pointer",
+      color: C.g400,
+      lineHeight: 1
+    }
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "20px 24px"
+    }
+  }, children)));
+}
+// ── INTERACTIVE LINE CHART ────────────────────────────────────
+function InteractiveLineChart({
+  data,
+  labels,
+  color = C.red
+}) {
+  const [hover, setHover] = useState(null);
+  const PAD = {
+    top: 20,
+    right: 16,
+    bottom: 28,
+    left: 52
+  };
+  const W = 420,
+    H = 160;
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+  const max = Math.max(...data) * 1.1;
+  const min = Math.max(0, Math.min(...data) * 0.88);
+  const xs = data.map((_, i) => PAD.left + i / (data.length - 1) * innerW);
+  const ys = data.map(v => PAD.top + innerH - (v - min) / (max - min) * innerH);
+  // Build smooth path
+  const linePath = xs.map((x, i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
+  const areaPath = linePath + ` L${xs[xs.length - 1].toFixed(1)},${(PAD.top + innerH).toFixed(1)} L${PAD.left.toFixed(1)},${(PAD.top + innerH).toFixed(1)} Z`;
+  // Y-axis ticks
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
+    val: Math.round(min + (max - min) * t),
+    y: PAD.top + innerH - t * innerH
+  }));
+  const fmtVal = v => v >= 1000 ? (v / 1000).toFixed(0) + "к" : v;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      userSelect: "none"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    style: {
+      width: "100%",
+      height: H,
+      overflow: "visible"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
+    id: "lineGrad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: color,
+    stopOpacity: "0.18"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: color,
+    stopOpacity: "0"
+  }))), yTicks.map((t, i) => /*#__PURE__*/React.createElement("g", {
+    key: i
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: PAD.left,
+    y1: t.y,
+    x2: W - PAD.right,
+    y2: t.y,
+    stroke: C.g200,
+    strokeWidth: "1",
+    strokeDasharray: "3,3"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: PAD.left - 6,
+    y: t.y + 4,
+    textAnchor: "end",
+    fontSize: "9",
+    fill: C.g400
+  }, fmtVal(t.val)))), /*#__PURE__*/React.createElement("path", {
+    d: areaPath,
+    fill: "url(#lineGrad)"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: linePath,
+    fill: "none",
+    stroke: color,
+    strokeWidth: "2.5",
+    strokeLinejoin: "round",
+    strokeLinecap: "round"
+  }), hover !== null && /*#__PURE__*/React.createElement("line", {
+    x1: xs[hover],
+    y1: PAD.top,
+    x2: xs[hover],
+    y2: PAD.top + innerH,
+    stroke: color,
+    strokeWidth: "1",
+    strokeDasharray: "4,3",
+    opacity: "0.5"
+  }), data.map((v, i) => /*#__PURE__*/React.createElement("g", {
+    key: i,
+    style: {
+      cursor: "pointer"
+    },
+    onMouseEnter: () => setHover(i),
+    onMouseLeave: () => setHover(null)
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: xs[i] - 18,
+    y: PAD.top,
+    width: 36,
+    height: innerH,
+    fill: "transparent"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: xs[i],
+    cy: ys[i],
+    r: hover === i ? 6 : 3.5,
+    fill: color,
+    stroke: "#fff",
+    strokeWidth: "2",
+    style: {
+      transition: "r 0.1s"
+    }
+  }))), labels.map((l, i) => /*#__PURE__*/React.createElement("text", {
+    key: i,
+    x: xs[i],
+    y: H - 4,
+    textAnchor: "middle",
+    fontSize: "10",
+    fill: hover === i ? color : C.g500,
+    fontWeight: hover === i ? "600" : "400"
+  }, l))), hover !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: `${xs[hover] / W * 100}%`,
+      top: `${(ys[hover] - PAD.top) / H * 100}%`,
+      transform: "translate(-50%,-130%)",
+      background: C.g800,
+      color: "#fff",
+      padding: "6px 12px",
+      borderRadius: 8,
+      fontSize: 12,
+      fontWeight: 600,
+      whiteSpace: "nowrap",
+      pointerEvents: "none",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: color === "red" || color === C.red ? "#fca5a5" : "#86efac",
+      fontSize: 10,
+      marginBottom: 1
+    }
+  }, labels[hover]), data[hover].toLocaleString(), " тыс. ₽", hover > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      marginLeft: 6,
+      color: data[hover] >= data[hover - 1] ? "#4ade80" : "#f87171"
+    }
+  }, data[hover] >= data[hover - 1] ? "▲" : "▼", Math.abs(Math.round((data[hover] - data[hover - 1]) / data[hover - 1] * 100)), "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      bottom: -5,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: 0,
+      height: 0,
+      borderLeft: "5px solid transparent",
+      borderRight: "5px solid transparent",
+      borderTop: `5px solid ${C.g800}`
+    }
+  })));
+}
+
+// ── INTERACTIVE PIE CHART ─────────────────────────────────────
+function InteractivePieChart({
+  data
+}) {
+  const [hover, setHover] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const active = selected ?? hover;
+  const CX = 110,
+    CY = 110,
+    R = 88,
+    HOLE = 52;
+  const total = data.reduce((s, d) => s + d.fill, 0);
+
+  // Compute slice angles
+  let cum = 0;
+  const slices = data.map((d, i) => {
+    const start = cum / total * 2 * Math.PI - Math.PI / 2;
+    cum += d.fill;
+    const end = cum / total * 2 * Math.PI - Math.PI / 2;
+    return {
+      d,
+      i,
+      start,
+      end,
+      mid: (start + end) / 2
+    };
+  });
+  function arc(cx, cy, r, start, end, clockwise = true) {
+    const sx = cx + r * Math.cos(start),
+      sy = cy + r * Math.sin(start);
+    const ex = cx + r * Math.cos(end),
+      ey = cy + r * Math.sin(end);
+    const large = end - start > Math.PI ? 1 : 0;
+    return `M${sx.toFixed(2)},${sy.toFixed(2)} A${r},${r},0,${large},${clockwise ? 1 : 0},${ex.toFixed(2)},${ey.toFixed(2)}`;
+  }
+  function donut(cx, cy, R, hole, start, end, expand = 0) {
+    const ec = expand > 0;
+    const ocx = ec ? cx + expand * Math.cos((start + end) / 2) : cx;
+    const ocy = ec ? cy + expand * Math.sin((start + end) / 2) : cy;
+    const sx = ocx + R * Math.cos(start),
+      sy = ocy + R * Math.sin(start);
+    const ex = ocx + R * Math.cos(end),
+      ey = ocy + R * Math.sin(end);
+    const hsx = ocx + hole * Math.cos(start),
+      hsy = ocy + hole * Math.sin(start);
+    const hex = ocx + hole * Math.cos(end),
+      hey = ocy + hole * Math.sin(end);
+    const large = end - start > Math.PI ? 1 : 0;
+    return `M${sx.toFixed(1)},${sy.toFixed(1)} A${R},${R},0,${large},1,${ex.toFixed(1)},${ey.toFixed(1)} L${hex.toFixed(1)},${hey.toFixed(1)} A${hole},${hole},0,${large},0,${hsx.toFixed(1)},${hsy.toFixed(1)} Z`;
+  }
+  const activeSlice = active !== null ? slices[active] : null;
+  const fc = activeSlice ? activeSlice.d.fill < 50 ? "#b00010" : activeSlice.d.fill < 75 ? "#92400E" : "#166534" : C.g700;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 16,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flexShrink: 0,
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: 220,
+    height: 220,
+    style: {
+      overflow: "visible"
+    }
+  }, slices.map(s => {
+    const isActive = s.i === active;
+    const path = donut(CX, CY, R, HOLE, s.start, s.end, isActive ? 7 : 0);
+    return /*#__PURE__*/React.createElement("path", {
+      key: s.i,
+      d: path,
+      fill: s.d.color,
+      opacity: active !== null && !isActive ? 0.5 : 0.88,
+      stroke: "#fff",
+      strokeWidth: "2",
+      style: {
+        cursor: "pointer",
+        transition: "opacity 0.15s, transform 0.15s"
+      },
+      onMouseEnter: () => {
+        if (selected === null) setHover(s.i);
+      },
+      onMouseLeave: () => {
+        if (selected === null) setHover(null);
+      },
+      onClick: () => setSelected(selected === s.i ? null : s.i)
+    });
+  }), /*#__PURE__*/React.createElement("text", {
+    x: CX,
+    y: CY - 10,
+    textAnchor: "middle",
+    fontSize: "11",
+    fill: C.g500
+  }, activeSlice ? activeSlice.d.cat : "Категории"), /*#__PURE__*/React.createElement("text", {
+    x: CX,
+    y: CY + 10,
+    textAnchor: "middle",
+    fontSize: "22",
+    fontWeight: "800",
+    fill: activeSlice ? activeSlice.d.color : C.g700
+  }, activeSlice ? `${activeSlice.d.fill}%` : `${Math.round(data.reduce((s, d) => s + d.fill, 0) / data.length)}%`), /*#__PURE__*/React.createElement("text", {
+    x: CX,
+    y: CY + 26,
+    textAnchor: "middle",
+    fontSize: "9",
+    fill: activeSlice ? fc : C.g400
+  }, activeSlice ? activeSlice.d.fill < 50 ? "⚠ Критически мало" : activeSlice.d.fill < 75 ? "Нужен заказ" : "В норме" : "ср. наполн.")), selected !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      bottom: -18,
+      left: "50%",
+      transform: "translateX(-50%)",
+      fontSize: 10,
+      color: C.g400,
+      whiteSpace: "nowrap"
+    }
+  }, "клик снова → снять выбор")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      gap: 3
+    }
+  }, data.map((d, i) => {
+    const isActive = i === active;
+    const fc2 = d.fill < 50 ? "#b00010" : d.fill < 75 ? "#92400E" : "#166534";
+    const bg2 = d.fill < 50 ? "#FEF2F2" : d.fill < 75 ? "#FFFBEB" : "#F0FDF4";
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      onMouseEnter: () => {
+        if (selected === null) setHover(i);
+      },
+      onMouseLeave: () => {
+        if (selected === null) setHover(null);
+      },
+      onClick: () => setSelected(selected === i ? null : i),
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "5px 8px",
+        borderRadius: 7,
+        cursor: "pointer",
+        background: isActive ? bg2 : "transparent",
+        border: `1px solid ${isActive ? d.color + "50" : "transparent"}`,
+        opacity: active !== null && !isActive ? 0.45 : 1,
+        transition: "all 0.15s"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 10,
+        height: 10,
+        borderRadius: 3,
+        background: d.color,
+        flexShrink: 0
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: C.g700,
+        flex: 1,
+        fontWeight: isActive ? 600 : 400
+      }
+    }, d.cat), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 52,
+        background: C.g100,
+        borderRadius: 4,
+        height: 5,
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${d.fill}%`,
+        height: 5,
+        borderRadius: 4,
+        background: d.color,
+        transition: "width 0.3s"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: fc2,
+        width: 30,
+        textAlign: "right"
+      }
+    }, d.fill, "%"));
+  })));
+}
+function StackedBarChart() {
+  return null;
+} // kept for compat, unused
+
+// Alias for use in CategoryDetailModal
+const MiniLineChart = InteractiveLineChart;
+function BenchmarkBar({
+  label,
+  own,
+  refVal,
+  unit = "%",
+  onImprove
+}) {
+  const max = Math.max(own, refVal) * 1.2;
+  const isGood = own >= refVal;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      color: C.g700,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", null, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: isGood ? C.green : C.red,
+      fontWeight: 700
+    }
+  }, isGood ? "▲" : "▼", " ", Math.abs(Math.round((own - refVal) / refVal * 100)), "% к эталону"), !isGood && /*#__PURE__*/React.createElement("span", {
+    onClick: onImprove,
+    style: {
+      color: C.blue,
+      fontSize: 11,
+      cursor: "pointer",
+      textDecoration: "underline"
+    }
+  }, "Как улучшить?"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g200,
+      borderRadius: 6,
+      height: 8,
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: isGood ? C.green : C.red,
+      width: `${own / max * 100}%`,
+      height: 8,
+      borderRadius: 6
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      color: C.g500
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Мой: ", own, unit), /*#__PURE__*/React.createElement("span", null, "Эталон: ", refVal, unit)));
+}
+
+// ── APPLICATION DETAIL PAGE — REDESIGNED ───────────────────────
+
+// Design tokens for each group
+const GRP = {
+  A: {
+    bg: "#EFF6FF",
+    border: "#BFDBFE",
+    accent: "#1D4ED8",
+    accentLight: "#DBEAFE",
+    text: "#1e3a8a",
+    icon: "⬆️",
+    label: "Загрузка документов",
+    badgeBg: "#DBEAFE",
+    badgeColor: "#1D4ED8"
+  },
+  B: {
+    bg: "#F0FDFA",
+    border: "#99F6E4",
+    accent: "#0D9488",
+    accentLight: "#CCFBF1",
+    text: "#134e4a",
+    icon: "✅",
+    label: "Согласование",
+    badgeBg: "#CCFBF1",
+    badgeColor: "#0D9488"
+  },
+  C: {
+    bg: "#F8F9FA",
+    border: "#DEE2E6",
+    accent: "#6C757D",
+    accentLight: "#E9ECEF",
+    text: "#495057",
+    icon: "⏳",
+    label: "Ожидание менеджера",
+    badgeBg: "#E9ECEF",
+    badgeColor: "#495057"
+  }
+};
+function GroupPill({
+  group,
+  done
+}) {
+  if (done) return /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#DCFCE7",
+      color: "#166534",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "3px 10px",
+      borderRadius: 20
+    }
+  }, "✓ Завершено");
+  const g = GRP[group];
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: g.badgeBg,
+      color: g.badgeColor,
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "3px 10px",
+      borderRadius: 20,
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4
+    }
+  }, g.icon, " ", g.label);
+}
+
+// Individual upload slot (one file per slot)
+function UploadSlot({
+  fileName,
+  uploaded,
+  onUpload
+}) {
+  const [drag, setDrag] = useState(false);
+  const [progress, setProgress] = useState(null);
+  function simulate(name) {
+    setProgress(0);
+    const iv = setInterval(() => setProgress(p => {
+      if (p >= 100) {
+        clearInterval(iv);
+        setProgress(null);
+        onUpload(name);
+        return null;
+      }
+      return p + 30;
+    }), 150);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "#1e3a8a",
+      marginBottom: 5,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#DBEAFE",
+      color: "#1D4ED8",
+      borderRadius: 4,
+      width: 18,
+      height: 18,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 10,
+      fontWeight: 700,
+      flexShrink: 0
+    }
+  }, "📎"), fileName), !uploaded ? /*#__PURE__*/React.createElement("div", {
+    onDragOver: e => {
+      e.preventDefault();
+      setDrag(true);
+    },
+    onDragLeave: () => setDrag(false),
+    onDrop: e => {
+      e.preventDefault();
+      setDrag(false);
+      simulate(e.dataTransfer.files[0]?.name || fileName + ".pdf");
+    },
+    onClick: () => simulate(fileName + ".pdf"),
+    style: {
+      border: `2px dashed ${drag ? "#1D4ED8" : "#93C5FD"}`,
+      borderRadius: 10,
+      padding: "14px 16px",
+      background: drag ? "#EFF6FF" : "#F8FBFF",
+      cursor: "pointer",
+      transition: "all 0.15s",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      background: "#DBEAFE",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 18,
+      flexShrink: 0
+    }
+  }, "☁️"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "#1e3a8a",
+      fontWeight: 500
+    }
+  }, "Перетащите файл или ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#1D4ED8",
+      textDecoration: "underline"
+    }
+  }, "выберите")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#93C5FD",
+      marginTop: 2
+    }
+  }, "PDF, JPG, PNG, DWG — до 50 МБ"))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#EFF6FF",
+      border: "1.5px solid #93C5FD",
+      borderRadius: 10,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+      background: "#1D4ED8",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 14,
+      flexShrink: 0
+    }
+  }, "✓"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "#1D4ED8"
+    }
+  }, uploaded), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#60A5FA"
+    }
+  }, "Файл загружен")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onUpload(null),
+    style: {
+      background: "none",
+      border: `1px solid #BFDBFE`,
+      borderRadius: 6,
+      padding: "4px 10px",
+      fontSize: 11,
+      color: "#1D4ED8",
+      cursor: "pointer"
+    }
+  }, "Заменить")), progress !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 10,
+      color: "#93C5FD",
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Загрузка..."), /*#__PURE__*/React.createElement("span", null, progress, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#DBEAFE",
+      borderRadius: 4,
+      height: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#1D4ED8",
+      height: 4,
+      borderRadius: 4,
+      width: `${progress}%`,
+      transition: "width 0.15s"
+    }
+  }))));
+}
+
+// Manager file row (read-only, Group B)
+function ManagerFile({
+  name,
+  onDownload
+}) {
+  const [hover, setHover] = useState(false);
+  const ext = name.split(".").pop().toUpperCase();
+  const extColor = ext === "PDF" ? "#b00010" : ext === "XLSX" ? "#166534" : "#1D4ED8";
+  const extBg = ext === "PDF" ? "#FFE8E9" : ext === "XLSX" ? "#DCFCE7" : "#DBEAFE";
+  return /*#__PURE__*/React.createElement("div", {
+    onMouseEnter: () => setHover(true),
+    onMouseLeave: () => setHover(false),
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      padding: "12px 14px",
+      background: hover ? "#F0FDFA" : "#F8FFFE",
+      border: `1.5px solid ${hover ? "#2DD4BF" : "#99F6E4"}`,
+      borderRadius: 10,
+      marginBottom: 8,
+      transition: "all 0.15s",
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      background: "#CCFBF1",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16
+    }
+  }, "📋")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: "#134e4a",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis"
+    }
+  }, name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: extBg,
+      color: extColor,
+      fontSize: 10,
+      fontWeight: 700,
+      padding: "1px 6px",
+      borderRadius: 4
+    }
+  }, ext), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#5EEAD4"
+    }
+  }, "Загружено менеджером"))), /*#__PURE__*/React.createElement("button", {
+    onClick: onDownload,
+    style: {
+      background: "#0D9488",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "7px 14px",
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: "pointer",
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, "↓ Скачать"));
+}
+
+// The main stage card
+function StageCard({
+  stage,
+  stageState,
+  onAction,
+  showToast,
+  stageRef,
+  managerHandled = false
+}) {
+  const {
+    status,
+    uploadedFiles
+  } = stageState;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const isLocked = status === "locked";
+  const isDone = status === "done";
+  const isWaiting = status === "waiting_manager";
+  const isActive = status === "active" || isWaiting;
+  const g = GRP[stage.group];
+  const allUploaded = uploadedFiles && stage.files && uploadedFiles.filter(Boolean).length === stage.files.length;
+
+  // Border and bg logic
+  let borderColor = C.g200,
+    cardBg = C.white,
+    leftAccent = "transparent";
+  if (isDone) {
+    borderColor = "#86EFAC";
+    cardBg = "#F0FDF4";
+    leftAccent = C.green;
+  } else if (isLocked) {
+    borderColor = C.g200;
+    cardBg = C.g50;
+  } else {
+    borderColor = g.border;
+    cardBg = "#FEFEFE";
+    leftAccent = g.accent;
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    ref: stageRef,
+    style: {
+      borderRadius: 14,
+      border: `1.5px solid ${borderColor}`,
+      background: cardBg,
+      marginBottom: 16,
+      overflow: "hidden",
+      opacity: isLocked ? 0.5 : 1,
+      transition: "opacity 0.3s, border-color 0.25s",
+      borderLeft: isLocked ? undefined : `4px solid ${leftAccent}`,
+      boxShadow: isActive && !isLocked ? `0 2px 12px ${g.accent}18` : "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 18px",
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      background: isDone ? "#F0FDF4" : isLocked ? C.g50 : g.bg,
+      borderBottom: `1px solid ${borderColor}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 42,
+      height: 42,
+      borderRadius: "50%",
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: isDone ? 18 : 15,
+      fontWeight: 800,
+      background: isDone ? C.green : isLocked ? C.g300 : g.accent,
+      color: "#fff",
+      boxShadow: isActive && !isLocked ? `0 0 0 4px ${g.accentLight}` : "none",
+      transition: "all 0.25s"
+    }
+  }, isDone ? "✓" : isLocked ? "🔒" : stage.n), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap",
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: isDone ? "#166534" : isLocked ? C.g400 : C.g800
+    }
+  }, stage.n, ". ", stage.label), /*#__PURE__*/React.createElement(GroupPill, {
+    group: stage.group,
+    done: isDone
+  })), isLocked && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: C.g400
+    }
+  }, "🔒 Завершите предыдущий этап, чтобы разблокировать"), isWaiting && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#92400E",
+      fontWeight: 500
+    }
+  }, "⏳ Документы отправлены — ожидается подтверждение менеджера"), isDone && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#166534",
+      fontWeight: 500
+    }
+  }, "Завершено успешно"))), !isLocked && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "18px 20px 20px 22px"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      lineHeight: 1.65,
+      marginBottom: 18
+    }
+  }, stage.desc), stage.group === "C" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F8F9FA",
+      border: `1.5px solid ${C.g200}`,
+      borderRadius: 10,
+      padding: "14px 16px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: "50%",
+      background: isDone ? C.greenLight : "#E9ECEF",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 18,
+      flexShrink: 0
+    }
+  }, isDone ? "✅" : "⏳"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: isDone ? "#166534" : C.g600
+    }
+  }, isDone ? stage.completedText : "Менеджер проводит переговоры с собственником"), !isDone && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g400,
+      marginTop: 3
+    }
+  }, "Ваше участие на этом этапе не требуется. Вы получите уведомление."))), stage.group === "A" && !isDone && managerHandled && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F0FDFA",
+      border: "1.5px solid #99F6E4",
+      borderRadius: 10,
+      padding: "16px 18px",
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 40,
+      height: 40,
+      borderRadius: "50%",
+      background: "#CCFBF1",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 20,
+      flexShrink: 0
+    }
+  }, "📋"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#134e4a",
+      marginBottom: 4
+    }
+  }, "Этап выполняется менеджером"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#0D9488",
+      lineHeight: 1.5
+    }
+  }, "Поскольку вы выбрали подбор объекта, фотографии и посадку выполняет ваш менеджер ", /*#__PURE__*/React.createElement("strong", null, "Ульяна"), ". Вы получите уведомление, когда этап будет завершён."))), stage.group === "A" && !isDone && !managerHandled && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#EFF6FF",
+      border: "1px solid #BFDBFE",
+      borderRadius: 8,
+      padding: "10px 14px",
+      marginBottom: 16,
+      fontSize: 12,
+      color: "#1D4ED8",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "ℹ️"), /*#__PURE__*/React.createElement("span", null, "Загрузите все необходимые документы. После загрузки нажмите «Отправить».")), stage.files.map((f, i) => /*#__PURE__*/React.createElement(UploadSlot, {
+    key: i,
+    fileName: f,
+    uploaded: uploadedFiles && uploadedFiles[i],
+    onUpload: name => onAction({
+      type: "upload",
+      fileIndex: i,
+      names: name ? [name] : null
+    })
+  })), stage.note && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFFBEB",
+      border: "1px solid #FDE68A",
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 12,
+      color: "#92400E",
+      marginBottom: 14,
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "⚠️"), /*#__PURE__*/React.createElement("span", null, stage.note.replace("⚠ ", ""))), isWaiting ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFFBEB",
+      border: "1.5px solid #FDE68A",
+      borderRadius: 10,
+      padding: "12px 16px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      fontSize: 13,
+      color: "#92400E"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18
+    }
+  }, "⏳"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600
+    }
+  }, "Документы отправлены"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      marginTop: 2
+    }
+  }, "Ожидается подтверждение менеджером. Обычно занимает 1–2 рабочих дня."))) : /*#__PURE__*/React.createElement("button", {
+    onClick: () => allUploaded && onAction({
+      type: "submitUpload"
+    }),
+    style: {
+      marginTop: 4,
+      width: "100%",
+      padding: "12px",
+      borderRadius: 10,
+      border: "none",
+      background: allUploaded ? "#1D4ED8" : C.g300,
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: allUploaded ? "pointer" : "not-allowed",
+      transition: "background 0.2s",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8
+    }
+  }, allUploaded ? "📤 Отправить документы на проверку →" : "Загрузите все файлы для отправки")), stage.group === "A" && isDone && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F0FDF4",
+      border: "1.5px solid #86EFAC",
+      borderRadius: 10,
+      padding: "12px 16px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 32,
+      height: 32,
+      borderRadius: "50%",
+      background: C.green,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#fff",
+      fontSize: 16,
+      flexShrink: 0
+    }
+  }, "✓"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: "#166534"
+    }
+  }, "Документы загружены и подтверждены менеджером"), uploadedFiles && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#4ADE80",
+      marginTop: 2
+    }
+  }, uploadedFiles.filter(Boolean).join(" · ")))), stage.group === "B" && !isDone && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 3,
+      height: 16,
+      background: "#0D9488",
+      borderRadius: 2
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: "#0D9488",
+      textTransform: "uppercase",
+      letterSpacing: 0.6
+    }
+  }, "Документы от менеджера")), stage.managerFiles.map((f, i) => /*#__PURE__*/React.createElement(ManagerFile, {
+    key: i,
+    name: f,
+    onDownload: () => showToast(`Скачивается: ${f}`)
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFFBEB",
+      border: "1px solid #FDE68A",
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontSize: 12,
+      color: "#92400E",
+      marginTop: 4,
+      marginBottom: 16,
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "ℹ️"), /*#__PURE__*/React.createElement("span", null, "Скачайте и внимательно ознакомьтесь с документами перед тем, как нажать «Согласовать».")), !confirmOpen ? /*#__PURE__*/React.createElement("button", {
+    onClick: () => setConfirmOpen(true),
+    style: {
+      width: "100%",
+      padding: "12px",
+      borderRadius: 10,
+      border: "none",
+      background: "#0D9488",
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8
+    }
+  }, stage.signMode ? "✍️ Подписать и согласовать договор" : "✅ Согласовать документы") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F0FDFA",
+      border: "2px solid #0D9488",
+      borderRadius: 12,
+      padding: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: "#134e4a",
+      marginBottom: 8
+    }
+  }, stage.signMode ? "Подтвердите подписание договора" : "Подтвердите согласование"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: "#5EEAD4",
+      marginBottom: 16,
+      lineHeight: 1.6
+    }
+  }, stage.signMode ? "Нажимая «Подписать», вы подтверждаете ознакомление с условиями договора франшизы и согласие с ними." : "Вы подтверждаете, что ознакомились со всеми документами и согласуете предложенные материалы."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setConfirmOpen(false);
+      onAction({
+        type: "approve"
+      });
+    },
+    style: {
+      flex: 2,
+      background: "#0D9488",
+      color: "#fff",
+      border: "none",
+      borderRadius: 9,
+      padding: "11px",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, stage.signMode ? "✍️ Подписать" : "✅ Подтверждаю"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setConfirmOpen(false),
+    style: {
+      flex: 1,
+      background: "none",
+      border: "1.5px solid #99F6E4",
+      borderRadius: 9,
+      padding: "11px",
+      fontSize: 13,
+      cursor: "pointer",
+      color: "#0D9488",
+      fontWeight: 600
+    }
+  }, "Отмена")))), stage.group === "B" && isDone && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F0FDF4",
+      border: "1.5px solid #86EFAC",
+      borderRadius: 10,
+      padding: "12px 16px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 32,
+      height: 32,
+      borderRadius: "50%",
+      background: C.green,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#fff",
+      fontSize: 16,
+      flexShrink: 0
+    }
+  }, "✓"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: "#166534"
+    }
+  }, stage.signMode ? "Договор подписан вами" : "Документы согласованы"))));
+}
+
+// Sticky mini-map sidebar (right column)
+function StageMinimap({
+  stages,
+  stageStates,
+  onJump
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "sticky",
+      top: 80,
+      width: 220,
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 16px",
+      background: "#1a1a2e",
+      borderBottom: "1px solid rgba(255,255,255,0.08)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: "#fff",
+      letterSpacing: 0.3
+    }
+  }, "Этапы заявки")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 0"
+    }
+  }, stages.map((stage, i) => {
+    const ss = stageStates[stage.n];
+    const isDone = ss.status === "done";
+    const isActive = ss.status === "active" || ss.status === "waiting_manager";
+    const isLocked = ss.status === "locked";
+    const g = GRP[stage.group];
+    return /*#__PURE__*/React.createElement("div", {
+      key: stage.n,
+      onClick: () => !isLocked && onJump(stage.n),
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 9,
+        padding: "7px 14px",
+        cursor: isLocked ? "default" : "pointer",
+        background: isActive ? "rgba(227,6,19,0.05)" : "transparent",
+        borderLeft: isActive ? `3px solid ${C.red}` : "3px solid transparent",
+        transition: "background 0.15s",
+        opacity: isLocked ? 0.4 : 1
+      },
+      onMouseEnter: e => {
+        if (!isLocked) e.currentTarget.style.background = "rgba(0,0,0,0.03)";
+      },
+      onMouseLeave: e => {
+        e.currentTarget.style.background = isActive ? "rgba(227,6,19,0.05)" : "transparent";
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: isDone ? C.green : isActive ? C.red : isLocked ? C.g200 : g.accent,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 10,
+        fontWeight: 700,
+        color: "#fff"
+      }
+    }, isDone ? "✓" : isLocked ? "" : stage.n), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: isActive ? 700 : 500,
+        color: isDone ? "#166534" : isActive ? C.red : isLocked ? C.g400 : C.g700,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }
+    }, stage.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: isDone ? "#4ADE80" : isActive ? C.red + "99" : isLocked ? C.g300 : g.accent + "99",
+        marginTop: 1
+      }
+    }, isDone ? "Завершено" : isActive ? ss.status === "waiting_manager" ? "Ожидание подтв." : "Активный" : isLocked ? "Заблокировано" : "Ожидает")), !isLocked && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.g300,
+        flexShrink: 0
+      }
+    }, g.icon));
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 12,
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.g500,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+      marginBottom: 8
+    }
+  }, "Типы этапов"), [{
+    color: "#1D4ED8",
+    bg: "#DBEAFE",
+    label: "А: ваша загрузка"
+  }, {
+    color: "#0D9488",
+    bg: "#CCFBF1",
+    label: "Б: ваше согласование"
+  }, {
+    color: C.g500,
+    bg: C.g200,
+    label: "В: ожидание"
+  }].map(l => /*#__PURE__*/React.createElement("div", {
+    key: l.label,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      marginBottom: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+      background: l.bg,
+      border: `1.5px solid ${l.color}`,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: C.g600
+    }
+  }, l.label)))));
+}
+
+// ── APPLICATION DETAIL PAGE ────────────────────────────────────
+function ApplicationDetailPage({
+  app,
+  onBack,
+  showToast,
+  isFindApp = false
+}) {
+  // Build the correct stage list for this app's path and format
+  const stages = getStages(isFindApp, app.format || "ММ");
+  const totalStages = stages.length;
+  const initStageStates = () => {
+    const s = {};
+    const reached = app.stageReached ?? (isFindApp ? 0 : 3);
+    stages.forEach((st, i) => {
+      if (i < reached) s[st.n] = {
+        status: "done",
+        uploadedFiles: st.files ? st.files.map(f => f + ".pdf") : null
+      };else if (i === reached) s[st.n] = {
+        status: "active",
+        uploadedFiles: st.files ? new Array(st.files.length).fill(null) : null
+      };else s[st.n] = {
+        status: "locked",
+        uploadedFiles: null
+      };
+    });
+    return s;
+  };
+  const [stageStates, setStageStates] = useState(initStageStates);
+  const stageRefs = useRef({});
+  const completedCount = Object.values(stageStates).filter(s => s.status === "done").length;
+  const pct = Math.round(completedCount / totalStages * 100);
+  function jumpToStage(n) {
+    const el = stageRefs.current[n];
+    if (el) el.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+  function handleAction(stageN, action) {
+    setStageStates(prev => {
+      const next = {
+        ...prev
+      };
+      const cur = {
+        ...next[stageN]
+      };
+      if (action.type === "upload") {
+        const files = [...(cur.uploadedFiles || [])];
+        if (action.names === null) files[action.fileIndex] = null;else files[action.fileIndex] = action.names[0] || action.names;
+        cur.uploadedFiles = files;
+        next[stageN] = cur;
+      } else if (action.type === "submitUpload") {
+        // Stage 1 of own-path needs manager confirmation → waiting_manager
+        if (stageN === 1 && !isFindApp) {
+          cur.status = "waiting_manager";
+          next[stageN] = cur;
+          showToast("Документы отправлены. Ожидается подтверждение менеджера.");
+          setTimeout(() => setStageStates(p => {
+            const n2 = {
+              ...p
+            };
+            n2[1] = {
+              ...n2[1],
+              status: "done"
+            };
+            const nextStage = stages[1]; // index 1 = stage n:2
+            if (nextStage) n2[nextStage.n] = {
+              status: "active",
+              uploadedFiles: nextStage.files ? new Array(nextStage.files.length).fill(null) : null
+            };
+            return n2;
+          }), 2500);
+        } else {
+          cur.status = "done";
+          next[stageN] = cur;
+          const idx = stages.findIndex(s => s.n === stageN);
+          if (idx < stages.length - 1) {
+            const nxt = stages[idx + 1];
+            next[nxt.n] = {
+              status: "active",
+              uploadedFiles: nxt.files ? new Array(nxt.files.length).fill(null) : null
+            };
+          }
+          showToast(`Этап ${stageN} завершён ✓`);
+        }
+      } else if (action.type === "approve") {
+        cur.status = "done";
+        next[stageN] = cur;
+        const idx = stages.findIndex(s => s.n === stageN);
+        if (idx < stages.length - 1) {
+          const nxt = stages[idx + 1];
+          next[nxt.n] = {
+            status: "active",
+            uploadedFiles: nxt.files ? new Array(nxt.files.length).fill(null) : null
+          };
+        }
+        showToast(`Этап ${stageN}: ${stages.find(s => s.n === stageN)?.label} — согласовано ✓`);
+      }
+      return next;
+    });
+  }
+
+  // Derive display title: use shopName once past stage 5 on own-path (or all done on find-path)
+  const shopNameThreshold = isFindApp ? 2 : 5;
+  const hasShopName = app.shopName && (app.stageReached ?? 0) >= shopNameThreshold;
+  const displayTitle = hasShopName ? `«${app.shopName}»` : `Заявка ${app.id}`;
+  const isNewApp = (app.stageReached ?? 0) === 0;
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 20,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onBack,
+    style: {
+      background: C.g100,
+      border: "none",
+      borderRadius: 8,
+      padding: "7px 14px",
+      cursor: "pointer",
+      color: C.g700,
+      fontWeight: 500
+    }
+  }, "← Назад"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g300
+    }
+  }, "›"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g500,
+      cursor: "pointer"
+    },
+    onClick: onBack
+  }, "История заявок"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g300
+    }
+  }, "›"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600,
+      color: C.g800
+    }
+  }, displayTitle)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 16,
+      padding: "20px 24px",
+      marginBottom: 24,
+      position: "relative",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 5,
+      background: C.red,
+      borderRadius: "4px 0 0 4px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      flexWrap: "wrap",
+      gap: 16,
+      paddingLeft: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: C.g800
+    }
+  }, displayTitle), /*#__PURE__*/React.createElement(Badge, {
+    status: app.status
+  })), hasShopName && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g400,
+      marginBottom: 4
+    }
+  }, app.id), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#F3EEFF",
+      color: "#7C3AED",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "2px 10px",
+      borderRadius: 12
+    }
+  }, "Формат: ", app.format), isNewApp && /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#DBEAFE",
+      color: "#1D4ED8",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "2px 10px",
+      borderRadius: 12
+    }
+  }, "Текущий этап: Посадка и фото объекта")), isNewApp && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFFBEB",
+      border: "1px solid #FDE68A",
+      borderRadius: 8,
+      padding: "8px 12px",
+      fontSize: 12,
+      color: "#92400E",
+      marginBottom: 6,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "⏳"), /*#__PURE__*/React.createElement("span", null, "Заявка принята. Начните с первого этапа — загрузите фото объекта.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: C.g600,
+      marginBottom: 3
+    }
+  }, "📍 ", app.city, ", ", MANAGERS[app.district]?.district || app.district || "Подбор объектов", ", ", app.address), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g400,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "👤 Менеджер:"), /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.g600
+    }
+  }, app.manager), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: C.g100,
+      color: C.g500,
+      fontSize: 10,
+      padding: "1px 7px",
+      borderRadius: 10
+    }
+  }, app.managerDistrict), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g300
+    }
+  }, "·"), /*#__PURE__*/React.createElement("span", null, "Подана: ", app.date))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      width: 72,
+      height: 72
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "72",
+    height: "72",
+    style: {
+      transform: "rotate(-90deg)"
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: "30",
+    fill: "none",
+    stroke: C.g200,
+    strokeWidth: "6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: "30",
+    fill: "none",
+    stroke: pct === 100 ? C.green : C.red,
+    strokeWidth: "6",
+    strokeDasharray: `${2 * Math.PI * 30}`,
+    strokeDashoffset: `${2 * Math.PI * 30 * (1 - pct / 100)}`,
+    strokeLinecap: "round",
+    style: {
+      transition: "stroke-dashoffset 0.5s"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: pct === 100 ? C.green : C.red,
+      lineHeight: 1
+    }
+  }, pct, "%"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g500,
+      marginTop: 4
+    }
+  }, completedCount, "/", totalStages, " этапов"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      marginTop: 20,
+      paddingLeft: 8
+    }
+  }, stages.map(st => {
+    const ss = stageStates[st.n];
+    const isDone = ss.status === "done";
+    const isAct = ss.status === "active" || ss.status === "waiting_manager";
+    const g = GRP[st.group];
+    return /*#__PURE__*/React.createElement("div", {
+      key: st.n,
+      onClick: () => ss.status !== "locked" && jumpToStage(st.n),
+      title: `Этап ${st.n}: ${st.label}`,
+      style: {
+        flex: 1,
+        height: 8,
+        borderRadius: 4,
+        background: isDone ? C.green : isAct ? g.accent : C.g200,
+        cursor: ss.status === "locked" ? "default" : "pointer",
+        transition: "background 0.2s",
+        boxShadow: isAct ? `0 0 0 2px ${g.accentLight}` : "none"
+      }
+    });
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 4,
+      paddingLeft: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: C.g400
+    }
+  }, "Этап 1"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: C.g400
+    }
+  }, "Этап ", totalStages))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 20,
+      alignItems: "flex-start"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, stages.map((stage, i) => /*#__PURE__*/React.createElement(StageCard, {
+    key: stage.n,
+    stage: stage,
+    stageState: stageStates[stage.n],
+    onAction: action => handleAction(stage.n, action),
+    showToast: showToast,
+    stageRef: el => stageRefs.current[stage.n] = el,
+    managerHandled: false
+  })), completedCount === totalStages && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.greenLight,
+      border: `2px solid ${C.green}`,
+      borderRadius: 14,
+      padding: 24,
+      textAlign: "center",
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 8
+    }
+  }, "🎉"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: "#166534",
+      marginBottom: 4
+    }
+  }, "Все этапы пройдены!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "#4ADE80"
+    }
+  }, "Заявка завершена. Ожидайте назначения даты открытия магазина."))), /*#__PURE__*/React.createElement(StageMinimap, {
+    stages: stages,
+    stageStates: stageStates,
+    onJump: jumpToStage
+  })));
+}
+
+// ── FINANCE PAGE (Excel workbook UI) ──────────────────────────
+const writeoffRows = [{
+  week: "Неделя 1 (01–07.06)",
+  category: "Молочная продукция",
+  qty: 34,
+  amount: "8 500 ₽",
+  reason: "Истёк срок годности"
+}, {
+  week: "Неделя 1 (01–07.06)",
+  category: "Свежая выпечка",
+  qty: 18,
+  amount: "3 240 ₽",
+  reason: "Бой/деформация"
+}, {
+  week: "Неделя 2 (08–14.06)",
+  category: "Мясо и птица",
+  qty: 12,
+  amount: "14 400 ₽",
+  reason: "Нарушение хранения"
+}, {
+  week: "Неделя 2 (08–14.06)",
+  category: "Молочная продукция",
+  qty: 29,
+  amount: "7 250 ₽",
+  reason: "Истёк срок годности"
+}, {
+  week: "Неделя 3 (15–21.06)",
+  category: "Овощи и фрукты",
+  qty: 45,
+  amount: "5 850 ₽",
+  reason: "Внешние повреждения"
+}, {
+  week: "Неделя 3 (15–21.06)",
+  category: "Напитки",
+  qty: 8,
+  amount: "2 960 ₽",
+  reason: "Бой стекла"
+}, {
+  week: "Неделя 4 (22–28.06)",
+  category: "Гастрономия",
+  qty: 21,
+  amount: "12 600 ₽",
+  reason: "Нарушение хранения"
+}, {
+  week: "Неделя 4 (22–28.06)",
+  category: "Хлеб",
+  qty: 37,
+  amount: "4 440 ₽",
+  reason: "Истёк срок годности"
+}];
+// Extra column: реестр платежей (payment register ID)
+const debtRowsExt = [{
+  date: "01.06",
+  category: "Молочная продукция",
+  amount: "124 500 ₽",
+  status: "Оплачено",
+  registry: "РП-2025-0601"
+}, {
+  date: "02.06",
+  category: "Напитки",
+  amount: "87 300 ₽",
+  status: "В пути",
+  registry: "РП-2025-0602"
+}, {
+  date: "03.06",
+  category: "Хлеб",
+  amount: "43 100 ₽",
+  status: "Оплачено",
+  registry: "РП-2025-0603"
+}, {
+  date: "04.06",
+  category: "Мясо",
+  amount: "198 700 ₽",
+  status: "Просрочено",
+  registry: "РП-2025-0604"
+}, {
+  date: "05.06",
+  category: "Бакалея",
+  amount: "66 400 ₽",
+  status: "В пути",
+  registry: "РП-2025-0605"
+}, {
+  date: "06.06",
+  category: "FMCG",
+  amount: "112 900 ₽",
+  status: "Оплачено",
+  registry: "РП-2025-0606"
+}];
+function FinancePage({
+  showToast
+}) {
+  const [sheet, setSheet] = useState("debt");
+  const [receipts, setReceipts] = useState([]); // {name, status: "pending"|"approved"}
+  const [dragOn, setDragOn] = useState(false);
+  const [uploadProg, setUploadProg] = useState(null);
+  const [approvalStatus, setApprovalStatus] = useState(null); // null | "pending" | "approved"
+
+  const sheets = [{
+    key: "debt",
+    label: "Дебиторская задолженность"
+  }, {
+    key: "goods",
+    label: "Агентский товар"
+  }, {
+    key: "writeoff",
+    label: "Задолженность и Списания"
+  }];
+  function handleDrop(files) {
+    setDragOn(false);
+    setUploadProg(0);
+    const names = Array.from(files).map(f => f.name);
+    const iv = setInterval(() => setUploadProg(p => {
+      if (p >= 100) {
+        clearInterval(iv);
+        setUploadProg(null);
+        setReceipts(prev => [...prev, ...names.map(n => ({
+          name: n,
+          status: "pending"
+        }))]);
+        setApprovalStatus("pending");
+        showToast("Чеки загружены — ожидают подтверждения менеджера");
+        // Simulate manager approves after 4s
+        setTimeout(() => {
+          setReceipts(prev => prev.map(r => ({
+            ...r,
+            status: "approved"
+          })));
+          setApprovalStatus("approved");
+        }, 4000);
+        return null;
+      }
+      return p + 20;
+    }), 200);
+  }
+  const statusSC = {
+    "Оплачено": {
+      bg: "#E8F8F0",
+      c: "#1a7a45"
+    },
+    "В пути": {
+      bg: "#E8F4FD",
+      c: "#1a5e8a"
+    },
+    "Просрочено": {
+      bg: "#FFE8E9",
+      c: "#b00010"
+    }
+  };
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      overflow: "hidden",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#217346",
+      padding: "8px 16px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18
+    }
+  }, "📊"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#fff",
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, "Отчёт агента — Июнь 2025")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => showToast("Файл Excel выгружен"),
+    style: {
+      background: "rgba(255,255,255,0.15)",
+      border: "1px solid rgba(255,255,255,0.3)",
+      borderRadius: 6,
+      padding: "5px 14px",
+      fontSize: 12,
+      color: "#fff",
+      fontWeight: 600,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, "📥 Выгрузить .xlsx")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      overflowX: "auto",
+      minHeight: 260
+    }
+  }, sheet === "debt" && /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 12,
+      fontFamily: "'Consolas','Courier New',monospace"
+    }
+  }, /*#__PURE__*/React.createElement("thead", {
+    style: {
+      position: "sticky",
+      top: 0
+    }
+  }, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#E2EFDA"
+    }
+  }, ["Дата", "Категория", "Сумма", "Статус", "Реестр платежей"].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      padding: "8px 10px",
+      textAlign: "left",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#1e3a1e",
+      borderBottom: "2px solid #B7D7A8",
+      borderRight: `1px solid ${C.g200}`,
+      whiteSpace: "nowrap"
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, debtRowsExt.map((r, i) => {
+    const sc = statusSC[r.status] || {
+      bg: C.g100,
+      c: C.g600
+    };
+    return /*#__PURE__*/React.createElement("tr", {
+      key: i,
+      style: {
+        background: i % 2 === 0 ? "#fff" : "#F9FFF6",
+        borderBottom: `1px solid #E2EFDA`
+      }
+    }, /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        color: C.g500,
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.date), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        fontWeight: 500,
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.category), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        fontWeight: 700,
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.amount), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: sc.bg,
+        color: sc.c,
+        fontSize: 11,
+        fontWeight: 600,
+        padding: "2px 8px",
+        borderRadius: 4
+      }
+    }, r.status)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        color: "#1D4ED8",
+        fontFamily: "monospace",
+        fontSize: 11
+      }
+    }, r.registry));
+  })), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#E2EFDA"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    colSpan: 2,
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#1e3a1e"
+    }
+  }, "ИТОГО"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      color: "#1e3a1e"
+    }
+  }, "633 000 ₽"), /*#__PURE__*/React.createElement("td", {
+    colSpan: 2
+  })))), sheet === "goods" && /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 12,
+      fontFamily: "'Consolas','Courier New',monospace"
+    }
+  }, /*#__PURE__*/React.createElement("thead", {
+    style: {
+      position: "sticky",
+      top: 0
+    }
+  }, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#DAEEF3"
+    }
+  }, ["Категория", "Остаток (шт.)", "Стоимость стока", "Оборачиваемость (дн.)"].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      padding: "8px 10px",
+      textAlign: "left",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#0d3744",
+      borderBottom: "2px solid #9FC9D3",
+      borderRight: `1px solid ${C.g200}`
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, goodsRows.map((r, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i,
+    style: {
+      background: i % 2 === 0 ? "#fff" : "#F0FAFD",
+      borderBottom: "1px solid #DAEEF3"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 500,
+      borderRight: `1px solid ${C.g200}`
+    }
+  }, r.category), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      borderRight: `1px solid ${C.g200}`
+    }
+  }, r.units.toLocaleString()), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      borderRight: `1px solid ${C.g200}`
+    }
+  }, r.cost), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: r.turnover <= 7 ? C.greenLight : r.turnover <= 14 ? C.yellowLight : C.redLight,
+      color: r.turnover <= 7 ? "#1a7a45" : r.turnover <= 14 ? "#8a5e00" : "#b00010",
+      padding: "2px 8px",
+      borderRadius: 4,
+      fontSize: 11,
+      fontWeight: 600
+    }
+  }, r.turnover, " дн."))))), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#DAEEF3"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#0d3744"
+    }
+  }, "ИТОГО"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      color: "#0d3744"
+    }
+  }, "4 970 шт."), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      color: "#0d3744"
+    }
+  }, "1 162 400 ₽"), /*#__PURE__*/React.createElement("td", null)))), sheet === "writeoff" && /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 12,
+      fontFamily: "'Consolas','Courier New',monospace"
+    }
+  }, /*#__PURE__*/React.createElement("thead", {
+    style: {
+      position: "sticky",
+      top: 0
+    }
+  }, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#FCE4D6"
+    }
+  }, ["Неделя", "Категория", "Кол-во (шт.)", "Сумма списания", "Причина"].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      padding: "8px 10px",
+      textAlign: "left",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#7b1e00",
+      borderBottom: "2px solid #F4B183",
+      borderRight: `1px solid ${C.g200}`
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, writeoffRows.map((r, i) => {
+    const isNewWeek = i === 0 || writeoffRows[i - 1].week !== r.week;
+    return /*#__PURE__*/React.createElement("tr", {
+      key: i,
+      style: {
+        background: i % 2 === 0 ? "#fff" : "#FFF5F0",
+        borderBottom: "1px solid #FCE4D6"
+      }
+    }, /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        fontSize: 11,
+        color: isNewWeek ? C.g700 : C.g400,
+        fontWeight: isNewWeek ? 600 : 400,
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, isNewWeek ? r.week : ""), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        fontWeight: 500,
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.category), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.qty), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        fontWeight: 700,
+        color: "#b00010",
+        borderRight: `1px solid ${C.g200}`
+      }
+    }, r.amount), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "7px 10px",
+        color: C.g500,
+        fontSize: 11
+      }
+    }, r.reason));
+  })), /*#__PURE__*/React.createElement("tfoot", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      background: "#FCE4D6"
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    colSpan: 2,
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      fontSize: 11,
+      color: "#7b1e00"
+    }
+  }, "ИТОГО ЗА МЕСЯЦ"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      color: "#7b1e00"
+    }
+  }, "204 шт."), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 10px",
+      fontWeight: 700,
+      color: "#7b1e00"
+    }
+  }, "59 240 ₽"), /*#__PURE__*/React.createElement("td", null))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `2px solid ${C.g200}`,
+      background: "#F2F2F2",
+      display: "flex",
+      alignItems: "stretch",
+      gap: 0,
+      padding: "0 8px"
+    }
+  }, sheets.map(s => /*#__PURE__*/React.createElement("button", {
+    key: s.key,
+    onClick: () => setSheet(s.key),
+    style: {
+      background: sheet === s.key ? "#fff" : "transparent",
+      border: "none",
+      borderTop: sheet === s.key ? "2px solid #217346" : "2px solid transparent",
+      borderLeft: `1px solid ${sheet === s.key ? C.g300 : "transparent"}`,
+      borderRight: `1px solid ${sheet === s.key ? C.g300 : "transparent"}`,
+      padding: "6px 16px",
+      fontSize: 12,
+      fontWeight: sheet === s.key ? 600 : 400,
+      color: sheet === s.key ? "#217346" : C.g600,
+      cursor: "pointer",
+      marginTop: sheet === s.key ? "-2px" : "0",
+      whiteSpace: "nowrap",
+      transition: "all 0.15s"
+    }
+  }, s.label)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, "Загрузка чеков об оплате"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g500,
+      marginTop: 2
+    }
+  }, "Загрузите подтверждение платежей — менеджер проверит и одобрит")), approvalStatus === "approved" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.greenLight,
+      border: `1.5px solid ${C.green}`,
+      borderRadius: 10,
+      padding: "8px 16px",
+      fontSize: 13,
+      color: "#1a7a45",
+      fontWeight: 600,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, "✅ Все документы одобрены менеджером"), approvalStatus === "pending" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.yellowLight,
+      border: `1.5px solid ${C.yellow}`,
+      borderRadius: 10,
+      padding: "8px 16px",
+      fontSize: 13,
+      color: "#8a5e00",
+      fontWeight: 600,
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, "⏳ Ожидает подтверждения менеджера")), /*#__PURE__*/React.createElement("div", {
+    onDragOver: e => {
+      e.preventDefault();
+      setDragOn(true);
+    },
+    onDragLeave: () => setDragOn(false),
+    onDrop: e => {
+      e.preventDefault();
+      handleDrop(e.dataTransfer.files);
+    },
+    onClick: () => handleDrop([{
+      name: "чек_оплата_" + new Date().toLocaleDateString("ru") + ".pdf"
+    }]),
+    style: {
+      border: `2px dashed ${dragOn ? "#1D4ED8" : C.g300}`,
+      borderRadius: 12,
+      padding: "28px 20px",
+      textAlign: "center",
+      background: dragOn ? "#EFF6FF" : C.g50,
+      cursor: "pointer",
+      transition: "all 0.15s",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      marginBottom: 8
+    }
+  }, "🧾"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: C.g600,
+      fontWeight: 500
+    }
+  }, "Перетащите чеки или ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#1D4ED8",
+      fontWeight: 600
+    }
+  }, "выберите файлы")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 4
+    }
+  }, "PDF, JPG, PNG — до 50 МБ · можно несколько файлов")), uploadProg !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      color: C.g500,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Загрузка..."), /*#__PURE__*/React.createElement("span", null, uploadProg, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g200,
+      borderRadius: 6,
+      height: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#1D4ED8",
+      height: 6,
+      borderRadius: 6,
+      width: `${uploadProg}%`,
+      transition: "width 0.2s"
+    }
+  }))), receipts.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      marginBottom: 8
+    }
+  }, "Загруженные чеки:"), receipts.map((r, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "8px 12px",
+      background: r.status === "approved" ? C.greenLight : C.yellowLight,
+      border: `1px solid ${r.status === "approved" ? "#86EFAC" : "#FDE68A"}`,
+      borderRadius: 8,
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16
+    }
+  }, r.status === "approved" ? "✅" : "⏳"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.g700,
+      flex: 1
+    }
+  }, r.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: r.status === "approved" ? "#1a7a45" : "#8a5e00"
+    }
+  }, r.status === "approved" ? "Одобрено менеджером" : "Ожидает подтверждения"))), approvalStatus === "approved" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.greenLight,
+      border: `1.5px solid ${C.green}`,
+      borderRadius: 10,
+      padding: "12px 16px",
+      marginTop: 12,
+      fontSize: 13,
+      color: "#166534"
+    }
+  }, "🎉 ", /*#__PURE__*/React.createElement("strong", null, "Все загруженные документы одобрены!"), " Платежи зафиксированы в системе."))));
+}
+
+// ── EXISTING DRAWER DETAIL COMPONENTS ─────────────────────────
+function KpiDetailDrawer({
+  kpiKey,
+  kpi,
+  onClose
+}) {
+  const configs = {
+    margin: {
+      title: "Валовый доход",
+      icon: "💚",
+      desc: "Ваш валовый доход за текущий месяц включает выручку по агентскому товару и алкогольной продукции.",
+      breakdown: [["Выручка по агентскому товару", "683 400 ₽"], ["Выручка по алкоголю", "163 920 ₽"], ["Валовый доход", "847 320 ₽"]],
+      tip: "Для роста валового дохода: увеличьте долю алкогольной категории — её маржинальность на 8% выше средней."
+    },
+    revenue: {
+      title: "Выручка за месяц",
+      icon: "💰",
+      desc: "Совокупная выручка от продаж за текущий месяц.",
+      breakdown: [["Продукты питания", "2 100 000 ₽"], ["FMCG", "780 000 ₽"], ["Свежие продукты", "940 000 ₽"], ["Хлеб и выпечка", "398 500 ₽"]],
+      tip: "Выручка на 8% выше прошлого месяца. Ключевой вклад: рост продаж в Напитках (+18%)."
+    },
+    rate: {
+      title: "Агентская ставка",
+      icon: "📈",
+      desc: "Средний процент агентского вознаграждения за отчётный период.",
+      breakdown: [["Плановая ставка", "20.0 %"], ["Факт (текущий период)", "18.3 %"], ["Отклонение", "−1.7 %"], ["Причина", "Недовыполнение по категории Свежее"]],
+      tip: "Для выхода на целевую ставку выполните план по категории Свежее минимум на 90%."
+    },
+    sqm: {
+      title: "Выручка на м²",
+      icon: "📐",
+      desc: "Эффективность использования торговой площади.",
+      breakdown: [["Торговая площадь", "120 м²"], ["Выручка за месяц", "4 218 500 ₽"], ["Выручка на м²", "2 840 ₽"], ["Эталон по сети", "2 900 ₽"]],
+      tip: "Пересмотрите планограмму прикассовой зоны: её эффективность на 22% ниже среднесетевой."
+    }
+  };
+  const cfg = configs[kpiKey] || configs.margin;
+  return /*#__PURE__*/React.createElement(Drawer, {
+    open: true,
+    onClose: onClose,
+    title: `${cfg.icon} ${cfg.title}`
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      marginBottom: 20
+    }
+  }, cfg.desc), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 20
+    }
+  }, cfg.breakdown.map(([k, v], i) => {
+    const isTotal = i === cfg.breakdown.length - 1;
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "7px 0",
+        borderTop: i > 0 ? `1px solid ${C.g200}` : "none",
+        fontWeight: isTotal ? 700 : 400,
+        fontSize: isTotal ? 15 : 13,
+        color: isTotal ? C.g800 : C.g700
+      }
+    }, /*#__PURE__*/React.createElement("span", null, k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: v.startsWith("−") ? C.red : C.g800
+      }
+    }, v));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.blueLight,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 13,
+      color: "#1a5e8a"
+    }
+  }, "💡 ", /*#__PURE__*/React.createElement("strong", null, "Совет куратора:"), " ", cfg.tip));
+}
+function CategoryDetailModal({
+  cat,
+  onClose
+}) {
+  return /*#__PURE__*/React.createElement(Modal, {
+    open: true,
+    onClose: onClose,
+    title: `📦 ${cat.name}`,
+    width: 540
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 12,
+      marginBottom: 20
+    }
+  }, [["SKU", cat.sku], ["Продано", cat.sold.toLocaleString()], ["Выручка", cat.revenue]].map(([l, v]) => /*#__PURE__*/React.createElement("div", {
+    key: l,
+    style: {
+      background: C.g50,
+      borderRadius: 10,
+      padding: 12,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g500,
+      marginBottom: 4
+    }
+  }, l), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, v)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 10
+    }
+  }, "Динамика продаж (6 мес.)"), /*#__PURE__*/React.createElement(MiniLineChart, {
+    data: cat.chart,
+    labels: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн"],
+    color: cat.delta >= 0 ? C.green : C.red
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 8
+    }
+  }, "Топ SKU"), cat.topSku.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "8px 0",
+      borderBottom: `1px solid ${C.g100}`
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: C.redLight,
+      color: C.red,
+      borderRadius: 6,
+      width: 22,
+      height: 22,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 11,
+      fontWeight: 700,
+      flexShrink: 0
+    }
+  }, i + 1), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.g800
+    }
+  }, s)))));
+}
+function DocDetailDrawer({
+  doc,
+  onClose,
+  showToast
+}) {
+  const [reupload, setReupload] = useState(false);
+  const [progress, setProgress] = useState(null);
+  function simulate() {
+    setProgress(0);
+    const iv = setInterval(() => setProgress(p => {
+      if (p >= 100) {
+        clearInterval(iv);
+        setProgress(null);
+        showToast("Документ загружен повторно");
+        onClose();
+        return null;
+      }
+      return p + 25;
+    }), 200);
+  }
+  return /*#__PURE__*/React.createElement(Drawer, {
+    open: true,
+    onClose: onClose,
+    title: `📄 ${doc.name}`
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(Badge, {
+    status: doc.status
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.g500
+    }
+  }, doc.date)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 20,
+      fontSize: 13
+    }
+  }, [["Тип", doc.type], ["ID", doc.id], ["Дата загрузки", doc.date], ["Статус", doc.status]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      padding: "6px 0",
+      borderBottom: `1px solid ${C.g200}`
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g500
+    }
+  }, k), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 500
+    }
+  }, v)))), doc.comment && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: doc.status === "Не согласован" ? C.redLight : C.yellowLight,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 20,
+      fontSize: 13,
+      color: doc.status === "Не согласован" ? "#b00010" : "#8a5e00"
+    }
+  }, doc.status === "Не согласован" ? "❌ Причина отказа: " : "ℹ️ ", doc.comment), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => showToast("Документ скачан"),
+    style: {
+      flex: 1,
+      background: C.blueLight,
+      border: `1px solid ${C.blue}`,
+      borderRadius: 8,
+      padding: "10px",
+      fontSize: 13,
+      color: C.blue,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "↓ Скачать"), (doc.status === "На согласовании" || doc.status === "Загружен") && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      showToast("Отправка отменена");
+      onClose();
+    },
+    style: {
+      flex: 1,
+      background: C.redLight,
+      border: `1px solid ${C.red}`,
+      borderRadius: 8,
+      padding: "10px",
+      fontSize: 13,
+      color: C.red,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "✕ Отменить")), doc.status === "Не согласован" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 10
+    }
+  }, "Загрузить исправленный документ"), !reupload && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setReupload(true),
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "10px 20px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
+      width: "100%"
+    }
+  }, "Загрузить повторно"), reupload && /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: `2px dashed ${C.g300}`,
+      borderRadius: 10,
+      padding: 24,
+      textAlign: "center",
+      background: C.g50,
+      cursor: "pointer"
+    },
+    onClick: simulate
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      marginBottom: 6
+    }
+  }, "📎"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.g600
+    }
+  }, "Нажмите для загрузки исправленного файла")), progress !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      background: C.g200,
+      borderRadius: 6,
+      height: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.red,
+      height: 6,
+      borderRadius: 6,
+      width: `${progress}%`,
+      transition: "width 0.2s"
+    }
+  }))));
+}
+function TicketDetailDrawer({
+  ticket,
+  onClose,
+  showToast
+}) {
+  const [reply, setReply] = useState("");
+  const [msgs, setMsgs] = useState(ticket.messages);
+  function send() {
+    if (!reply.trim()) return;
+    setMsgs(m => [...m, {
+      from: "partner",
+      text: reply,
+      time: "Сейчас"
+    }]);
+    setReply("");
+    showToast("Сообщение отправлено");
+  }
+  return /*#__PURE__*/React.createElement(Drawer, {
+    open: true,
+    onClose: onClose,
+    title: `${ticket.id} — ${ticket.title}`,
+    width: 520
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement(Badge, {
+    status: ticket.status
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: C.g100,
+      borderRadius: 20,
+      padding: "3px 10px",
+      fontSize: 12,
+      color: C.g600
+    }
+  }, ticket.category), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: ticket.priority === "Высокий" ? C.redLight : ticket.priority === "Средний" ? C.yellowLight : C.g100,
+      color: ticket.priority === "Высокий" ? "#b00010" : ticket.priority === "Средний" ? "#8a5e00" : C.g600,
+      borderRadius: 20,
+      padding: "3px 10px",
+      fontSize: 12,
+      fontWeight: 600
+    }
+  }, ticket.priority, " приоритет")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 20,
+      minHeight: 200,
+      maxHeight: 280,
+      overflowY: "auto",
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, msgs.map((m, i) => {
+    const isP = m.from === "partner";
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isP ? "flex-end" : "flex-start"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: isP ? C.red : "#fff",
+        border: isP ? "none" : `1px solid ${C.g200}`,
+        color: isP ? "#fff" : C.g800,
+        borderRadius: isP ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+        padding: "10px 14px",
+        fontSize: 13,
+        maxWidth: "80%"
+      }
+    }, m.text), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.g400,
+        marginTop: 3
+      }
+    }, isP ? "Вы" : "Служба поддержки", " · ", m.time));
+  })), ticket.status !== "Решено" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("textarea", {
+    value: reply,
+    onChange: e => setReply(e.target.value),
+    placeholder: "Напишите ответ...",
+    rows: 3,
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "10px 12px",
+      fontSize: 13,
+      resize: "none",
+      outline: "none",
+      boxSizing: "border-box",
+      marginBottom: 8
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: send,
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "9px 20px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Отправить")), ticket.status === "Решено" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.greenLight,
+      borderRadius: 10,
+      padding: 12,
+      fontSize: 13,
+      color: "#1a7a45",
+      textAlign: "center"
+    }
+  }, "✓ Обращение закрыто"));
+}
+function BenchmarkHelpDrawer({
+  metricLabel,
+  onClose,
+  showToast
+}) {
+  const tips = {
+    "Агентская ставка": [{
+      t: "Выполните план по категории Свежее",
+      d: "Доведите долю до 22% выручки. Текущий показатель: 17%."
+    }, {
+      t: "Снизьте списания до 1.5%",
+      d: "Настройте заказы под реальный спрос."
+    }, {
+      t: "Увеличьте оборачиваемость",
+      d: "Ускорение на 2 дня повысит ставку на 0.4 пп."
+    }],
+    "Выручка на м²": [{
+      t: "Оптимизируйте прикассовую зону",
+      d: "Разместите товары импульсного спроса. Потенциал +180 ₽/м²."
+    }, {
+      t: "Пересмотрите планограмму",
+      d: "Запросите актуальную планограмму от куратора."
+    }, {
+      t: "Расширьте ассортимент напитков",
+      d: "В вашем магазине 28% меньше SKU напитков."
+    }],
+    "Оборачиваемость, дней": [{
+      t: "Сократите избыточный запас Бакалеи",
+      d: "Текущий запас на 14 дней превышает норматив в 7 дней."
+    }, {
+      t: "Скорректируйте частоту заказов",
+      d: "Переходите на заказ 3 раза в неделю вместо 2."
+    }]
+  };
+  const items = tips[metricLabel] || [];
+  return /*#__PURE__*/React.createElement(Drawer, {
+    open: true,
+    onClose: onClose,
+    title: `💡 Как улучшить: ${metricLabel}`
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      marginBottom: 20
+    }
+  }, "Рекомендации куратора на основе анализа вашего магазина:"), items.map((item, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      background: C.g50,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g800,
+      marginBottom: 6
+    }
+  }, i + 1, ". ", item.t), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.g600
+    }
+  }, item.d))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      showToast("Запрос консультации отправлен куратору");
+      onClose();
+    },
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "11px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
+      width: "100%",
+      marginTop: 8
+    }
+  }, "Запросить консультацию куратора"));
+}
+function ProfileDrawer({
+  onClose,
+  showToast
+}) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    name: "Алексей Иванов",
+    phone: "+7 (900) 123-45-67",
+    email: "a.ivanov@mail.ru",
+    inn: "770012345678"
+  });
+  return /*#__PURE__*/React.createElement(Drawer, {
+    open: true,
+    onClose: onClose,
+    title: "Профиль партнёра"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      marginBottom: 24,
+      padding: "14px 16px",
+      background: C.redLight,
+      borderRadius: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.red,
+      borderRadius: "50%",
+      width: 52,
+      height: 52,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 18,
+      fontWeight: 700,
+      color: "#fff",
+      flexShrink: 0
+    }
+  }, "АИ"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, form.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g500,
+      marginTop: 2
+    }
+  }, "Партнёр #8821 · Активен с 2022"))), [["ФИО", "name"], ["Телефон", "phone"], ["Email", "email"], ["ИНН", "inn"]].map(([label, key]) => /*#__PURE__*/React.createElement("div", {
+    key: key,
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: C.g500,
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, label), editing ? /*#__PURE__*/React.createElement("input", {
+    value: form[key],
+    onChange: e => setForm(f => ({
+      ...f,
+      [key]: e.target.value
+    })),
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: C.g800,
+      padding: "8px 0",
+      borderBottom: `1px solid ${C.g100}`
+    }
+  }, form[key]))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      display: "flex",
+      gap: 10
+    }
+  }, editing ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditing(false);
+      showToast("Профиль обновлён");
+    },
+    style: {
+      flex: 1,
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "10px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Сохранить"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setEditing(false),
+    style: {
+      flex: 1,
+      background: "none",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "10px",
+      fontSize: 13,
+      cursor: "pointer",
+      color: C.g600
+    }
+  }, "Отмена")) : /*#__PURE__*/React.createElement("button", {
+    onClick: () => setEditing(true),
+    style: {
+      flex: 1,
+      background: C.g100,
+      border: "none",
+      borderRadius: 8,
+      padding: "10px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
+      color: C.g700
+    }
+  }, "Редактировать профиль")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 24,
+      padding: 16,
+      background: C.g50,
+      borderRadius: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 10
+    }
+  }, "Мои объекты"), STORES.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      fontSize: 13,
+      color: C.g700,
+      padding: "6px 0",
+      borderBottom: `1px solid ${C.g200}`,
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.red
+    }
+  }, "🏪"), s))));
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────
+
+// ── SHARED BREAKDOWN MODAL (Средний чек / Трафик / РТО) ───────
+function CheckTrafficRtoModal({
+  title,
+  accentColor,
+  unit,
+  currentVal,
+  delta,
+  bd,
+  weekKey,
+  monthKey,
+  fmtVal,
+  onClose
+}) {
+  const [view, setView] = useState("weeks"); // "weeks" | "months"
+  const rows = view === "weeks" ? bd[weekKey] : bd[monthKey];
+  const labelKey = view === "weeks" ? "w" : "m";
+  const maxVal = Math.max(...rows.map(r => r.v));
+  return /*#__PURE__*/React.createElement(Modal, {
+    open: true,
+    onClose: onClose,
+    title: title,
+    width: 520
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 20,
+      padding: "16px 18px",
+      background: C.g50,
+      borderRadius: 12,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g500,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginBottom: 4
+    }
+  }, "Текущий показатель (июнь 2025)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      fontWeight: 800,
+      color: accentColor
+    }
+  }, currentVal)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginLeft: "auto",
+      textAlign: "right"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: delta >= 0 ? C.green : C.red,
+      fontWeight: 700
+    }
+  }, delta >= 0 ? "▲" : "▼", " ", Math.abs(delta), "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 2
+    }
+  }, "к пред. периоду"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      background: C.g100,
+      borderRadius: 8,
+      padding: 3,
+      marginBottom: 20,
+      width: "fit-content"
+    }
+  }, [["weeks", "По неделям"], ["months", "По месяцам"]].map(([k, label]) => /*#__PURE__*/React.createElement("button", {
+    key: k,
+    onClick: () => setView(k),
+    style: {
+      background: view === k ? C.white : "transparent",
+      border: "none",
+      borderRadius: 6,
+      padding: "7px 18px",
+      fontSize: 13,
+      fontWeight: view === k ? 600 : 400,
+      color: view === k ? accentColor : C.g600,
+      cursor: "pointer",
+      transition: "all 0.15s",
+      boxShadow: view === k ? "0 1px 4px rgba(0,0,0,0.08)" : "none"
+    }
+  }, label))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, rows.map((row, i) => {
+    const pct = row.v / maxVal * 100;
+    const isMax = row.v === maxVal;
+    const isMin = row.v === Math.min(...rows.map(r => r.v));
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 4,
+        fontSize: 13
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.g700,
+        fontWeight: 500
+      }
+    }, row[labelKey]), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 700,
+        color: isMax ? accentColor : isMin ? C.red : C.g700
+      }
+    }, fmtVal(row.v))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: C.g100,
+        borderRadius: 6,
+        height: 10,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${pct}%`,
+        height: 10,
+        borderRadius: 6,
+        background: isMax ? accentColor : isMin ? C.red : accentColor + "99",
+        transition: "width 0.4s ease"
+      }
+    })), isMax && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: accentColor,
+        marginTop: 2,
+        fontWeight: 600
+      }
+    }, "▲ Максимум периода"), isMin && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.red,
+        marginTop: 2,
+        fontWeight: 600
+      }
+    }, "▼ Минимум периода"));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10
+    }
+  }, [{
+    label: "Максимум",
+    val: fmtVal(Math.max(...rows.map(r => r.v))),
+    color: accentColor,
+    bg: accentColor + "14"
+  }, {
+    label: "Минимум",
+    val: fmtVal(Math.min(...rows.map(r => r.v))),
+    color: C.red,
+    bg: C.redLight
+  }].map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.label,
+    style: {
+      background: s.bg,
+      borderRadius: 10,
+      padding: "12px 16px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: s.color,
+      fontWeight: 600,
+      marginBottom: 4
+    }
+  }, s.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: s.color
+    }
+  }, s.val)))));
+}
+function App() {
+  const [tab, setTab] = useState("dashboard");
+  const [store, setStore] = useState(0);
+  const [selectedLE, setSelectedLE] = useState("le1");
+  const [leDropOpen, setLeDropOpen] = useState(false);
+  const [storeDropOpen, setStoreDropOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [docTab, setDocTab] = useState("debt");
+  const [appFilter, setAppFilter] = useState("Все");
+  const [showNewApp, setShowNewApp] = useState(false);
+  const [appPath, setAppPath] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  const [newTicketOpen, setNewTicketOpen] = useState(false);
+  const [ticketTitle, setTicketTitle] = useState("");
+  const [ticketCategory, setTicketCategory] = useState("Техническая");
+  const [edoFilled, setEdoFilled] = useState(false);
+  const [edoForm, setEdoForm] = useState({
+    inn: "",
+    operator: "",
+    participantId: "",
+    contact: ""
+  });
+  const [areaRange, setAreaRange] = useState([80, 350]);
+  const [rentRange, setRentRange] = useState([600, 2000]);
+  const [newAppForm, setNewAppForm] = useState({
+    city: "",
+    district: "",
+    street: "",
+    building: "",
+    format: "",
+    area: "",
+    areaRange: [80, 350],
+    rentRange: [600, 2000],
+    selectedAddr: "",
+    planFile: null,
+    photosDone: false
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [ticketFilter, setTicketFilter] = useState("Все");
+  // Application detail page
+  const [appDetailPage, setAppDetailPage] = useState(null); // app object when open
+  // Drawers
+  const [kpiDrawer, setKpiDrawer] = useState(null);
+  const [categoryModal, setCategoryModal] = useState(null);
+  const [docDetailDrawer, setDocDetailDrawer] = useState(null);
+  const [ticketDetailDrawer, setTicketDetailDrawer] = useState(null);
+  const [benchmarkHelp, setBenchmarkHelp] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [grossModal, setGrossModal] = useState(false);
+  const [checkModal, setCheckModal] = useState(false);
+  const [trafficModal, setTrafficModal] = useState(false);
+  const [rtoModal, setRtoModal] = useState(false);
+  const kpi = kpiData[store];
+  const currentLE = LEGAL_ENTITIES.find(le => le.id === selectedLE) || LEGAL_ENTITIES[0];
+  const currentStore = currentLE.stores.find(s => s.id === store) || currentLE.stores[0];
+  const showToast = useCallback(msg => setToast(msg), []);
+  function simulateUpload(files) {
+    setUploadProgress(0);
+    const iv = setInterval(() => setUploadProgress(p => {
+      if (p >= 100) {
+        clearInterval(iv);
+        setUploadProgress(null);
+        showToast("Файл успешно загружен");
+        return null;
+      }
+      return p + 20;
+    }), 250);
+    setUploadedFiles(prev => [...prev, ...Array.from(files).map(f => f.name)]);
+  }
+  const navItems = [{
+    key: "dashboard",
+    icon: "📊",
+    label: "Дашборд"
+  }, {
+    key: "onboarding",
+    icon: "🏪",
+    label: "Мои магазины"
+  }, {
+    key: "finance",
+    icon: "💰",
+    label: "Отчётность"
+  }, {
+    key: "support",
+    icon: "💬",
+    label: "Поддержка"
+  }];
+  const [applicationsList, setApplicationsList] = useState(applications);
+  const filteredApps = appFilter === "Все" ? applicationsList : applicationsList.filter(a => a.status === appFilter);
+  const filteredTickets = ticketFilter === "Все" ? allTickets : allTickets.filter(t => t.status === ticketFilter);
+
+  // Page title
+  const pageTitle = appDetailPage ? `Заявка ${appDetailPage.id}` : navItems.find(n => n.key === tab)?.label;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Inter','Segoe UI',sans-serif",
+      display: "flex",
+      minHeight: "100vh",
+      background: C.g50
+    }
+  }, /*#__PURE__*/React.createElement("style", null, `@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`), /*#__PURE__*/React.createElement("aside", {
+    style: {
+      width: sidebarCollapsed ? 64 : 220,
+      background: "#1a1a2e",
+      color: "#fff",
+      flexShrink: 0,
+      display: "flex",
+      flexDirection: "column",
+      transition: "width 0.2s",
+      overflow: "hidden",
+      position: "sticky",
+      top: 0,
+      height: "100vh"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: sidebarCollapsed ? "20px 14px" : "20px 16px",
+      borderBottom: "1px solid rgba(255,255,255,0.08)",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      cursor: "pointer"
+    },
+    onClick: () => setSidebarCollapsed(!sidebarCollapsed)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.red,
+      borderRadius: 8,
+      width: 36,
+      height: 36,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#fff",
+      fontWeight: 900,
+      fontSize: 13,
+      letterSpacing: -0.5
+    }
+  }, "МФ")), !sidebarCollapsed && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#fff"
+    }
+  }, "Магнит Франшиза"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.45)",
+      marginTop: 1
+    }
+  }, "Личный кабинет"))), /*#__PURE__*/React.createElement("nav", {
+    style: {
+      padding: "12px 0",
+      flex: 1
+    }
+  }, navItems.map(n => /*#__PURE__*/React.createElement("div", {
+    key: n.key,
+    onClick: () => {
+      setTab(n.key);
+      setAppDetailPage(null);
+      setShowNewApp(false);
+      setAppPath(null);
+    },
+    title: sidebarCollapsed ? n.label : "",
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "11px 18px",
+      cursor: "pointer",
+      background: tab === n.key && !appDetailPage ? "rgba(227,6,19,0.18)" : "transparent",
+      borderLeft: tab === n.key && !appDetailPage ? `3px solid ${C.red}` : "3px solid transparent",
+      marginBottom: 2,
+      transition: "background 0.15s"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18,
+      flexShrink: 0
+    }
+  }, n.icon), !sidebarCollapsed && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: tab === n.key && !appDetailPage ? 600 : 400,
+      color: tab === n.key && !appDetailPage ? "#fff" : "rgba(255,255,255,0.65)",
+      whiteSpace: "nowrap"
+    }
+  }, n.label)))), /*#__PURE__*/React.createElement("div", {
+    onClick: () => setProfileOpen(true),
+    style: {
+      padding: sidebarCollapsed ? "14px 14px" : "14px 18px",
+      borderTop: "1px solid rgba(255,255,255,0.08)",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    },
+    title: sidebarCollapsed ? "Профиль" : ""
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.red,
+      borderRadius: "50%",
+      width: 32,
+      height: 32,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#fff",
+      flexShrink: 0
+    }
+  }, "АИ"), !sidebarCollapsed && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#fff",
+      fontWeight: 600
+    }
+  }, "Алексей Иванов"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.45)"
+    }
+  }, "Профиль →"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: sidebarCollapsed ? "10px 10px 14px" : "10px 16px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (window.parent && window.parent.frExitCabinet) {
+        window.parent.frExitCabinet();
+      }
+    },
+    title: "Выйти",
+    style: {
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      background: "rgba(255,255,255,0.12)",
+      color: "#fff",
+      border: "1px solid rgba(255,255,255,0.25)",
+      borderRadius: 9,
+      padding: "9px 12px",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      fontFamily: "inherit"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+  })), !sidebarCollapsed && /*#__PURE__*/React.createElement("span", null, "Выйти")))), /*#__PURE__*/React.createElement("main", {
+    style: {
+      flex: 1,
+      overflow: "auto",
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("header", {
+    style: {
+      background: C.white,
+      borderBottom: `1px solid ${C.g200}`,
+      padding: "14px 28px",
+      display: "flex",
+      alignItems: "center",
+      gap: 16,
+      position: "sticky",
+      top: 0,
+      zIndex: 200
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      margin: 0,
+      fontSize: 18,
+      fontWeight: 700,
+      color: C.g800,
+      flex: 1
+    }
+  }, pageTitle), tab === "dashboard" && !appDetailPage && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setLeDropOpen(!leDropOpen);
+      setStoreDropOpen(false);
+    },
+    style: {
+      background: C.violetLight,
+      border: `1.5px solid #7C3AED`,
+      borderRadius: 8,
+      padding: "7px 12px",
+      fontSize: 12,
+      color: "#7C3AED",
+      fontWeight: 600,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      whiteSpace: "nowrap"
+    }
+  }, "🏢 ", currentLE.name, " ", leDropOpen ? "▲" : "▼"), leDropOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: "calc(100% + 6px)",
+      right: 0,
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 10,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+      zIndex: 500,
+      minWidth: 220,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 12px",
+      fontSize: 11,
+      color: C.g500,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      borderBottom: `1px solid ${C.g100}`
+    }
+  }, "Юридическое лицо"), LEGAL_ENTITIES.map(le => /*#__PURE__*/React.createElement("div", {
+    key: le.id,
+    onClick: () => {
+      setSelectedLE(le.id);
+      setStore(le.stores[0].id);
+      setLeDropOpen(false);
+    },
+    style: {
+      padding: "10px 14px",
+      fontSize: 13,
+      cursor: "pointer",
+      fontWeight: le.id === selectedLE ? 600 : 400,
+      color: le.id === selectedLE ? "#7C3AED" : C.g700,
+      background: le.id === selectedLE ? C.violetLight : "transparent"
+    },
+    onMouseEnter: e => e.currentTarget.style.background = le.id === selectedLE ? C.violetLight : C.g50,
+    onMouseLeave: e => e.currentTarget.style.background = le.id === selectedLE ? C.violetLight : "transparent"
+  }, le.id === selectedLE ? "✓ " : "", le.name)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setStoreDropOpen(!storeDropOpen);
+      setLeDropOpen(false);
+    },
+    style: {
+      background: C.redLight,
+      border: `1.5px solid ${C.red}`,
+      borderRadius: 8,
+      padding: "7px 12px",
+      fontSize: 12,
+      color: C.redDark,
+      fontWeight: 600,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      whiteSpace: "nowrap"
+    }
+  }, "🏪 ", currentStore.name, " ", storeDropOpen ? "▲" : "▼"), storeDropOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: "calc(100% + 6px)",
+      right: 0,
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 10,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+      zIndex: 500,
+      minWidth: 200,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 12px",
+      fontSize: 11,
+      color: C.g500,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      borderBottom: `1px solid ${C.g100}`
+    }
+  }, "Магазины"), currentLE.stores.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    onClick: () => {
+      setStore(s.id);
+      setStoreDropOpen(false);
+    },
+    style: {
+      padding: "10px 14px",
+      cursor: "pointer",
+      fontWeight: s.id === store ? 600 : 400,
+      color: s.id === store ? C.red : C.g700,
+      background: s.id === store ? C.redLight : "transparent"
+    },
+    onMouseEnter: e => e.currentTarget.style.background = s.id === store ? C.redLight : C.g50,
+    onMouseLeave: e => e.currentTarget.style.background = s.id === store ? C.redLight : "transparent"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13
+    }
+  }, s.id === store ? "✓ " : "", s.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400
+    }
+  }, s.address)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g100,
+      borderRadius: 8,
+      padding: "6px 14px",
+      fontSize: 12,
+      color: C.g600
+    }
+  }, "Июнь 2025")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "28px"
+    }
+  }, appDetailPage && /*#__PURE__*/React.createElement(ApplicationDetailPage, {
+    app: appDetailPage,
+    onBack: () => setAppDetailPage(null),
+    showToast: showToast,
+    isFindApp: appDetailPage.district === "find"
+  }), !appDetailPage && tab === "dashboard" && /*#__PURE__*/React.createElement("div", {
+    onClick: () => {
+      setLeDropOpen(false);
+      setStoreDropOpen(false);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4,1fr)",
+      gap: 16,
+      marginBottom: 16
+    }
+  }, [{
+    label: "Валовый доход",
+    value: kpi.grossIncome,
+    delta: kpi.grossDelta,
+    icon: "💚",
+    color: C.green,
+    bg: C.greenLight,
+    key: "margin",
+    special: "gross"
+  }, {
+    label: "Выручка за месяц",
+    value: kpi.revenue,
+    delta: null,
+    icon: "💰",
+    color: C.blue,
+    bg: C.blueLight,
+    key: "revenue"
+  }, {
+    label: "Агентская ставка",
+    value: kpi.rate + "%",
+    delta: +(kpi.rate - kpi.prevRate).toFixed(1),
+    icon: "📈",
+    color: C.orange,
+    bg: C.orangeLight,
+    key: "rate",
+    deltaLabel: "к прош. месяцу (" + kpi.prevRate + "%)"
+  }, {
+    label: "Выручка на м²",
+    value: kpi.sqm,
+    delta: kpi.sqmDelta,
+    icon: "📐",
+    color: C.red,
+    bg: C.redLight,
+    key: "sqm"
+  }].map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.key,
+    onClick: () => c.special === "gross" ? setGrossModal(true) : setKpiDrawer(c.key),
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: "18px 20px",
+      cursor: "pointer",
+      transition: "box-shadow 0.15s",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
+    },
+    onMouseEnter: e => e.currentTarget.style.boxShadow = "0 4px 16px rgba(227,6,19,0.10)",
+    onMouseLeave: e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: C.g500,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, c.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: c.bg,
+      borderRadius: 8,
+      padding: "4px 8px",
+      fontSize: 16
+    }
+  }, c.icon)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, c.value), c.delta != null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 12,
+      color: c.delta >= 0 ? C.green : C.red,
+      fontWeight: 600
+    }
+  }, c.delta >= 0 ? "▲" : "▼", " ", Math.abs(c.delta), "% ", c.deltaLabel || "к пред. периоду"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 11,
+      color: C.g400
+    }
+  }, "Нажмите для детализации →")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3,1fr)",
+      gap: 16,
+      marginBottom: 24
+    }
+  }, [{
+    label: "Средний чек",
+    value: kpi.avgCheck,
+    delta: kpi.avgCheckDelta,
+    icon: "🧾",
+    color: "#0EA5E9",
+    bg: "#E0F2FE",
+    special: "check",
+    hint: "по неделям и месяцам"
+  }, {
+    label: "Трафик",
+    value: kpi.traffic,
+    delta: kpi.trafficDelta,
+    icon: "👥",
+    color: "#8B5CF6",
+    bg: "#F3EEFF",
+    special: "traffic",
+    hint: "посещений за июнь"
+  }, {
+    label: "РТО",
+    value: kpi.rto,
+    delta: kpi.rtoDelta,
+    icon: "🏪",
+    color: "#D97706",
+    bg: "#FEF3C7",
+    special: "rto",
+    hint: "розничный товарооборот"
+  }].map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.special,
+    onClick: () => c.special === "check" ? setCheckModal(true) : c.special === "traffic" ? setTrafficModal(true) : setRtoModal(true),
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: "18px 20px",
+      cursor: "pointer",
+      transition: "box-shadow 0.15s",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
+    },
+    onMouseEnter: e => e.currentTarget.style.boxShadow = `0 4px 16px ${c.color}28`,
+    onMouseLeave: e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: C.g500,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, c.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: c.bg,
+      borderRadius: 8,
+      padding: "4px 8px",
+      fontSize: 16
+    }
+  }, c.icon)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, c.value), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 12,
+      color: c.delta >= 0 ? C.green : C.red,
+      fontWeight: 600
+    }
+  }, c.delta >= 0 ? "▲" : "▼", " ", Math.abs(c.delta), "% к пред. периоду"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4,
+      fontSize: 11,
+      color: C.g400,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, c.hint), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: c.color,
+      fontWeight: 600
+    }
+  }, "Детализация →"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1.4fr 1fr",
+      gap: 16,
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 14
+    }
+  }, "Динамика дохода за 6 месяцев"), /*#__PURE__*/React.createElement(InteractiveLineChart, {
+    data: trendData,
+    labels: trendLabels
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700
+    }
+  }, "Наполняемость по категориям"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 2
+    }
+  }, "% от потребности магазина")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      fontSize: 10
+    }
+  }, [["<50%", "#b00010"], ["50–75%", "#8a5e00"], [">75%", "#1a7a45"]].map(([l, col]) => /*#__PURE__*/React.createElement("span", {
+    key: l,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 3,
+      color: col
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: col,
+      display: "inline-block"
+    }
+  }), l)))), /*#__PURE__*/React.createElement(InteractivePieChart, {
+    data: categoryFillData[store]
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 16
+    }
+  }, "Бенчмаркинг с эталоном сети"), /*#__PURE__*/React.createElement(BenchmarkBar, {
+    label: "Агентская ставка",
+    own: kpi.rate,
+    refVal: 20,
+    unit: "%",
+    onImprove: () => setBenchmarkHelp("Агентская ставка")
+  }), /*#__PURE__*/React.createElement(BenchmarkBar, {
+    label: "Выручка на м²",
+    own: parseInt(kpi.sqm),
+    refVal: 2900,
+    unit: " ₽",
+    onImprove: () => setBenchmarkHelp("Выручка на м²")
+  }), /*#__PURE__*/React.createElement(BenchmarkBar, {
+    label: "Оборачиваемость, дней",
+    own: 8,
+    refVal: 7,
+    unit: "",
+    onImprove: () => setBenchmarkHelp("Оборачиваемость, дней")
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 14
+    }
+  }, "Топ категории продаж"), /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      color: C.g500,
+      fontSize: 11
+    }
+  }, ["Категория", "SKU", "Продано", "Δ", ""].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      textAlign: "left",
+      paddingBottom: 8,
+      fontWeight: 600
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, topCategories.map((r, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i,
+    style: {
+      background: i % 2 === 0 ? C.g50 : C.white,
+      cursor: "pointer"
+    },
+    onClick: () => setCategoryModal(r),
+    onMouseEnter: e => e.currentTarget.style.background = C.redLight,
+    onMouseLeave: e => e.currentTarget.style.background = i % 2 === 0 ? C.g50 : C.white
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 0 7px 6px",
+      fontWeight: 500
+    }
+  }, r.name), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 6px"
+    }
+  }, r.sku), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 6px"
+    }
+  }, r.sold.toLocaleString()), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 6px",
+      color: r.delta >= 0 ? C.green : C.red,
+      fontWeight: 700
+    }
+  }, r.delta >= 0 ? "+" : "", r.delta, "%"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "7px 0",
+      color: C.g400,
+      fontSize: 11
+    }
+  }, "→")))))))), !appDetailPage && tab === "onboarding" && /*#__PURE__*/React.createElement("div", null, !showNewApp ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 24,
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700
+    }
+  }, "История заявок"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    value: appFilter,
+    onChange: e => setAppFilter(e.target.value),
+    style: {
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "6px 12px",
+      fontSize: 12,
+      outline: "none"
+    }
+  }, ["Все", "Новая", "Черновик", "На согласовании", "Открыт", "Отклонен"].map(f => /*#__PURE__*/React.createElement("option", {
+    key: f
+  }, f))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowNewApp(true),
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "8px 16px",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "+ Новый магазин"))), /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      color: C.g500,
+      fontSize: 11,
+      borderBottom: `1px solid ${C.g200}`
+    }
+  }, ["Заявка", "Адрес", "Формат", "Дата", "Статус", ""].map(h => /*#__PURE__*/React.createElement("th", {
+    key: h,
+    style: {
+      textAlign: "left",
+      paddingBottom: 10,
+      fontWeight: 600
+    }
+  }, h)))), /*#__PURE__*/React.createElement("tbody", null, filteredApps.map((a, i) => {
+    const hasName = a.shopName && a.stageReached >= 5;
+    return /*#__PURE__*/React.createElement("tr", {
+      key: i,
+      style: {
+        borderBottom: `1px solid ${C.g100}`,
+        cursor: "pointer"
+      },
+      onMouseEnter: e => e.currentTarget.style.background = C.g50,
+      onMouseLeave: e => e.currentTarget.style.background = "transparent",
+      onClick: () => setAppDetailPage(a)
+    }, /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 0",
+        minWidth: 160
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        color: hasName ? C.g800 : C.blue,
+        fontSize: 13
+      }
+    }, hasName ? `«${a.shopName}»` : a.id), hasName && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: C.g400,
+        marginTop: 1
+      }
+    }, a.id)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 8px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: C.g700
+      }
+    }, a.city, ", ", a.address), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: C.g400,
+        marginTop: 1
+      }
+    }, MANAGERS[a.district]?.district)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 8px"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: "#F3EEFF",
+        color: "#7C3AED",
+        fontSize: 11,
+        fontWeight: 700,
+        padding: "2px 9px",
+        borderRadius: 10
+      }
+    }, a.format)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 8px",
+        color: C.g500
+      }
+    }, a.date), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 8px"
+      }
+    }, /*#__PURE__*/React.createElement(Badge, {
+      status: a.status
+    })), /*#__PURE__*/React.createElement("td", {
+      style: {
+        padding: "10px 0",
+        color: C.blue,
+        fontSize: 12,
+        whiteSpace: "nowrap"
+      }
+    }, "Детализация →"));
+  }))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 28,
+      maxWidth: 680
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      color: C.g800
+    }
+  }, "Новый магазин"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setShowNewApp(false);
+      setAppPath(null);
+      setNewAppForm({
+        city: "",
+        district: "",
+        street: "",
+        building: "",
+        format: "",
+        area: "",
+        areaRange: [80, 350],
+        rentRange: [600, 2000],
+        selectedAddr: "",
+        planFile: null,
+        photosDone: false,
+        comment: ""
+      });
+    },
+    style: {
+      background: "none",
+      border: "none",
+      fontSize: 20,
+      cursor: "pointer",
+      color: C.g400
+    }
+  }, "✕")), !appPath && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      marginBottom: 16
+    }
+  }, "Выберите сценарий:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 14
+    }
+  }, [["🏢", "Есть свой объект", "Укажу адрес и параметры помещения", "own"], ["🔍", "Нужно подобрать", "Выбрать из базы вакантных площадей", "find"]].map(([icon, title, sub, path]) => /*#__PURE__*/React.createElement("div", {
+    key: path,
+    onClick: () => setAppPath(path),
+    style: {
+      border: `2px solid ${C.g200}`,
+      borderRadius: 12,
+      padding: 20,
+      cursor: "pointer",
+      textAlign: "center",
+      transition: "border 0.15s"
+    },
+    onMouseEnter: e => e.currentTarget.style.borderColor = C.red,
+    onMouseLeave: e => e.currentTarget.style.borderColor = C.g200
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      marginBottom: 8
+    }
+  }, icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g800,
+      marginBottom: 4
+    }
+  }, title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.g500
+    }
+  }, sub))))), appPath === "own" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 8
+    }
+  }, "Формат магазина *"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, ["ММ", "МК", "Мини"].map(f => /*#__PURE__*/React.createElement("div", {
+    key: f,
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      format: f
+    })),
+    style: {
+      flex: 1,
+      border: `2px solid ${newAppForm.format === f ? "#7C3AED" : C.g200}`,
+      background: newAppForm.format === f ? "#F3EEFF" : C.white,
+      borderRadius: 10,
+      padding: "12px 0",
+      textAlign: "center",
+      cursor: "pointer",
+      transition: "all 0.15s"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: newAppForm.format === f ? "#7C3AED" : C.g500
+    }
+  }, f), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: newAppForm.format === f ? "#7C3AED" : C.g400,
+      marginTop: 2
+    }
+  }, f === "ММ" ? "Магнит Мини" : f === "МК" ? "Магнит Косметик" : "Мини-формат"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Город *"), /*#__PURE__*/React.createElement("input", {
+    value: newAppForm.city,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      city: e.target.value
+    })),
+    placeholder: "Москва",
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Округ *"), /*#__PURE__*/React.createElement("select", {
+    value: newAppForm.district,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      district: e.target.value
+    })),
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      background: C.white
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— выберите округ —"), Object.entries(MANAGERS).filter(([k]) => k !== "find").map(([k, v]) => /*#__PURE__*/React.createElement("option", {
+    key: k,
+    value: k
+  }, v.district, " (", k, ")"))), newAppForm.district && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      background: "#F0FDF4",
+      border: "1px solid #86EFAC",
+      borderRadius: 8,
+      padding: "8px 12px",
+      fontSize: 12,
+      color: "#166534",
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, "✓ Заявка будет направлена менеджеру: ", /*#__PURE__*/React.createElement("strong", null, MANAGERS[newAppForm.district]?.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#DCFCE7",
+      color: "#166534",
+      fontSize: 10,
+      padding: "1px 7px",
+      borderRadius: 8,
+      marginLeft: 4
+    }
+  }, MANAGERS[newAppForm.district]?.district))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "2fr 1fr",
+      gap: 12,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Улица *"), /*#__PURE__*/React.createElement("input", {
+    value: newAppForm.street,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      street: e.target.value
+    })),
+    placeholder: "ул. Ленина",
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Дом *"), /*#__PURE__*/React.createElement("input", {
+    value: newAppForm.building,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      building: e.target.value
+    })),
+    placeholder: "42",
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Площадь (м²) *"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: newAppForm.area,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      area: e.target.value
+    })),
+    placeholder: "150",
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Планограмма (PDF/JPG/PNG) *"), !newAppForm.planFile ? /*#__PURE__*/React.createElement("div", {
+    onDragOver: e => {
+      e.preventDefault();
+      setDragOver(true);
+    },
+    onDragLeave: () => setDragOver(false),
+    onDrop: e => {
+      e.preventDefault();
+      setDragOver(false);
+      setNewAppForm(p => ({
+        ...p,
+        planFile: e.dataTransfer.files[0]?.name || "план.pdf"
+      }));
+    },
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      planFile: "планограмма.pdf"
+    })),
+    style: {
+      border: `2px dashed ${dragOver ? C.red : C.g300}`,
+      borderRadius: 10,
+      padding: 20,
+      textAlign: "center",
+      background: dragOver ? C.redLight : C.g50,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      marginBottom: 4
+    }
+  }, "📎"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.g600
+    }
+  }, "Перетащите или ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.red,
+      fontWeight: 600
+    }
+  }, "выберите")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 2
+    }
+  }, "PDF, JPG, PNG — до 50 МБ")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#EFF6FF",
+      border: "1.5px solid #93C5FD",
+      borderRadius: 10,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#1D4ED8",
+      fontSize: 16
+    }
+  }, "✓"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: "#1D4ED8",
+      fontWeight: 500
+    }
+  }, newAppForm.planFile), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      planFile: null
+    })),
+    style: {
+      marginLeft: "auto",
+      background: "none",
+      border: "none",
+      color: C.g400,
+      cursor: "pointer",
+      fontSize: 12
+    }
+  }, "Заменить"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 22
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Фото фасада и входной группы * ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 400,
+      color: C.g400
+    }
+  }, "(множественная загрузка)")), !newAppForm.photosDone ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: `2px dashed ${C.g300}`,
+      borderRadius: 10,
+      padding: 18,
+      textAlign: "center",
+      background: C.g50,
+      cursor: "pointer"
+    },
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      photosDone: true
+    }))
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22
+    }
+  }, "📷"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      marginTop: 4
+    }
+  }, "Добавить фотографии"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 2
+    }
+  }, "JPG, PNG — мин. 5 фото")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#EFF6FF",
+      border: "1.5px solid #93C5FD",
+      borderRadius: 10,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#1D4ED8",
+      fontSize: 16
+    }
+  }, "✓"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: "#1D4ED8",
+      fontWeight: 500
+    }
+  }, "5 фотографий добавлено"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      photosDone: false
+    })),
+    style: {
+      marginLeft: "auto",
+      background: "none",
+      border: "none",
+      color: C.g400,
+      cursor: "pointer",
+      fontSize: 12
+    }
+  }, "Изменить"))), (() => {
+    const missing = [];
+    if (!newAppForm.format) missing.push("формат магазина");
+    if (!newAppForm.city) missing.push("город");
+    if (!newAppForm.district) missing.push("округ");
+    if (!newAppForm.street) missing.push("улица");
+    if (!newAppForm.building) missing.push("дом");
+    if (!newAppForm.area) missing.push("площадь");
+    if (!newAppForm.planFile) missing.push("планограмма");
+    if (!newAppForm.photosDone) missing.push("фото фасада");
+    const ok = missing.length === 0;
+    return /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        if (!ok) {
+          showToast("Заполните: " + missing.join(", "));
+          return;
+        }
+        const newId = "#0" + (Math.floor(Math.random() * 900) + 100);
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, "0")}.${String(today.getMonth() + 1).padStart(2, "0")}.${today.getFullYear()}`;
+        const newApp = {
+          id: newId,
+          city: newAppForm.city,
+          district: newAppForm.district,
+          address: `${newAppForm.street}, ${newAppForm.building}`,
+          status: "Новая",
+          date: dateStr,
+          format: newAppForm.format,
+          shopName: null,
+          stageReached: 0,
+          manager: MANAGERS[newAppForm.district]?.name || "—",
+          managerDistrict: MANAGERS[newAppForm.district]?.district || "—",
+          comment: "",
+          docs: [],
+          history: [{
+            date: dateStr,
+            event: "Заявка подана"
+          }]
+        };
+        setApplicationsList(prev => [newApp, ...prev]);
+        setShowNewApp(false);
+        setAppPath(null);
+        setNewAppForm({
+          city: "",
+          district: "",
+          street: "",
+          building: "",
+          format: "",
+          area: "",
+          areaRange: [80, 350],
+          rentRange: [600, 2000],
+          selectedAddr: "",
+          planFile: null,
+          photosDone: false,
+          comment: ""
+        });
+        showToast("Заявка " + newId + " создана → " + MANAGERS[newAppForm.district]?.name);
+      },
+      style: {
+        background: ok ? C.red : C.g300,
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        padding: "12px 28px",
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: ok ? "pointer" : "not-allowed",
+        width: "100%",
+        transition: "background 0.2s"
+      }
+    }, ok ? "Отправить заявку →" : "Заполните все обязательные поля");
+  })()), appPath === "find" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#F0FDF4",
+      border: "1px solid #86EFAC",
+      borderRadius: 10,
+      padding: "12px 16px",
+      marginBottom: 20,
+      fontSize: 13,
+      color: "#166534",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16
+    }
+  }, "ℹ️"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, "Автоназначение:"), " все заявки на подбор объекта направляются менеджеру ", /*#__PURE__*/React.createElement("strong", null, "Ульяне"), ".")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 8
+    }
+  }, "Формат магазина *"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, ["ММ", "МК", "Мини"].map(f => /*#__PURE__*/React.createElement("div", {
+    key: f,
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      format: f
+    })),
+    style: {
+      flex: 1,
+      border: `2px solid ${newAppForm.format === f ? "#7C3AED" : C.g200}`,
+      background: newAppForm.format === f ? "#F3EEFF" : C.white,
+      borderRadius: 10,
+      padding: "12px 0",
+      textAlign: "center",
+      cursor: "pointer",
+      transition: "all 0.15s"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: newAppForm.format === f ? "#7C3AED" : C.g500
+    }
+  }, f), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: newAppForm.format === f ? "#7C3AED" : C.g400,
+      marginTop: 2
+    }
+  }, f === "ММ" ? "Магнит Мини" : f === "МК" ? "Магнит Косметик" : "Мини-формат"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Область и город *"), /*#__PURE__*/React.createElement("select", {
+    value: newAppForm.city,
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      city: e.target.value
+    })),
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      background: C.white
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— выберите регион и город —"), /*#__PURE__*/React.createElement("optgroup", {
+    label: "Москва и МО"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "Москва, г. Москва"
+  }, "г. Москва"), /*#__PURE__*/React.createElement("option", {
+    value: "Московская обл., г. Подольск"
+  }, "Московская обл., г. Подольск"), /*#__PURE__*/React.createElement("option", {
+    value: "Московская обл., г. Красногорск"
+  }, "Московская обл., г. Красногорск"), /*#__PURE__*/React.createElement("option", {
+    value: "Московская обл., г. Химки"
+  }, "Московская обл., г. Химки")), /*#__PURE__*/React.createElement("optgroup", {
+    label: "Центральный ФО"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "Тульская обл., г. Тула"
+  }, "Тульская обл., г. Тула"), /*#__PURE__*/React.createElement("option", {
+    value: "Рязанская обл., г. Рязань"
+  }, "Рязанская обл., г. Рязань"), /*#__PURE__*/React.createElement("option", {
+    value: "Калужская обл., г. Калуга"
+  }, "Калужская обл., г. Калуга")), /*#__PURE__*/React.createElement("optgroup", {
+    label: "Северо-Западный ФО"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "г. Санкт-Петербург"
+  }, "г. Санкт-Петербург"), /*#__PURE__*/React.createElement("option", {
+    value: "Ленинградская обл., г. Гатчина"
+  }, "Ленинградская обл., г. Гатчина")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 10
+    }
+  }, "Желаемая площадь: ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.g800,
+      fontWeight: 700
+    }
+  }, newAppForm.areaRange[1], " м²")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: C.g500,
+      flexShrink: 0,
+      width: 36
+    }
+  }, "50 м²"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    min: 50,
+    max: 500,
+    step: 10,
+    value: newAppForm.areaRange[1],
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      areaRange: [50, +e.target.value]
+    })),
+    style: {
+      width: "100%",
+      accentColor: C.red
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: C.g500,
+      flexShrink: 0,
+      width: 40,
+      textAlign: "right"
+    }
+  }, "500 м²")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 6
+    }
+  }, [50, 150, 250, 350, 500].map(v => /*#__PURE__*/React.createElement("span", {
+    key: v,
+    onClick: () => setNewAppForm(p => ({
+      ...p,
+      areaRange: [50, v]
+    })),
+    style: {
+      fontSize: 10,
+      color: newAppForm.areaRange[1] === v ? C.red : C.g400,
+      cursor: "pointer",
+      fontWeight: newAppForm.areaRange[1] === v ? 700 : 400
+    }
+  }, v)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 22
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: C.g600,
+      display: "block",
+      marginBottom: 6
+    }
+  }, "Комментарий ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 400,
+      color: C.g400
+    }
+  }, "(необязательно)")), /*#__PURE__*/React.createElement("textarea", {
+    value: newAppForm.comment || "",
+    onChange: e => setNewAppForm(p => ({
+      ...p,
+      comment: e.target.value
+    })),
+    placeholder: "Укажите пожелания к локации: близость к метро, жилые кварталы, первая линия домов и т.д.",
+    rows: 3,
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      fontSize: 13,
+      outline: "none",
+      resize: "vertical",
+      boxSizing: "border-box",
+      color: C.g700,
+      lineHeight: 1.5
+    }
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (!newAppForm.format || !newAppForm.city) {
+        showToast("Укажите формат магазина и регион");
+        return;
+      }
+      const newId = "#0" + (Math.floor(Math.random() * 900) + 100);
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, "0")}.${String(today.getMonth() + 1).padStart(2, "0")}.${today.getFullYear()}`;
+      const newApp = {
+        id: newId,
+        city: newAppForm.city.split(",")[0] || "Москва",
+        district: "find",
+        address: "Адрес на согласовании",
+        status: "Новая",
+        date: dateStr,
+        format: newAppForm.format,
+        shopName: null,
+        stageReached: 0,
+        manager: "Ульяна",
+        managerDistrict: "Подбор объектов",
+        comment: newAppForm.comment || "",
+        docs: [],
+        history: [{
+          date: dateStr,
+          event: "Заявка подана на подбор объекта"
+        }],
+        findArea: newAppForm.areaRange[1],
+        findCity: newAppForm.city
+      };
+      setApplicationsList(prev => [newApp, ...prev]);
+      setShowNewApp(false);
+      setAppPath(null);
+      setNewAppForm({
+        city: "",
+        district: "",
+        street: "",
+        building: "",
+        format: "",
+        area: "",
+        areaRange: [80, 350],
+        rentRange: [600, 2000],
+        selectedAddr: "",
+        planFile: null,
+        photosDone: false,
+        comment: ""
+      });
+      showToast(`Заявка ${newId} создана → Ульяна`);
+    },
+    style: {
+      background: newAppForm.format && newAppForm.city ? C.red : C.g300,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "12px 28px",
+      fontSize: 14,
+      fontWeight: 600,
+      cursor: newAppForm.format && newAppForm.city ? "pointer" : "not-allowed",
+      width: "100%",
+      transition: "background 0.2s"
+    }
+  }, newAppForm.format && newAppForm.city ? "Отправить заявку → Ульяна" : "Укажите формат и регион")))), !appDetailPage && tab === "finance" && /*#__PURE__*/React.createElement(FinancePage, {
+    showToast: showToast
+  }), !appDetailPage && tab === "support" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3,1fr)",
+      gap: 16,
+      marginBottom: 24
+    }
+  }, [["Открытые", "Открыт", C.red, C.redLight], ["В работе", "В работе", C.yellow, C.yellowLight], ["Решено", "Решено", C.green, C.greenLight]].map(([label, filterVal, color, bg]) => /*#__PURE__*/React.createElement("div", {
+    key: label,
+    onClick: () => setTicketFilter(ticketFilter === filterVal ? "Все" : filterVal),
+    style: {
+      background: ticketFilter === filterVal ? bg : "#fff",
+      border: `2px solid ${ticketFilter === filterVal ? color : C.g200}`,
+      borderRadius: 14,
+      padding: "18px 20px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      transition: "border 0.15s"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700
+    }
+  }, label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 28,
+      fontWeight: 800,
+      color
+    }
+  }, allTickets.filter(t => t.status === filterVal).length)))), ticketFilter !== "Все" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.yellowLight,
+      border: `1px solid #FFD600`,
+      borderRadius: 8,
+      padding: "8px 14px",
+      marginBottom: 16,
+      fontSize: 12,
+      color: "#7a5a00",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, "Показаны: ", ticketFilter, " (", filteredTickets.length, ")", /*#__PURE__*/React.createElement("span", {
+    onClick: () => setTicketFilter("Все"),
+    style: {
+      cursor: "pointer",
+      color: C.blue
+    }
+  }, "Показать все")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 20,
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700
+    }
+  }, "Мои обращения"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNewTicketOpen(true),
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "7px 14px",
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "+ Новая заявка")), newTicketOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    value: ticketCategory,
+    onChange: e => setTicketCategory(e.target.value),
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 7,
+      padding: "7px 10px",
+      fontSize: 12,
+      outline: "none",
+      marginBottom: 8
+    }
+  }, ["Техническая", "Финансы", "Документы", "Доступы", "Прочее"].map(c => /*#__PURE__*/React.createElement("option", {
+    key: c
+  }, c))), /*#__PURE__*/React.createElement("input", {
+    value: ticketTitle,
+    onChange: e => setTicketTitle(e.target.value),
+    placeholder: "Опишите проблему...",
+    style: {
+      width: "100%",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 8,
+      padding: "8px 12px",
+      fontSize: 13,
+      outline: "none",
+      marginBottom: 10,
+      boxSizing: "border-box"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (ticketTitle) {
+        setNewTicketOpen(false);
+        setTicketTitle("");
+        showToast("Заявка #T-091 создана");
+      }
+    },
+    style: {
+      background: C.red,
+      color: "#fff",
+      border: "none",
+      borderRadius: 7,
+      padding: "7px 16px",
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Отправить"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNewTicketOpen(false),
+    style: {
+      background: "none",
+      border: `1px solid ${C.g300}`,
+      borderRadius: 7,
+      padding: "7px 12px",
+      fontSize: 12,
+      cursor: "pointer",
+      color: C.g600
+    }
+  }, "Отмена"))), filteredTickets.map((t, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    onClick: () => setTicketDetailDrawer(t),
+    style: {
+      borderBottom: `1px solid ${C.g100}`,
+      padding: "10px 0",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer"
+    },
+    onMouseEnter: e => e.currentTarget.style.background = C.g50,
+    onMouseLeave: e => e.currentTarget.style.background = "transparent"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: C.g800
+    }
+  }, t.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400,
+      marginTop: 2
+    }
+  }, t.id, " · ", t.date, " · ", t.category)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      gap: 4
+    }
+  }, /*#__PURE__*/React.createElement(Badge, {
+    status: t.status
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: C.blue
+    }
+  }, "Открыть →"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 18
+    }
+  }, "База знаний и обучение"), knowledgeBase.map((kb, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "10px 0",
+      borderBottom: `1px solid ${C.g100}`,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: kb.type === "PDF" ? C.redLight : C.orangeLight,
+      color: kb.type === "PDF" ? C.red : C.orange,
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "2px 7px",
+      borderRadius: 5
+    }
+  }, kb.type), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: C.g800
+    }
+  }, kb.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.g400
+    }
+  }, kb.desc))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => showToast(`Скачивается: ${kb.title}`),
+    style: {
+      background: C.blueLight,
+      border: `1px solid ${C.blue}40`,
+      borderRadius: 6,
+      padding: "5px 12px",
+      fontSize: 12,
+      color: C.blue,
+      fontWeight: 600,
+      cursor: "pointer",
+      flexShrink: 0,
+      marginLeft: 10
+    }
+  }, "↓ Скачать"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.white,
+      border: `1px solid ${C.g200}`,
+      borderRadius: 14,
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: C.g700,
+      marginBottom: 12
+    }
+  }, "Проверки и аудит"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      borderRadius: 10,
+      padding: "24px",
+      textAlign: "center",
+      color: C.g400,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      marginBottom: 8
+    }
+  }, "🔍"), "Результаты аудита будут доступны после проведения первой проверки", /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => showToast("Запрос на проведение аудита отправлен куратору"),
+    style: {
+      background: C.g100,
+      border: "none",
+      borderRadius: 8,
+      padding: "8px 18px",
+      fontSize: 12,
+      color: C.g600,
+      cursor: "pointer",
+      fontWeight: 600
+    }
+  }, "Запросить аудит"))))))), kpiDrawer && /*#__PURE__*/React.createElement(KpiDetailDrawer, {
+    kpiKey: kpiDrawer,
+    kpi: kpi,
+    onClose: () => setKpiDrawer(null)
+  }), grossModal && /*#__PURE__*/React.createElement(Modal, {
+    open: true,
+    onClose: () => setGrossModal(false),
+    title: "💚 Валовый доход — детализация",
+    width: 460
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: C.g600,
+      marginBottom: 20
+    }
+  }, "Валовый доход складывается из двух составляющих: агентский товар и алкогольная продукция."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.g50,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16
+    }
+  }, [["Выручка по агентскому товару", kpi.agentRevenue, "#1D4ED8", "#DBEAFE"], ["Выручка по алкоголю", kpi.alcoholRevenue, "#7C3AED", "#F3EEFF"]].map(([label, val, col, bg]) => /*#__PURE__*/React.createElement("div", {
+    key: label,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "12px 0",
+      borderBottom: `1px solid ${C.g200}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+      background: col,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.g700
+    }
+  }, label)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: col
+    }
+  }, val))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "14px 0 0 0",
+      fontWeight: 700
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      color: C.g800
+    }
+  }, "Итого валовый доход"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 17,
+      color: C.green
+    }
+  }, kpi.grossIncome))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.greenLight,
+      border: `1px solid ${C.green}`,
+      borderRadius: 10,
+      padding: "10px 14px",
+      fontSize: 12,
+      color: "#1a7a45",
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "💡"), /*#__PURE__*/React.createElement("span", null, "Доля алкоголя в валовом доходе составляет ", Math.round(parseInt(kpi.alcoholRevenue) / parseInt(kpi.grossIncome) * 100), "% — целевой показатель: 18–22%."))), checkModal && /*#__PURE__*/React.createElement(CheckTrafficRtoModal, {
+    title: "🧾 Средний чек",
+    accentColor: "#0EA5E9",
+    unit: "₽",
+    currentVal: kpi.avgCheck,
+    delta: kpi.avgCheckDelta,
+    bd: breakdownData[store],
+    weekKey: "checkWeeks",
+    monthKey: "checkMonths",
+    fmtVal: v => `${v.toLocaleString()} ₽`,
+    onClose: () => setCheckModal(false)
+  }), trafficModal && /*#__PURE__*/React.createElement(CheckTrafficRtoModal, {
+    title: "👥 Трафик",
+    accentColor: "#8B5CF6",
+    unit: "чел.",
+    currentVal: kpi.traffic,
+    delta: kpi.trafficDelta,
+    bd: breakdownData[store],
+    weekKey: "trafficWeeks",
+    monthKey: "trafficMonths",
+    fmtVal: v => `${v.toLocaleString()} чел.`,
+    onClose: () => setTrafficModal(false)
+  }), rtoModal && /*#__PURE__*/React.createElement(CheckTrafficRtoModal, {
+    title: "🏪 РТО",
+    accentColor: "#D97706",
+    unit: "₽",
+    currentVal: kpi.rto,
+    delta: kpi.rtoDelta,
+    bd: breakdownData[store],
+    weekKey: "rtoWeeks",
+    monthKey: "rtoMonths",
+    fmtVal: v => `${(v / 1000000).toFixed(2)} млн ₽`,
+    onClose: () => setRtoModal(false)
+  }), categoryModal && /*#__PURE__*/React.createElement(CategoryDetailModal, {
+    cat: categoryModal,
+    onClose: () => setCategoryModal(null)
+  }), docDetailDrawer && /*#__PURE__*/React.createElement(DocDetailDrawer, {
+    doc: docDetailDrawer,
+    onClose: () => setDocDetailDrawer(null),
+    showToast: showToast
+  }), ticketDetailDrawer && /*#__PURE__*/React.createElement(TicketDetailDrawer, {
+    ticket: ticketDetailDrawer,
+    onClose: () => setTicketDetailDrawer(null),
+    showToast: showToast
+  }), benchmarkHelp && /*#__PURE__*/React.createElement(BenchmarkHelpDrawer, {
+    metricLabel: benchmarkHelp,
+    onClose: () => setBenchmarkHelp(null),
+    showToast: showToast
+  }), profileOpen && /*#__PURE__*/React.createElement(ProfileDrawer, {
+    onClose: () => setProfileOpen(false),
+    showToast: showToast
+  }), toast && /*#__PURE__*/React.createElement(Toast, {
+    msg: toast,
+    onClose: () => setToast(null)
+  }));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
+
+</script>
+</body>
+</html>

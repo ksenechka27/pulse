@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Магнит Франшиза — Портал менеджера</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --r:#D0021B;--rd:#8B0012;--rdd:#5C000C;--rl:#FDE8EB;--rxl:#FFF0F2;
+  --acc:#F5A623;--accl:#FFF7E6;
+  --bl:#1A5FA8;--bll:#E6F0FB;
+  --pu:#6B3FA0;--pul:#F0EAF9;
+  --gr:#1A7A4A;--grl:#E6F4EC;
+  --gray:#F4F5F7;--bor:#E2E8F0;--txt:#1A202C;--mut:#718096;
+  --sw:230px;--fn:'Segoe UI',system-ui,-apple-system,sans-serif
+}
+html,body{height:100%;font-family:var(--fn);background:#F7F8FA;color:var(--txt);overflow:hidden}
+#app{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:linear-gradient(180deg,#3A0008 0%,#6B0012 40%,#8B0012 100%);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-row{display:flex;align-items:center;gap:12px}
+.logo-badge{background:var(--acc);color:#fff;font-size:22px;font-weight:900;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:-1px}
+.logo-text{color:#fff;font-size:14px;font-weight:700;line-height:1.3}
+.logo-sub{color:rgba(255,255,255,.55);font-size:11px;margin-top:1px}
+.sb-sec{padding:16px 20px 6px;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase}
+.snav{padding:4px 10px;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;margin-bottom:2px;transition:all .15s;user-select:none}
+.ni:hover{background:rgba(255,255,255,.1);color:#fff}
+.ni.active{background:rgba(255,255,255,.18);color:#fff}
+.ni-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.ni-lbl{flex:1}
+.nbadge{background:var(--acc);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.su{padding:14px 16px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.su-av{width:34px;height:34px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.su-name{color:#fff;font-size:12px;font-weight:600}
+.su-role{color:rgba(255,255,255,.5);font-size:10px;margin-top:1px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid var(--bor);padding:0 28px;height:58px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
+.tb-title{font-size:16px;font-weight:800;color:var(--txt)}
+.tb-sub{font-size:13px;color:var(--mut)}
+.tb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:var(--fn);white-space:nowrap}
+.btn-p{background:var(--r);color:#fff}
+.btn-p:hover{background:var(--rd);transform:translateY(-1px)}
+.btn-o{background:#fff;color:var(--txt);border:1px solid var(--bor)}
+.btn-o:hover{background:var(--gray)}
+.btn-d{background:var(--rd);color:#fff}
+.btn-d:hover{background:var(--rdd)}
+.btn-warn{background:#B7760A;color:#fff}
+.btn-warn:hover{background:#8A5A07}
+.btn-sm{padding:6px 12px;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+
+/* PAGES */
+.pg{display:none;animation:fadeIn .2s ease}
+.pg.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* METRICS */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.mc{background:#fff;border:1px solid var(--bor);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.mc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0}
+.mc-r::before{background:var(--r)} .mc-a::before{background:var(--acc)} .mc-b::before{background:var(--bl)} .mc-p::before{background:var(--pu)}
+.m-ico{font-size:20px;margin-bottom:8px}
+.m-lbl{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.m-val{font-size:32px;font-weight:900;color:var(--txt);line-height:1}
+.m-dlt{font-size:11px;margin-top:6px;font-weight:500}
+
+/* PIPELINE */
+.pipe-wrap{background:#fff;border:1px solid var(--bor);border-radius:14px;overflow:hidden;display:flex;margin-bottom:22px}
+.pipe-step{flex:1;padding:14px 16px;border-right:1px solid var(--bor);text-align:center;cursor:pointer;transition:background .15s}
+.pipe-step:last-child{border-right:none}
+.pipe-step:hover{background:var(--rxl)}
+.pdot{width:9px;height:9px;border-radius:50%;margin:0 auto 7px}
+.pcount{font-size:24px;font-weight:900;line-height:1}
+.plbl{font-size:10px;color:var(--mut);margin-top:3px;line-height:1.4}
+
+/* SECTIONS */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sec-ttl{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--txt)}
+.sec-cnt{background:var(--rl);color:var(--r);font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px}
+.sec-cnt.or{background:#FFF0D6;color:#B7760A}
+
+/* FILTER */
+.frow{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.fsel{padding:7px 12px;border:1px solid var(--bor);border-radius:9px;font-size:12px;background:#fff;color:var(--txt);outline:none;cursor:pointer;font-family:var(--fn);transition:border .15s}
+.fsel:focus{border-color:var(--r)}
+.flbl{font-size:12px;color:var(--mut)}
+
+/* TABLES */
+.dt{width:100%;background:#fff;border:1px solid var(--bor);border-radius:14px;overflow:hidden;border-collapse:collapse;margin-bottom:20px}
+.dt th{text-align:left;font-size:10px;font-weight:700;color:var(--mut);padding:11px 16px;background:#FAFBFD;border-bottom:1px solid var(--bor);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.dt td{padding:12px 16px;font-size:12px;border-bottom:1px solid #F1F3F7;vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tr.rc:hover td{background:var(--rxl);cursor:pointer}
+.dt tr.rc:active td{background:var(--rl)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.bd{width:5px;height:5px;border-radius:50%;background:currentColor}
+.b-new{background:#FFF0D6;color:#B7760A}
+.b-nda{background:var(--bll);color:var(--bl)}
+.b-docs{background:var(--pul);color:var(--pu)}
+.b-loc{background:var(--rl);color:var(--r)}
+.b-done{background:#F2D0D4;color:var(--rd)}
+.b-pend{background:#FFF0D6;color:#B7760A}
+.b-appr{background:var(--grl);color:#1A5C38}
+.b-rej{background:var(--rl);color:var(--rd)}
+
+/* MGR CHIP */
+.mc2{display:inline-flex;align-items:center;gap:7px}
+.mav{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+
+/* MODALS */
+.mol{display:none;position:fixed;inset:0;background:rgba(60,0,10,.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.mol.open{display:flex}
+.modal{background:#fff;border-radius:18px;width:600px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:mIn .22s cubic-bezier(.34,1.2,.64,1);box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.modal-sm{width:460px}
+@keyframes mIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.mhdr{padding:20px 22px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:flex-start;gap:12px}
+.mhico{width:38px;height:38px;border-radius:10px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mtitle{font-size:15px;font-weight:800;color:var(--txt);line-height:1.3}
+.msub{font-size:12px;color:var(--mut);margin-top:2px}
+.mclose{margin-left:auto;cursor:pointer;width:30px;height:30px;border-radius:8px;background:none;border:none;font-size:18px;color:var(--mut);display:flex;align-items:center;justify-content:center;transition:all .1s;flex-shrink:0}
+.mclose:hover{background:var(--gray);color:var(--txt)}
+.mbody{padding:18px 22px;overflow-y:auto;flex:1}
+.mfoot{padding:14px 22px;border-top:1px solid var(--bor);display:flex;gap:8px;justify-content:flex-end;background:#FAFBFD}
+
+/* APP LIST MODAL */
+.ali{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bor);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:#FAFBFD}
+.ali:hover{border-color:var(--r);background:var(--rxl)}
+.ali:last-child{margin-bottom:0}
+.ali-id{font-size:11px;color:var(--mut);font-weight:600;min-width:50px}
+.ali-addr{flex:1;font-size:13px;font-weight:600;color:var(--txt)}
+.ali-meta{font-size:11px;color:var(--mut);margin-top:2px}
+.ali-date{font-size:11px;color:var(--mut);min-width:80px;text-align:right}
+
+/* FORM */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.flabel{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.finput,.fselect,.ftarea{padding:9px 11px;border:1px solid var(--bor);border-radius:9px;font-size:13px;font-family:var(--fn);color:var(--txt);background:#fff;outline:none;transition:border .15s;width:100%}
+.finput:focus,.fselect:focus,.ftarea:focus{border-color:var(--r);box-shadow:0 0 0 3px rgba(208,2,27,.08)}
+.ftarea{resize:vertical;min-height:80px}
+.finput[readonly]{background:#FAFBFD;color:var(--mut)}
+
+/* BLOCK LABELS */
+.blbl{font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.blbl::after{content:'';flex:1;height:1px;background:var(--bor)}
+.blbl:first-child{margin-top:0}
+
+/* DOCUMENTS */
+.doc-ehdr{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 7px;display:flex;align-items:center;gap:6px}
+.doci{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--bor);border-radius:10px;margin-bottom:6px;background:#FAFBFD;transition:border .15s}
+.doci:hover{border-color:#C8D6E8}
+.dico{font-size:18px;flex-shrink:0}
+.dname{flex:1;font-size:12px;font-weight:600;color:var(--txt)}
+.dsz{font-size:11px;color:var(--mut);margin-right:4px;white-space:nowrap}
+.dacts{display:flex;gap:5px;margin-left:6px}
+.dbtn{padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;transition:all .12s;font-family:var(--fn);white-space:nowrap}
+.ddl{border-color:var(--bor);background:#fff;color:var(--mut)}
+.ddl:hover{background:var(--gray);color:var(--txt)}
+.dok{border-color:#9FE1CB;background:var(--grl);color:#1A5C38}
+.dok:hover{background:#c5ecda}
+.drej{border-color:#F0997B;background:var(--rxl);color:var(--rd)}
+.drej:hover{background:var(--rl)}
+
+/* DOC TABS */
+.dtab{flex:1;padding:10px 14px;cursor:pointer;border-right:1px solid var(--bor);font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;transition:background .15s;color:var(--mut)}
+.dtab:last-child{border-right:none}
+.dtab:hover{background:var(--rxl)}
+.dtab.atab{background:var(--rxl);color:var(--r);font-weight:700}
+.dtab-sub{font-size:10px;font-weight:500;color:var(--mut)}
+
+/* PROGRESS BAR */
+.pbar-wrap{background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.pbar-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pbar-lbl{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.pbar-val{font-size:12px;font-weight:700;color:var(--txt)}
+.pbar-track{height:6px;background:var(--gray);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* AUDIT */
+.audit-list{background:#fff;border:1px solid var(--bor);border-radius:14px;overflow:hidden}
+.audit-row{display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #F1F3F7;font-size:12px;align-items:flex-start;transition:background .1s}
+.audit-row:last-child{border-bottom:none}
+.audit-row:hover{background:#FAFBFD}
+.audit-dot{width:7px;height:7px;border-radius:50%;background:var(--bor);margin-top:5px;flex-shrink:0}
+.audit-time{color:var(--mut);min-width:115px;flex-shrink:0;font-size:11px;padding-top:1px}
+.audit-action{flex:1;color:var(--txt);line-height:1.5}
+.au-user{color:var(--r);font-weight:700}
+.au-old{text-decoration:line-through;color:var(--mut)}
+.au-new{color:var(--gr);font-weight:700}
+.au-tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;margin-right:4px}
+.at-stat{background:var(--rl);color:var(--rd)}
+.at-doc{background:var(--bll);color:var(--bl)}
+.at-mgr{background:var(--pul);color:var(--pu)}
+.at-sys{background:var(--gray);color:var(--mut)}
+.at-crt{background:#FFF0D6;color:#B7760A}
+
+/* ALERT */
+.alert{padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.aw{background:#FFF7E6;color:#B7760A;border:1px solid #FAD59A}
+.ai{background:var(--bll);color:var(--bl);border:1px solid #A8C9F0}
+.as{background:var(--grl);color:#1A5C38;border:1px solid #9FE1CB}
+
+/* TOAST */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#1A202C;color:#fff;padding:11px 18px;border-radius:11px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;animation:tIn .25s cubic-bezier(.34,1.2,.64,1);box-shadow:0 6px 24px rgba(0,0,0,.3);max-width:320px}
+.ts{background:var(--gr)} .te{background:var(--rd)} .ti{background:var(--bl)}
+@keyframes tIn{from{transform:translateX(60px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.req{color:var(--r)}
+
+/* ── APPLICATION DETAIL PAGE ── */
+.det-header{background:#fff;border:1px solid var(--bor);border-radius:14px;padding:20px 24px;margin-bottom:18px}
+.det-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);cursor:pointer;margin-bottom:14px;padding:5px 10px;border-radius:7px;transition:all .12s;border:1px solid transparent}
+.det-back:hover{background:var(--rxl);color:var(--r);border-color:var(--rl)}
+.det-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.det-meta-item{background:var(--gray);border-radius:9px;padding:10px 14px}
+.det-meta-lbl{font-size:10px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.det-meta-val{font-size:13px;font-weight:700;color:var(--txt)}
+
+/* STAGE PROGRESS RAIL */
+.stage-rail{display:flex;align-items:center;margin-bottom:20px;background:#fff;border:1px solid var(--bor);border-radius:14px;padding:14px 20px;overflow-x:auto;gap:0}
+.sr-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:60px;position:relative;cursor:pointer}
+.sr-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;right:-50%;height:2px;background:var(--bor);z-index:0}
+.sr-step.done:not(:last-child)::after{background:var(--gr)}
+.sr-step.active:not(:last-child)::after{background:linear-gradient(90deg,var(--gr) 0%,var(--bor) 100%)}
+.sr-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;z-index:1;position:relative;border:2px solid var(--bor);background:#fff;color:var(--mut);transition:all .2s}
+.sr-step.done .sr-circle{background:var(--gr);border-color:var(--gr);color:#fff}
+.sr-step.active .sr-circle{background:var(--r);border-color:var(--r);color:#fff;box-shadow:0 0 0 4px var(--rl)}
+.sr-step.locked .sr-circle{background:var(--gray);border-color:var(--bor);color:#C0C8D4}
+.sr-lbl{font-size:9px;color:var(--mut);text-align:center;line-height:1.3;max-width:65px;font-weight:600}
+.sr-step.done .sr-lbl{color:var(--gr)}
+.sr-step.active .sr-lbl{color:var(--r);font-weight:800}
+.sr-step.locked .sr-lbl{color:#C0C8D4}
+
+/* STAGE CARDS */
+.stage-card{background:#fff;border:1px solid var(--bor);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow .15s}
+.stage-card.s-done{border-color:#A8D5B8}
+.stage-card.s-active{border-color:var(--r);box-shadow:0 2px 16px rgba(208,2,27,.1)}
+.stage-card.s-locked{opacity:.55;pointer-events:none}
+.sc-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none}
+.sc-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+.sc-num-done{background:var(--grl);color:var(--gr)}
+.sc-num-active{background:var(--rl);color:var(--r)}
+.sc-num-locked{background:var(--gray);color:#C0C8D4}
+.sc-title{font-size:14px;font-weight:800;color:var(--txt);flex:1}
+.sc-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.sc-status-done{background:var(--grl);color:var(--gr)}
+.sc-status-active{background:var(--rl);color:var(--r)}
+.sc-status-locked{background:var(--gray);color:#C0C8D4}
+.sc-dates{display:flex;gap:16px;font-size:11px;color:var(--mut);margin-left:8px}
+.sc-date-item{display:flex;flex-direction:column;gap:1px;align-items:flex-end}
+.sc-date-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.sc-date-val{font-weight:600;color:var(--txt)}
+.sc-chevron{font-size:14px;color:var(--mut);transition:transform .2s;flex-shrink:0}
+.sc-body{padding:0 18px 16px;border-top:1px solid var(--bor);display:none}
+.sc-body.open{display:block}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--bor);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#FAFBFD;margin:10px 0}
+.dropzone:hover{border-color:var(--r);background:var(--rxl)}
+.dz-ico{font-size:28px;margin-bottom:6px}
+.dz-text{font-size:12px;font-weight:600;color:var(--mut)}
+.dz-sub{font-size:11px;color:#A0AEC0;margin-top:3px}
+.dz-file-list{margin-top:10px;text-align:left}
+.dz-file-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border:1px solid var(--bor);border-radius:8px;margin-bottom:5px;font-size:12px}
+.dz-fname{flex:1;font-weight:600}
+.dz-fsz{color:var(--mut);font-size:11px}
+.dz-rm{cursor:pointer;color:var(--r);font-size:14px;line-height:1}
+
+/* INFO ROW */
+.info-row{display:flex;gap:20px;margin:10px 0 6px;font-size:12px;flex-wrap:wrap}
+.ir-item{display:flex;flex-direction:column;gap:2px}
+.ir-lbl{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.ir-val{font-weight:600;color:var(--txt)}
+
+/* PARTNER FILE ROW */
+.partner-file{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--bor);border-radius:10px;margin-bottom:6px;background:#FAFBFD}
+.partner-file-name{flex:1;font-size:12px;font-weight:600}
+.partner-file-date{font-size:11px;color:var(--mut)}
+
+/* ACTION BUTTONS ROW */
+.action-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#A0AEC0}
+
+/* PATH CHOICE CARDS */
+.path-card{border:2px solid var(--bor);border-radius:14px;padding:22px 18px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.path-card:hover{border-color:var(--r);background:var(--rxl);transform:translateY(-2px);box-shadow:0 8px 24px rgba(208,2,27,.1)}
+.path-card.selected{border-color:var(--r);background:var(--rxl)}
+
+/* DISTRICT PILLS */
+.dist-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.dp-cao{background:#E6F0FB;color:#1A5FA8}
+.dp-sao{background:#E6F4EC;color:#1A5C38}
+.dp-pfo{background:#F0EAF9;color:#6B3FA0}
+.dp-ufo{background:#FFF0D6;color:#B7760A}
+.dp-yfo{background:#FDE8EB;color:#8B0012}
+.dp-sfo{background:#E8F0FB;color:#0C447C}
+.dp-szfo{background:#E6F4EC;color:#1A5C38}
+.dp-cfo{background:#FFF7E6;color:#B7760A}
+
+/* FORMAT PILL */
+.fmt-pill{display:inline-block;background:#F4F5F7;color:#1A202C;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+
+/* INBOX CARDS */
+.inbox-card{background:#fff;border:1px solid var(--bor);border-radius:12px;padding:16px 18px;margin-bottom:12px;transition:box-shadow .15s}
+.inbox-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+
+/* TICKET ROWS */
+.ticket-row{padding:12px 16px;border-bottom:1px solid var(--bor);cursor:pointer;border-left:3px solid transparent;transition:background .12s}
+.ticket-row:hover{background:var(--rxl)}
+.ticket-row:last-child{border-bottom:none}
+.ticket-row.active-tr{background:var(--rxl);border-left-color:var(--r)}
+
+/* CHAT BUBBLES */
+.bubble-mgr{background:var(--r);color:#fff;border-radius:14px 14px 2px 14px;padding:10px 14px;font-size:13px;max-width:80%;align-self:flex-end}
+.bubble-partner{background:#fff;border:1px solid var(--bor);color:var(--txt);border-radius:14px 14px 14px 2px;padding:10px 14px;font-size:13px;max-width:80%;align-self:flex-start}
+.bubble-time{font-size:10px;color:var(--mut);margin-top:3px}
+
+/* INBOX TABS */
+.inbox-tab{transition:background .15s}
+.inbox-tab:hover{background:var(--rxl)}
+
+/* AUDIT APP LINK */
+.audit-app-link{flex-shrink:0;margin-left:auto;padding:2px 8px;background:var(--rxl);color:var(--r);font-size:10px;font-weight:700;border-radius:6px;cursor:pointer;white-space:nowrap;transition:background .1s}
+.audit-app-link:hover{background:var(--rl)}
+
+/* TRACKER TABLE */
+.tracker-tbl{border-collapse:collapse;font-size:11px;width:max-content;min-width:100%}
+.tracker-tbl th{
+  background:#F1F3F7;border:1px solid #DDE1E9;
+  padding:7px 10px;text-align:left;
+  font-size:10px;font-weight:700;color:#4A5568;
+  text-transform:uppercase;letter-spacing:.04em;
+  white-space:nowrap;position:sticky;top:0;z-index:2;
+}
+.tracker-tbl td{
+  border:1px solid #E8EAED;padding:0;
+  vertical-align:middle;min-height:32px;
+}
+.tracker-tbl tr:hover td{background:#FFF8F8}
+.tracker-tbl tr.filtered-out{display:none}
+.tc{
+  display:block;width:100%;min-height:32px;padding:5px 8px;
+  border:none;outline:none;background:transparent;
+  font-size:11px;font-family:var(--fn);color:var(--txt);
+  resize:none;line-height:1.4;
+  cursor:text;
+}
+.tc:focus{background:#FFFDE8;box-shadow:inset 0 0 0 2px var(--r)}
+.tc.auto-fill{color:var(--bl);font-weight:600}
+.tc.status-active{color:var(--r);font-weight:700}
+.tc.status-done{color:var(--gr);font-weight:700}
+.tc.money-cell{color:var(--gr);font-weight:600;text-align:right}
+.tracker-filter{
+  padding:5px 10px;border:1px solid var(--bor);border-radius:7px;
+  font-size:11px;font-family:var(--fn);outline:none;
+  width:130px;background:#fff;
+  transition:border .15s;
+}
+.tracker-filter:focus{border-color:var(--r)}
+.th-fix{position:sticky;left:0;z-index:3;background:#F1F3F7}</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-badge">М</div>
+      <div><div class="logo-text">Магнит Франшиза</div><div class="logo-sub">Портал менеджера</div></div>
+    </div>
+  </div>
+  <div class="sb-sec">Меню</div>
+  <nav class="snav">
+    <div class="ni active" data-pg="dashboard" onclick="showPage('dashboard',this)"><span class="ni-icon">📊</span><span class="ni-lbl">Главная</span></div>
+    <div class="ni" data-pg="applications" onclick="showPage('applications',this)"><span class="ni-icon">📋</span><span class="ni-lbl">Заявки</span><span class="nbadge">5</span></div>
+    <div class="ni" data-pg="inbox" onclick="showPage('inbox',this)"><span class="ni-icon">💬</span><span class="ni-lbl">Входящие</span><span class="nbadge" id="inbox-badge" style="background:var(--r)">4</span></div>
+    <div class="ni" data-pg="documents" onclick="showPage('documents',this)"><span class="ni-icon">📁</span><span class="ni-lbl">Документы</span></div>
+    <div class="ni" data-pg="audit" onclick="showPage('audit',this)"><span class="ni-icon">📝</span><span class="ni-lbl">Журнал аудита</span></div>
+  </nav>
+  <div class="su">
+    <div class="su-av">ИП</div>
+    <div><div class="su-name">Иванов Павел</div><div class="su-role">Менеджер по развитию</div></div>
+  </div>
+  <div style="padding:10px 16px 14px">
+    <button onclick="if(window.parent&&window.parent.frExitCabinet){window.parent.frExitCabinet();}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fn);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Выйти
+    </button>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div><span class="tb-title" id="tbtitle">Главная</span> <span class="tb-sub" id="tbsub">— сводка по заявкам</span></div>
+    <div class="tb-right">
+      <div style="position:relative;cursor:pointer" onclick="showPage('inbox',document.querySelector('[data-pg=inbox]'))">
+        <div style="width:36px;height:36px;border-radius:9px;background:var(--gray);display:flex;align-items:center;justify-content:center;font-size:16px">🔔</div>
+        <div id="bell-badge" style="position:absolute;top:-4px;right:-4px;background:var(--r);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px">4</div>
+      </div>
+      <button class="btn btn-p btn-sm" onclick="openNewAppModal()">+ Новая заявка</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="pg active" id="pg-dashboard">
+    <div class="mgrid">
+      <div class="mc mc-r"><div class="m-ico">📦</div><div class="m-lbl">Всего заявок</div><div class="m-val">42</div><div class="m-dlt" style="color:var(--r)">↑ 8 за этот месяц</div></div>
+      <div class="mc mc-a"><div class="m-ico">🔔</div><div class="m-lbl">Новых</div><div class="m-val">5</div><div class="m-dlt" style="color:#B7760A">Новые заявки</div></div>
+      <div class="mc mc-b"><div class="m-ico">⚙️</div><div class="m-lbl">В работе</div><div class="m-val">27</div><div class="m-dlt" style="color:var(--bl)">Заявок в работе</div></div>
+      <div class="mc mc-p"><div class="m-ico">🏪</div><div class="m-lbl">Завершено</div><div class="m-val">10</div><div class="m-dlt" style="color:var(--pu)">Завершённых заявок</div></div>
+    </div>
+
+    <!-- Districts breakdown -->
+    <div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:18px 22px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em">🗺 Заявки по округам</div>
+        <span style="font-size:11px;color:var(--mut)">Всего: 42</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="district-bars">
+        <!-- filled below -->
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--txt)">📊 Сводная таблица по объектам</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-o btn-sm" onclick="clearTrackerFilters()">✕ Сбросить фильтры</button>
+        <button class="btn btn-p btn-sm" onclick="exportTrackerExcel()">⬇ Выгрузить в Excel</button>
+        <button class="btn btn-o btn-sm" onclick="addTrackerRow()">+ Добавить строку</button>
+      </div>
+    </div>
+
+    <!-- FILTER ROW -->
+    <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Фильтры:</span>
+      <input class="tracker-filter" id="tf-date" placeholder="Дата внесения" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-mgr-dev" placeholder="Менеджер (развитие)" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-partner" placeholder="Партнёр" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-ul" placeholder="ЮЛ (ООО/ИП)" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-format" placeholder="Формат" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-district" placeholder="Округ" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-status" placeholder="Статус" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-name" placeholder="Наименование" oninput="applyTrackerFilters()">
+      <input class="tracker-filter" id="tf-subject" placeholder="Субъект" oninput="applyTrackerFilters()">
+    </div>
+
+    <!-- TRACKER TABLE WRAPPER -->
+    <div style="overflow-x:auto;background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:4px">
+      <table class="tracker-tbl" id="tracker-table">
+        <thead>
+          <tr>
+            <th class="th-fix" style="min-width:100px">Дата внесения</th>
+            <th style="min-width:140px">Менеджер (развитие)</th>
+            <th style="min-width:140px">Менеджер (поддержки)</th>
+            <th style="min-width:140px">Партнёр</th>
+            <th style="min-width:90px">ЮЛ</th>
+            <th style="min-width:70px">Формат</th>
+            <th style="min-width:110px">Округ</th>
+            <th style="min-width:110px">Филиал</th>
+            <th style="min-width:110px">Субъект</th>
+            <th style="min-width:200px">Адрес</th>
+            <th style="min-width:160px">Наименование</th>
+            <th style="min-width:130px">Статус</th>
+            <th style="min-width:70px">S общ, м²</th>
+            <th style="min-width:70px">S ТЗ, м²</th>
+            <th style="min-width:120px">НОЭ</th>
+            <th style="min-width:120px">ДФ/ОДО</th>
+            <th style="min-width:110px">МИК</th>
+            <th style="min-width:110px">NDA</th>
+            <th style="min-width:130px">Соглашение о намерениях</th>
+            <th style="min-width:110px">ДКК, АГД</th>
+            <th style="min-width:90px">РСР</th>
+            <th style="min-width:110px">Открытие</th>
+            <th style="min-width:200px">Комментарий</th>
+            <th style="min-width:120px">Прогноз РТО, ₽</th>
+            <th style="min-width:140px">Факт РТО полн. мес, ₽</th>
+            <th style="min-width:120px">РТО первый день, ₽</th>
+          </tr>
+        </thead>
+        <tbody id="tracker-tbody">
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--mut);padding:4px 2px">💡 Нажмите на любую ячейку чтобы редактировать · Данные сохраняются автоматически · Строки, связанные с заявками, обогащаются автоматически</div>
+  </div>
+
+  <!-- ════ APPLICATIONS ════ -->
+  <div class="pg" id="pg-applications">
+    <div class="frow">
+      <span class="flbl">Фильтр:</span>
+      <select class="fsel"><option>Все статусы</option><option>Новая</option><option>Подписание NDA</option><option>Обработка документов</option><option>Подбор помещения</option><option>Завершено</option></select>
+      <select class="fsel"><option>Все округа</option><option>ЦАО</option><option>САО</option><option>ЮАО</option><option>ЮЗАО</option><option>Приволжский</option><option>Уральский</option><option>Южный</option><option>Сибирский</option></select>
+      <select class="fsel"><option>Все форматы</option><option>ММ</option><option>МК</option><option>Мини</option></select>
+      <select class="fsel"><option>Все менеджеры</option><option>Алексеев С. (ЦАО)</option><option>Петрова М. (Юг)</option><option>Козлов Д. (Урал)</option><option>Иванов П. (САО)</option><option>Ульяна (подбор)</option></select>
+      <button class="btn btn-o btn-sm" style="margin-left:auto" onclick="exportExcel()">⬇&nbsp;Выгрузить в Excel</button>
+    </div>
+    <div class="sec-hdr"><span class="sec-ttl">Новые заявки</span><span class="sec-cnt or" id="new-apps-cnt">5</span></div>
+    <table class="dt" id="new-apps-table">
+      <thead><tr><th>ID</th><th>Заявитель (ЮЛ)</th><th>Адрес объекта</th><th>Округ</th><th>Формат</th><th>Дата</th><th>Последнее обновление</th><th>Тип</th><th>Статус</th></tr></thead>
+      <tbody id="new-apps-tbody">
+        <tr class="rc" onclick="openDetail('ООО «СеверТорг»','#1042')"><td><span style="color:var(--mut);font-weight:700">#1042</span></td><td><div><strong>ООО «СеверТорг»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td><td>Москва, ул. Ленина, 42</td><td><span class="dist-pill dp-cao">ЦАО</span></td><td><span class="fmt-pill">ММ</span></td><td style="color:var(--mut)">01.06.2025</td><td><span style="font-size:11px;color:var(--mut)">01.06.2025, 09:14<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td><td><span class="badge" style="background:var(--grl);color:var(--gr);font-size:10px">🏢 Свой объект</span></td><td><span class="badge b-new"><span class="bd"></span>Новая</span></td></tr>
+        <tr class="rc" onclick="openDetail('ООО «ВолгаРитейл»','#1041')"><td><span style="color:var(--mut);font-weight:700">#1041</span></td><td><div><strong>ООО «ВолгаРитейл»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td><td>Самара, ул. Чапаева, 7</td><td><span class="dist-pill dp-pfo">Приволжский</span></td><td><span class="fmt-pill">МК</span></td><td style="color:var(--mut)">31.05.2025</td><td><span style="font-size:11px;color:var(--mut)">31.05.2025, 14:22<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td><td><span class="badge" style="background:#FFF0D6;color:#B7760A;font-size:10px">🔍 Нужен подбор</span></td><td><span class="badge b-new"><span class="bd"></span>Новая</span></td></tr>
+        <tr class="rc" onclick="openDetail('ЗАО «ЮжПром»','#1039')"><td><span style="color:var(--mut);font-weight:700">#1039</span></td><td><div><strong>ЗАО «ЮжПром»</strong><br><span style="font-size:10px;color:var(--mut)">ЗАО</span></div></td><td>Воронеж, пл. Ленина, 1</td><td><span class="dist-pill dp-cfo">ЦФО</span></td><td><span class="fmt-pill">Мини</span></td><td style="color:var(--mut)">30.05.2025</td><td><span style="font-size:11px;color:var(--mut)">30.05.2025, 11:07<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td><td><span class="badge" style="background:var(--grl);color:var(--gr);font-size:10px">🏢 Свой объект</span></td><td><span class="badge b-new"><span class="bd"></span>Новая</span></td></tr>
+        <tr class="rc" onclick="openDetail('ИП Орлов Трейд','#1040')"><td><span style="color:var(--mut);font-weight:700">#1040</span></td><td><div><strong>ИП Орлов Трейд</strong><br><span style="font-size:10px;color:var(--mut)">ИП</span></div></td><td>Уфа, ул. Октябрьская, 88</td><td><span class="dist-pill dp-ufo">Уральский</span></td><td><span class="fmt-pill">ММ</span></td><td style="color:var(--mut)">30.05.2025</td><td><span style="font-size:11px;color:var(--mut)">30.05.2025, 16:45<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td><td><span class="badge" style="background:#FFF0D6;color:#B7760A;font-size:10px">🔍 Нужен подбор</span></td><td><span class="badge b-new"><span class="bd"></span>Новая</span></td></tr>
+        <tr class="rc" onclick="openDetail('ООО «АльфаТорг»','#1037')"><td><span style="color:var(--mut);font-weight:700">#1037</span></td><td><div><strong>ООО «АльфаТорг»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td><td>Нижний Новгород, ул. Горького, 3</td><td><span class="dist-pill dp-pfo">Приволжский</span></td><td><span class="fmt-pill">ММ</span></td><td style="color:var(--mut)">29.05.2025</td><td><span style="font-size:11px;color:var(--mut)">29.05.2025, 10:30<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td><td><span class="badge" style="background:#FFF0D6;color:#B7760A;font-size:10px">🔍 Нужен подбор</span></td><td><span class="badge b-new"><span class="bd"></span>Новая</span></td></tr>
+      </tbody>
+    </table>
+    <!-- В РАБОТЕ -->
+    <div class="sec-hdr" style="margin-top:4px">
+      <span class="sec-ttl">В работе</span>
+      <span class="sec-cnt">34</span>
+      <span style="font-size:11px;color:var(--mut);margin-left:8px">Заявки на активных этапах обработки</span>
+    </div>
+    <table class="dt">
+      <thead><tr><th>ID</th><th>Заявитель (ЮЛ)</th><th>Адрес объекта</th><th>Округ</th><th>Формат</th><th>Последнее обновление</th><th>Текущий этап</th><th>Ответственный</th></tr></thead>
+      <tbody>
+        <tr class="rc" onclick="openDetail('ООО «РитейлПро»','#1038')">
+          <td><span style="color:var(--mut);font-weight:700">#1038</span></td>
+          <td><div><strong>ООО «РитейлПро»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td>
+          <td>Казань, пр. Победы, 15</td>
+          <td><span class="dist-pill dp-pfo">Приволжский</span></td>
+          <td><span class="fmt-pill">ММ</span></td>
+          <td><span style="font-size:11px;color:var(--mut)">02.06.2025, 11:03<br><span style="font-size:10px;color:#B7760A">Партнёр загрузил фото</span></span></td>
+          <td><span class="badge b-pend"><span class="bd"></span>⏳ Ждёт подтверждения</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#CECBF6;color:#3C3489">АС</div>Алексеев С. <span style="font-size:9px;color:var(--mut)">(ЦАО)</span></div></td>
+        </tr>
+        <tr class="rc" onclick="openDetail('ООО «НевскийТрейд»','#1031')">
+          <td><span style="color:var(--mut);font-weight:700">#1031</span></td>
+          <td><div><strong>ООО «НевскийТрейд»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td>
+          <td>Санкт-Петербург, ул. Садовая, 33</td>
+          <td><span class="dist-pill dp-szfo">СЗФО</span></td>
+          <td><span class="fmt-pill">МК</span></td>
+          <td><span style="font-size:11px;color:var(--mut)">01.06.2025, 17:33<br><span style="font-size:10px;color:var(--bl)">Партнёр прикрепил документ</span></span></td>
+          <td><span class="badge b-nda"><span class="bd"></span>Подписание NDA</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#E8F0FB;color:#1A5FA8">ПМ</div>Петрова М. <span style="font-size:9px;color:var(--mut)">(Юг)</span></div></td>
+        </tr>
+        <tr class="rc" onclick="openDetail('ООО «УралФуд»','#1025')">
+          <td><span style="color:var(--mut);font-weight:700">#1025</span></td>
+          <td><div><strong>ООО «УралФуд»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td>
+          <td>Екатеринбург, ул. 8 Марта, 51</td>
+          <td><span class="dist-pill dp-ufo">Уральский</span></td>
+          <td><span class="fmt-pill">МК</span></td>
+          <td><span style="font-size:11px;color:var(--mut)">02.06.2025, 08:55<br><span style="font-size:10px;color:var(--gr)">Менеджер согласовал этап</span></span></td>
+          <td><span class="badge b-loc"><span class="bd"></span>Подбор помещения</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#B5D4F4;color:#0C447C">КД</div>Козлов Д. <span style="font-size:9px;color:var(--mut)">(Урал)</span></div></td>
+        </tr>
+        <tr class="rc" onclick="openDetail('ООО «ЮгТрейд»','#1012')">
+          <td><span style="color:var(--mut);font-weight:700">#1012</span></td>
+          <td><div><strong>ООО «ЮгТрейд»</strong><br><span style="font-size:10px;color:var(--mut)">ООО</span></div></td>
+          <td>Краснодар, ул. Красная, 77</td>
+          <td><span class="dist-pill dp-yfo">Южный</span></td>
+          <td><span class="fmt-pill">Мини</span></td>
+          <td><span style="font-size:11px;color:var(--mut)">01.06.2025, 14:05<br><span style="font-size:10px;color:var(--r)">Менеджер отклонил документ</span></span></td>
+          <td><span class="badge b-docs"><span class="bd"></span>Обработка документов</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#E8F0FB;color:#1A5FA8">ПМ</div>Петрова М. <span style="font-size:9px;color:var(--mut)">(Юг)</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ОБРАБОТАННЫЕ -->
+    <div class="sec-hdr" style="margin-top:8px">
+      <span class="sec-ttl">Обработанные</span>
+      <span class="sec-cnt" style="background:var(--grl);color:var(--gr)">3</span>
+      <span style="font-size:11px;color:var(--mut);margin-left:8px">Магазины успешно открыты</span>
+    </div>
+    <table class="dt">
+      <thead><tr><th>ID</th><th>Название магазина</th><th>Адрес объекта</th><th>Округ</th><th>Формат</th><th>Дата открытия</th><th>Статус</th><th>Ответственный</th></tr></thead>
+      <tbody>
+        <tr class="rc" onclick="openDetail('ООО «СибТорг»','#1018')">
+          <td><span style="color:var(--mut);font-weight:700">#1018</span></td>
+          <td>
+            <div><strong style="color:var(--gr)">🏪 Магнит Новосибирск</strong><br><span style="font-size:10px;color:var(--mut)">ООО «СибТорг»</span></div>
+          </td>
+          <td>Новосибирск, пр. Маркса, 9</td>
+          <td><span class="dist-pill dp-sfo">Сибирский</span></td>
+          <td><span class="fmt-pill">ММ</span></td>
+          <td><span style="font-size:11px;color:var(--gr);font-weight:600">20.04.2025</span></td>
+          <td><span class="badge b-done"><span class="bd"></span>Завершено</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#CECBF6;color:#3C3489">АС</div>Алексеев С. <span style="font-size:9px;color:var(--mut)">(ЦАО)</span></div></td>
+        </tr>
+        <tr class="rc" onclick="openDetail('ООО «РитейлПро»','#1003')">
+          <td><span style="color:var(--mut);font-weight:700">#1003</span></td>
+          <td>
+            <div><strong style="color:var(--gr)">🏪 Магнит Казань Центр</strong><br><span style="font-size:10px;color:var(--mut)">ООО «РитейлПро»</span></div>
+          </td>
+          <td>Казань, ул. Баумана, 5</td>
+          <td><span class="dist-pill dp-pfo">Приволжский</span></td>
+          <td><span class="fmt-pill">МК</span></td>
+          <td><span style="font-size:11px;color:var(--gr);font-weight:600">12.03.2025</span></td>
+          <td><span class="badge b-done"><span class="bd"></span>Завершено</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#CECBF6;color:#3C3489">АС</div>Алексеев С. <span style="font-size:9px;color:var(--mut)">(ЦАО)</span></div></td>
+        </tr>
+        <tr class="rc" onclick="openDetail('ООО «УралФуд»','#0991')">
+          <td><span style="color:var(--mut);font-weight:700">#0991</span></td>
+          <td>
+            <div><strong style="color:var(--gr)">🏪 Магнит Урал Сити</strong><br><span style="font-size:10px;color:var(--mut)">ООО «УралФуд»</span></div>
+          </td>
+          <td>Екатеринбург, ул. Вайнера, 14</td>
+          <td><span class="dist-pill dp-ufo">Уральский</span></td>
+          <td><span class="fmt-pill">ММ</span></td>
+          <td><span style="font-size:11px;color:var(--gr);font-weight:600">05.02.2025</span></td>
+          <td><span class="badge b-done"><span class="bd"></span>Завершено</span></td>
+          <td><div class="mc2"><div class="mav" style="background:#B5D4F4;color:#0C447C">КД</div>Козлов Д. <span style="font-size:9px;color:var(--mut)">(Урал)</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════ APPLICATION DETAIL ════ -->
+  <div class="pg" id="pg-detail">
+    <!-- Back + header -->
+    <div class="det-header">
+      <div class="det-back" onclick="goBack()">← Назад к заявкам</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px;font-weight:900" id="det-title">Заявка #1042</span>
+            <span class="badge b-new" id="det-badge"><span class="bd"></span>Новая</span>
+          </div>
+          <div style="font-size:13px;color:var(--mut);margin-top:4px" id="det-sub">—</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <select class="fsel" style="font-size:12px" id="det-mgr-select"><option>— Не назначен —</option><option>Алексеев С. (ЦАО / Приволжский)</option><option selected>Иванов П. (САО)</option><option>Петрова М. (Юг / ЮАО / СЗФО)</option><option>Козлов Д. (Урал / Сибирский)</option><option>Ульяна (подбор объекта)</option></select>
+          <button class="btn btn-o btn-sm">💬 Комментарий</button>
+        </div>
+      </div>
+      <div class="det-meta">
+        <div class="det-meta-item"><div class="det-meta-lbl">Заявитель (ЮЛ)</div><div class="det-meta-val" id="det-name">—</div></div>
+        <div class="det-meta-item"><div class="det-meta-lbl">Адрес объекта</div><div class="det-meta-val" id="det-addr">—</div></div>
+        <div class="det-meta-item"><div class="det-meta-lbl">Формат / Округ</div><div class="det-meta-val" id="det-fmt">—</div></div>
+        <div class="det-meta-item"><div class="det-meta-lbl">Тип заявки</div><div class="det-meta-val" id="det-type">—</div></div>
+      </div>
+    </div>
+
+    <!-- Stage progress rail -->
+    <div class="stage-rail" id="stage-rail"><!-- filled by JS --></div>
+
+    <!-- Stage progress bar -->
+    <div class="pbar-wrap" style="margin-bottom:18px">
+      <div class="pbar-hdr">
+        <span class="pbar-lbl">Прогресс по этапам</span>
+        <span class="pbar-val" id="det-progress-txt">Этап 1 из 10</span>
+      </div>
+      <div class="pbar-track"><div class="pbar-fill" id="det-progress-bar" style="background:var(--r);width:10%"></div></div>
+    </div>
+
+    <!-- Stage cards container -->
+    <div id="stages-container"><!-- filled by JS --></div>
+  </div>
+
+  <!-- ════ INBOX ════ -->
+  <div class="pg" id="pg-inbox">
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;background:#fff;border:1px solid var(--bor);border-radius:12px;overflow:hidden;margin-bottom:16px">
+      <div class="inbox-tab active-itab" id="itab-waiting" onclick="switchInboxTab('waiting')" style="flex:1;padding:11px 16px;cursor:pointer;border-right:1px solid var(--bor);font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;background:var(--rxl);color:var(--r)">
+        ⏳ Ожидают действия
+        <span style="background:var(--r);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto" id="waiting-cnt">2</span>
+      </div>
+      <div class="inbox-tab" id="itab-tickets" onclick="switchInboxTab('tickets')" style="flex:1;padding:11px 16px;cursor:pointer;border-right:1px solid var(--bor);font-size:12px;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:8px">
+        💬 Тикеты партнёров
+        <span style="background:var(--acc);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto" id="tickets-cnt">2</span>
+      </div>
+      <div class="inbox-tab" id="itab-finance" onclick="switchInboxTab('finance')" style="flex:1;padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:8px">
+        💰 Дебиторская задолженность
+        <span style="background:var(--bl);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto" id="finance-cnt">1</span>
+      </div>
+    </div>
+
+    <!-- ── WAITING ACTIONS ── -->
+    <div id="inbox-waiting">
+      <div class="alert ai" style="margin-bottom:14px">📋 Эти заявки ждут вашего подтверждения — партнёр загрузил документы и не может двигаться дальше.</div>
+
+      <!-- Waiting item 1 -->
+      <div class="inbox-card" id="iw-1038" onclick="openDetail('ООО «РитейлПро»','#1038')" style="cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseenter="this.style.boxShadow='0 4px 20px rgba(208,2,27,.12)';this.style.borderColor='var(--r)'" onmouseleave="this.style.boxShadow='';this.style.borderColor='var(--bor)'">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:44px;height:44px;border-radius:12px;background:#FFF0D6;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⏳</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-size:14px;font-weight:800;color:var(--txt)">ООО «РитейлПро»</span>
+              <span class="badge b-pend" style="font-size:10px;padding:2px 8px">Ожидает подтверждения</span>
+              <span style="font-size:10px;color:var(--mut);margin-left:auto">2 ч. назад</span>
+              <span style="font-size:11px;color:var(--bl);font-weight:700">Открыть заявку →</span>
+            </div>
+            <div style="font-size:12px;color:var(--mut);margin-bottom:10px">
+              📍 Казань, пр. Победы, 15 · Заявка #1038 · Этап 1: Посадка и фото объекта
+            </div>
+            <!-- Partner uploaded files preview -->
+            <div style="background:#FAFBFD;border:1px solid var(--bor);border-radius:9px;padding:10px 12px;margin-bottom:10px" onclick="event.stopPropagation()">
+              <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📸 Загружено партнёром</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>🖼️</span><span style="flex:1">фото_фасад_казань.jpg</span><span style="color:var(--mut);font-size:10px">2.1 МБ</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇ Скачать</button></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>🖼️</span><span style="flex:1">входная_группа.jpg</span><span style="color:var(--mut);font-size:10px">1.8 МБ</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇ Скачать</button></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>📄</span><span style="flex:1">посадка_объекта.pdf</span><span style="color:var(--mut);font-size:10px">890 КБ</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇ Скачать</button></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+              <button class="btn btn-p btn-sm" onclick="confirmWaiting('iw-1038','ООО «РитейлПро»','#1038','Посадка и фото объекта')">✓ Подтвердить — перейти к этапу 2</button>
+              <button class="btn btn-warn btn-sm" onclick="openRejectAppModal('ООО «РитейлПро»','#1038')">🔄 Согласование ММ мини/УК</button>
+              <button class="btn btn-d btn-sm" onclick="openRejectAppModal('ООО «РитейлПро»','#1038')">✕ Отказать по заявке</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waiting item 2 -->
+      <div class="inbox-card" id="iw-1031" onclick="openDetail('ООО «НевскийТрейд»','#1031')" style="cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseenter="this.style.boxShadow='0 4px 20px rgba(208,2,27,.12)';this.style.borderColor='var(--r)'" onmouseleave="this.style.boxShadow='';this.style.borderColor='var(--bor)'">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:44px;height:44px;border-radius:12px;background:#FFF0D6;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⏳</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-size:14px;font-weight:800;color:var(--txt)">ООО «НевскийТрейд»</span>
+              <span class="badge b-pend" style="font-size:10px;padding:2px 8px">Ожидает подтверждения</span>
+              <span style="font-size:10px;color:var(--mut);margin-left:auto">5 ч. назад</span>
+              <span style="font-size:11px;color:var(--bl);font-weight:700">Открыть заявку →</span>
+            </div>
+            <div style="font-size:12px;color:var(--mut);margin-bottom:10px">
+              📍 СПб, ул. Садовая, 33 · Заявка #1031 · Этап 2: Технический план объекта
+            </div>
+            <div style="background:#FAFBFD;border:1px solid var(--bor);border-radius:9px;padding:10px 12px;margin-bottom:10px" onclick="event.stopPropagation()">
+              <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📐 Загружено партнёром</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>📄</span><span style="flex:1">техплан_садовая_33.pdf</span><span style="color:var(--mut);font-size:10px">4.2 МБ</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇ Скачать</button></div>
+            </div>
+            <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+              <button class="btn btn-p btn-sm" onclick="confirmWaiting('iw-1031','ООО «НевскийТрейд»','#1031','Технический план объекта')">✓ Принять — перейти к этапу 3</button>
+              <button class="btn btn-d btn-sm" onclick="openRejectAppModal('ООО «НевскийТрейд»','#1031')">✕ Отказать</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="waiting-empty" style="display:none;text-align:center;padding:40px;color:var(--mut)">
+        <div style="font-size:40px;margin-bottom:12px">✅</div>
+        <div style="font-size:14px;font-weight:700">Все заявки обработаны</div>
+        <div style="font-size:12px;margin-top:4px">Нет заявок, ожидающих вашего действия</div>
+      </div>
+    </div>
+
+    <!-- ── TICKETS ── -->
+    <div id="inbox-tickets" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+
+        <!-- Ticket list -->
+        <div style="background:#fff;border:1px solid var(--bor);border-radius:12px;overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:700">Обращения партнёров</span>
+            <span class="sec-cnt" style="margin-left:auto">4 активных</span>
+          </div>
+          <div id="ticket-list-mgr">
+            <div class="ticket-row" id="tr-T081" onclick="openTicketChat('T081')" style="border-left:3px solid var(--r)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;color:var(--txt)">#T-081 · Не синхронизируется касса #3</div>
+                  <div style="font-size:11px;color:var(--mut);margin-top:2px">ООО «РитейлПро» · Техническая · <span style="color:var(--r);font-weight:600">Высокий</span></div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <span class="badge b-docs" style="font-size:10px;padding:2px 7px">В работе</span>
+                  <div style="font-size:10px;color:var(--mut);margin-top:3px">28.05 · 1 непрочитанное</div>
+                </div>
+              </div>
+            </div>
+            <div class="ticket-row" id="tr-T088" onclick="openTicketChat('T088')" style="border-left:3px solid var(--acc)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;color:var(--txt)">#T-088 · Запрос доступа для нового сотрудника</div>
+                  <div style="font-size:11px;color:var(--mut);margin-top:2px">ООО «УралФуд» · Доступы · <span style="color:#B7760A;font-weight:600">Низкий</span></div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <span class="badge b-new" style="font-size:10px;padding:2px 7px">Открыт</span>
+                  <div style="font-size:10px;color:var(--mut);margin-top:3px">01.06 · Новое</div>
+                </div>
+              </div>
+            </div>
+            <div class="ticket-row" id="tr-T079" onclick="openTicketChat('T079')">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;color:var(--txt)">#T-079 · Ошибка в акте за апрель</div>
+                  <div style="font-size:11px;color:var(--mut);margin-top:2px">ООО «СибТорг» · Документы · Средний</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <span class="badge b-appr" style="font-size:10px;padding:2px 7px">Решено</span>
+                  <div style="font-size:10px;color:var(--mut);margin-top:3px">19.05</div>
+                </div>
+              </div>
+            </div>
+            <div class="ticket-row" id="tr-T074" onclick="openTicketChat('T074')">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;color:var(--txt)">#T-074 · Вопрос по агентской ставке Q2</div>
+                  <div style="font-size:11px;color:var(--mut);margin-top:2px">ООО «НевскийТрейд» · Финансы · Низкий</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <span class="badge b-appr" style="font-size:10px;padding:2px 7px">Решено</span>
+                  <div style="font-size:10px;color:var(--mut);margin-top:3px">03.05</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat panel -->
+        <div style="background:#fff;border:1px solid var(--bor);border-radius:12px;overflow:hidden;display:flex;flex-direction:column" id="chat-panel">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bor);background:#FAFBFD">
+            <div style="font-size:13px;font-weight:700;color:var(--txt)" id="chat-title">Выберите тикет для просмотра</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:2px" id="chat-meta">—</div>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:280px;background:#F7F8FA" id="chat-messages">
+            <div style="text-align:center;color:var(--mut);font-size:12px;padding:40px 0">
+              <div style="font-size:28px;margin-bottom:8px">💬</div>
+              Выберите тикет слева
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-top:1px solid var(--bor)" id="chat-input-area" style="display:none">
+            <div style="display:flex;gap:8px">
+              <input id="chat-reply" placeholder="Напишите ответ партнёру..." style="flex:1;padding:9px 12px;border:1px solid var(--bor);border-radius:9px;font-size:13px;outline:none;font-family:var(--fn)"
+                onkeydown="if(event.key==='Enter')sendChatReply()">
+              <button class="btn btn-p btn-sm" onclick="sendChatReply()">Отправить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ДЕБИТОРСКАЯ ЗАДОЛЖЕННОСТЬ ── -->
+    <div id="inbox-finance" style="display:none">
+      <div class="alert ai" style="margin-bottom:14px">💰 Партнёры предоставили платёжные документы — необходимо подтвердить получение для закрытия дебиторской задолженности.</div>
+
+      <div class="inbox-card" id="ifc-1025" onclick="openDetail('ООО «УралФуд»','#1025')" style="cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseenter="this.style.boxShadow='0 4px 20px rgba(208,2,27,.12)';this.style.borderColor='var(--r)'" onmouseleave="this.style.boxShadow='';this.style.borderColor='var(--bor)'">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:44px;height:44px;border-radius:12px;background:var(--bll);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💰</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-size:14px;font-weight:800;color:var(--txt)">ООО «УралФуд»</span>
+              <span class="badge b-pend" style="font-size:10px;padding:2px 8px">Ожидает одобрения</span>
+              <span style="font-size:10px;color:var(--mut);margin-left:auto">сегодня, 10:31</span>
+              <span style="font-size:11px;color:var(--bl);font-weight:700">Открыть заявку →</span>
+            </div>
+            <div style="font-size:12px;color:var(--mut);margin-bottom:10px">📍 Екатеринбург, ул. 8 Марта, 51 · Заявка #1025 · Дебиторская задолженность за июнь 2025</div>
+            <div style="background:#FAFBFD;border:1px solid var(--bor);border-radius:9px;padding:10px 12px;margin-bottom:10px" onclick="event.stopPropagation()">
+              <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📄 Загруженные документы</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>📄</span><span style="flex:1">чек_молочная_01.06.pdf</span><span style="color:var(--mut);font-size:10px">124 500 ₽</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇</button></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>📄</span><span style="flex:1">чек_напитки_02.06.pdf</span><span style="color:var(--mut);font-size:10px">87 300 ₽</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇</button></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span>📄</span><span style="flex:1">чек_хлеб_03.06.pdf</span><span style="color:var(--mut);font-size:10px">43 100 ₽</span><button class="dbtn ddl" onclick="event.stopPropagation();toast('⬇ Скачан','s')">⬇</button></div>
+              </div>
+              <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bor);font-size:12px;font-weight:700;display:flex;justify-content:space-between">
+                <span>Итого к одобрению:</span><span style="color:var(--gr)">254 900 ₽</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+              <button class="btn btn-p btn-sm" style="background:var(--gr);gap:6px" onclick="approveFinance('ifc-1025','ООО «УралФуд»')">✓ Одобрить все чеки</button>
+              <button class="btn btn-d btn-sm" onclick="toast('Запрос на уточнение отправлен партнёру','i')">⚠ Запросить уточнение</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="finance-empty" style="display:none;text-align:center;padding:40px;color:var(--mut)">
+        <div style="font-size:40px;margin-bottom:12px">✅</div>
+        <div style="font-size:14px;font-weight:700">Все финансовые документы проверены</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════ DOCUMENTS ════ -->
+  <div class="pg" id="pg-documents">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px"><div style="font-size:22px;font-weight:900;color:var(--txt)">18</div><div style="font-size:11px;color:var(--mut);font-weight:600;line-height:1.4">Всего<br>документов</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px"><div style="font-size:22px;font-weight:900;color:#1A5C38">9</div><div style="font-size:11px;color:var(--mut);font-weight:600;line-height:1.4">Одобрено</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px"><div style="font-size:22px;font-weight:900;color:#B7760A">6</div><div style="font-size:11px;color:var(--mut);font-weight:600;line-height:1.4">На проверке</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-left:3px solid var(--r)"><div style="font-size:22px;font-weight:900;color:var(--r)">3</div><div style="font-size:11px;font-weight:600;line-height:1.4">На доработке<br><span style="color:var(--r);font-size:10px">блокируют переход</span></div></div>
+    </div>
+    <div style="display:flex;background:#fff;border:1px solid var(--bor);border-radius:10px;overflow:hidden;margin-bottom:14px">
+      <div class="dtab atab" id="dtab-1038" onclick="switchDocTab('1038')"><div><div style="font-weight:700;color:var(--r)">ООО «РитейлПро»</div><div class="dtab-sub">#1038 · Обработка документов · <span onclick="event.stopPropagation();openDetail('ООО «РитейлПро»','#1038')" style="color:var(--bl);text-decoration:underline;cursor:pointer">→ к заявке</span></div></div><span class="badge b-rej" style="font-size:9px;padding:2px 7px;margin-left:auto">1 замечание</span></div>
+      <div class="dtab" id="dtab-1031" onclick="switchDocTab('1031')"><div><div>ООО «НевскийТрейд»</div><div class="dtab-sub">#1031 · Подписание NDA · <span onclick="event.stopPropagation();openDetail('ООО «НевскийТрейд»','#1031')" style="color:var(--bl);text-decoration:underline;cursor:pointer">→ к заявке</span></div></div><span class="badge b-pend" style="font-size:9px;padding:2px 7px;margin-left:auto">2 на проверке</span></div>
+      <div class="dtab" id="dtab-1025" onclick="switchDocTab('1025')"><div><div>ООО «УралФуд»</div><div class="dtab-sub">#1025 · Подбор помещения · <span onclick="event.stopPropagation();openDetail('ООО «УралФуд»','#1025')" style="color:var(--bl);text-decoration:underline;cursor:pointer">→ к заявке</span></div></div><span class="badge b-appr" style="font-size:9px;padding:2px 7px;margin-left:auto">все одобрены</span></div>
+    </div>
+    <div id="docs-1038">
+      <div class="alert aw" style="justify-content:space-between">
+        <span>⚠️ Заявка <strong>#1038</strong> заблокирована: «Договор_аренды.docx» требует доработки. Переход на следующий этап невозможен.</span>
+        <span onclick="openDetail('ООО «РитейлПро»','#1038')" style="color:var(--r);font-weight:700;cursor:pointer;white-space:nowrap;margin-left:12px;text-decoration:underline">Открыть заявку →</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-hdr"><span class="pbar-lbl">Прогресс проверки</span><span class="pbar-val">6 / 9</span></div><div class="pbar-track"><div class="pbar-fill" style="width:66%;background:var(--r)"></div></div></div>
+      <div class="doc-ehdr">🏢 Юридическое лицо</div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Устав_РитейлПро_2024.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Алексеев С. · 30.05.2025</div></div><span class="dsz">1.2 МБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Устав скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Свидетельство_ИНН.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Алексеев С. · 30.05.2025</div></div><span class="dsz">280 КБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ ИНН скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" id="doc-egryl" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Выписка_ЕГРЮЛ.pdf</div><div style="font-size:10px;color:var(--mut)">Загружено 01.06.2025</div></div><span class="dsz">842 КБ</span><span class="badge b-pend" style="font-size:10px;padding:3px 8px" id="egryl-s">⏳ На проверке</span><div class="dacts" id="egryl-a" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ ЕГРЮЛ скачан','s')">⬇ Скачать</button><button class="dbtn dok" onclick="approveDoc('doc-egryl','egryl-s','egryl-a','Выписка_ЕГРЮЛ.pdf','ООО «РитейлПро»','#1038')">✓ Утвердить</button><button class="dbtn drej" onclick="openRejectM('doc-egryl','egryl-s','egryl-a','Выписка_ЕГРЮЛ.pdf')">✕ Отказать</button></div></div>
+      <div class="doc-ehdr">🏪 Объект</div>
+      <div class="doci" id="doc-rent" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Договор_аренды.docx</div><div style="font-size:10px;color:var(--r);font-weight:600">💬 «Необходима нотариальная заверка»</div></div><span class="dsz">356 КБ</span><span class="badge b-rej" style="font-size:10px;padding:3px 8px" id="rent-s">✕ На доработке</span><div class="dacts" id="rent-a" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Договор скачан','s')">⬇ Скачать</button><button class="dbtn dok" onclick="approveDoc('doc-rent','rent-s','rent-a','Договор_аренды.docx','ООО «РитейлПро»','#1038')">✓ Утвердить</button></div></div>
+      <div class="doci" id="doc-photo" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">🖼️</span><div style="flex:1"><div class="dname">Фото_помещения.zip</div><div style="font-size:10px;color:var(--mut)">Загружено 01.06.2025 · 14 файлов</div></div><span class="dsz">14.5 МБ</span><span class="badge b-pend" style="font-size:10px;padding:3px 8px" id="photo-s">⏳ На проверке</span><div class="dacts" id="photo-a" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Фото скачаны','s')">⬇ Скачать</button><button class="dbtn dok" onclick="approveDoc('doc-photo','photo-s','photo-a','Фото_помещения.zip','ООО «РитейлПро»','#1038')">✓ Утвердить</button><button class="dbtn drej" onclick="openRejectM('doc-photo','photo-s','photo-a','Фото_помещения.zip')">✕ Отказать</button></div></div>
+      <div class="doc-ehdr">💰 Финансовые документы</div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📊</span><div style="flex:1"><div class="dname">Бухгалтерский_баланс_2024.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Алексеев С. · 30.05.2025</div></div><span class="dsz">3.4 МБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Баланс скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" id="doc-bank" style="cursor:pointer" onclick="openDetail('ООО «РитейлПро»','#1038')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">🏦</span><div style="flex:1"><div class="dname">Справка_из_банка.pdf</div><div style="font-size:10px;color:var(--mut)">Загружено 02.06.2025</div></div><span class="dsz">190 КБ</span><span class="badge b-pend" style="font-size:10px;padding:3px 8px" id="bank-s">⏳ На проверке</span><div class="dacts" id="bank-a" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Справка скачана','s')">⬇ Скачать</button><button class="dbtn dok" onclick="approveDoc('doc-bank','bank-s','bank-a','Справка_из_банка.pdf','ООО «РитейлПро»','#1038')">✓ Утвердить</button><button class="dbtn drej" onclick="openRejectM('doc-bank','bank-s','bank-a','Справка_из_банка.pdf')">✕ Отказать</button></div></div>
+    </div>
+    <div id="docs-1031" style="display:none">
+      <div class="alert ai" style="justify-content:space-between">
+        <span>ℹ️ Заявка <strong>#1031</strong> на этапе «Подписание NDA». Часть документов ожидается от партнёра.</span>
+        <span onclick="openDetail('ООО «НевскийТрейд»','#1031')" style="color:var(--bl);font-weight:700;cursor:pointer;white-space:nowrap;margin-left:12px;text-decoration:underline">Открыть заявку →</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-hdr"><span class="pbar-lbl">Прогресс проверки</span><span class="pbar-val">3 / 6</span></div><div class="pbar-track"><div class="pbar-fill" style="width:50%;background:var(--bl)"></div></div></div>
+      <div class="doc-ehdr">🏢 Юридическое лицо</div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «НевскийТрейд»','#1031')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Свидетельство_ОГРНИП.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Петрова М. · 28.05.2025</div></div><span class="dsz">445 КБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ ОГРНИП скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «НевскийТрейд»','#1031')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">🪪</span><div style="flex:1"><div class="dname">Паспорт_Никитин_разворот.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Петрова М. · 28.05.2025</div></div><span class="dsz">512 КБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Паспорт скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" id="doc-ndas" style="cursor:pointer" onclick="openDetail('ООО «НевскийТрейд»','#1031')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">🤝</span><div style="flex:1"><div class="dname">NDA_подписанный_скан.pdf</div><div style="font-size:10px;color:var(--mut)">Загружено 01.06.2025</div></div><span class="dsz">1.8 МБ</span><span class="badge b-pend" style="font-size:10px;padding:3px 8px" id="ndas-s">⏳ На проверке</span><div class="dacts" id="ndas-a" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ NDA скачан','s')">⬇ Скачать</button><button class="dbtn dok" onclick="approveDoc('doc-ndas','ndas-s','ndas-a','NDA_подписанный_скан.pdf','ООО «НевскийТрейд»','#1031')">✓ Утвердить</button><button class="dbtn drej" onclick="openRejectM('doc-ndas','ndas-s','ndas-a','NDA_подписанный_скан.pdf')">✕ Отказать</button></div></div>
+      <div class="doc-ehdr" style="margin-top:14px">📬 Ожидается от партнёра</div>
+      <div style="background:#FAFBFD;border:1px dashed var(--bor);border-radius:10px;padding:12px 14px;color:var(--mut);font-size:12px;margin-bottom:6px">📋 Анкета_франчайзи.pdf — <em>ожидается загрузка</em></div>
+      <div style="background:#FAFBFD;border:1px dashed var(--bor);border-radius:10px;padding:12px 14px;color:var(--mut);font-size:12px;margin-bottom:6px">🏦 Справка_о_доходах.pdf — <em>ожидается загрузка</em></div>
+    </div>
+    <div id="docs-1025" style="display:none">
+      <div class="alert as" style="justify-content:space-between">
+        <span>✅ Все документы по заявке <strong>#1025</strong> одобрены. Заявка перешла на этап «Подбор помещения».</span>
+        <span onclick="openDetail('ООО «УралФуд»','#1025')" style="color:var(--gr);font-weight:700;cursor:pointer;white-space:nowrap;margin-left:12px;text-decoration:underline">Открыть заявку →</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-hdr"><span class="pbar-lbl">Прогресс проверки</span><span class="pbar-val" style="color:#1A5C38">7 / 7 ✓</span></div><div class="pbar-track"><div class="pbar-fill" style="width:100%;background:var(--gr)"></div></div></div>
+      <div class="doc-ehdr">🏢 Юридическое лицо</div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «УралФуд»','#1025')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">📄</span><div style="flex:1"><div class="dname">Свидетельство_ОГРНИП.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Козлов Д. · 18.05.2025</div></div><span class="dsz">390 КБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div></div>
+      <div class="doci" style="cursor:pointer" onclick="openDetail('ООО «УралФуд»','#1025')" onmouseenter="this.style.borderColor='var(--r)'" onmouseleave="this.style.borderColor='var(--bor)'"><span class="dico">🪪</span><div style="flex:1"><div class="dname">Паспорт_разворот.pdf</div><div style="font-size:10px;color:var(--mut)">Одобрено: Козлов Д. · 18.05.2025</div></div><span class="dsz">480 КБ</span><span class="badge b-appr" style="font-size:10px;padding:3px 8px">✓ Одобрено</span><div class="dacts" onclick="event.stopPropagation()"><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div></div>
+    </div>
+  </div>
+
+  <!-- ════ AUDIT ════ -->
+  <div class="pg" id="pg-audit">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:11px 14px;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--txt)">186</div><div style="font-size:10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Всего событий</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:11px 14px;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--r)">34</div><div style="font-size:10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Смен статуса</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:11px 14px;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--bl)">89</div><div style="font-size:10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Действий с документами</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:11px 14px;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--pu)">29</div><div style="font-size:10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Назначений</div></div>
+      <div style="background:#fff;border:1px solid var(--bor);border-radius:10px;padding:11px 14px;text-align:center"><div style="font-size:22px;font-weight:900;color:#B7760A">12</div><div style="font-size:10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Отказов</div></div>
+    </div>
+    <div class="frow" style="margin-bottom:14px">
+      <span class="flbl">Фильтр:</span>
+      <select class="fsel"><option>Все типы событий</option><option>Смена статуса</option><option>Документ</option><option>Назначение</option><option>Создание</option></select>
+      <select class="fsel"><option>Все пользователи</option><option>Иванов П.</option><option>Алексеев С.</option><option>Петрова М.</option><option>Козлов Д.</option></select>
+      <select class="fsel"><option>За все время</option><option>Сегодня</option><option>Последние 7 дней</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:11px;color:var(--mut);font-weight:600">Тип:</span>
+      <span class="au-tag at-stat">Статус</span><span class="au-tag at-doc">Документ</span><span class="au-tag at-mgr">Менеджер</span><span class="au-tag at-crt">Создание</span><span class="au-tag at-sys">Система</span>
+    </div>
+    <div class="audit-list" id="audit-list">
+      <div class="audit-row" onclick="openDetail('ООО «СеверТорг»','#1042')" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--r)"></div><span class="audit-time">02.06.2025 14:31</span><span class="audit-action"><span class="au-tag at-stat">Статус</span><span class="au-user">Иванов П.</span> изменил статус заявки <strong>#1042</strong>: <span class="au-old">Новая</span> → <span class="au-new">Подписание NDA</span> · <em style="font-size:10px;color:var(--mut)">нажмите чтобы открыть заявку</em></span><span class="audit-app-link">#1042 →</span></div>
+      <div class="audit-row" onclick="openDetail('ООО «РитейлПро»','#1038')" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--bl)"></div><span class="audit-time">02.06.2025 13:55</span><span class="audit-action"><span class="au-tag at-doc">Документ</span><span class="au-user">Алексеев С.</span> утвердил <strong>Устав_РитейлПро_2024.pdf</strong> по заявке #1038 — <span class="au-new">Одобрено</span> · <em style="font-size:10px;color:var(--mut)">нажмите чтобы открыть заявку</em></span><span class="audit-app-link">#1038 →</span></div>
+      <div class="audit-row" onclick="openDetail('ООО «НевскийТрейд»','#1031')" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--pu)"></div><span class="audit-time">02.06.2025 11:22</span><span class="audit-action"><span class="au-tag at-mgr">Менеджер</span><span class="au-user">Иванов П.</span> назначил ответственного по заявке <strong>#1031</strong>: <span class="au-old">не назначен</span> → <span class="au-new">Петрова М.</span> · <em style="font-size:10px;color:var(--mut)">нажмите чтобы открыть заявку</em></span><span class="audit-app-link">#1031 →</span></div>
+      <div class="audit-row" onclick="openDetailAtStage('ООО «РитейлПро»','#1038',1)" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--r)"></div><span class="audit-time">02.06.2025 10:08</span><span class="audit-action"><span class="au-tag at-doc">Документ</span><span class="au-user">Алексеев С.</span> отклонил <strong>Договор_аренды.docx</strong> по заявке #1038 — «Необходима нотариальная заверка» · <em style="font-size:10px;color:var(--mut)">→ откроет этап 1 заявки</em></span><span class="audit-app-link">#1038 →</span></div>
+      <div class="audit-row" onclick="openDetailAtStage('ООО «УралФуд»','#1025',4)" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--bl)"></div><span class="audit-time">01.06.2025 16:10</span><span class="audit-action"><span class="au-tag at-stat">Статус</span><span class="au-user">Козлов Д.</span> изменил статус заявки <strong>#1025</strong>: <span class="au-old">Обработка документов</span> → <span class="au-new">Подбор помещения</span> · <em style="font-size:10px;color:var(--mut)">→ откроет этап 4 заявки</em></span><span class="audit-app-link">#1025 →</span></div>
+      <div class="audit-row" onclick="openDetail('ООО «СеверТорг»','#1042')" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:#B7760A"></div><span class="audit-time">01.06.2025 09:14</span><span class="audit-action"><span class="au-tag at-crt">Создание</span><span class="au-user">Система</span> создала заявку <strong>#1042</strong> — ООО «СеверТорг», статус: <span class="au-new">Новая</span> · <em style="font-size:10px;color:var(--mut)">нажмите чтобы открыть заявку</em></span><span class="audit-app-link">#1042 →</span></div>
+      <div class="audit-row" onclick="openDetail('ООО «РитейлПро»','#1038')" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--pu)"></div><span class="audit-time">31.05.2025 16:40</span><span class="audit-action"><span class="au-tag at-mgr">Менеджер</span><span class="au-user">Иванов П.</span> назначил ответственного по заявке <strong>#1038</strong>: <span class="au-new">Алексеев С.</span> · <em style="font-size:10px;color:var(--mut)">нажмите чтобы открыть заявку</em></span><span class="audit-app-link">#1038 →</span></div>
+      <div class="audit-row" onclick="openDetailAtStage('ООО «РитейлПро»','#1038',2)" style="cursor:pointer" onmouseenter="this.style.background='var(--rxl)'" onmouseleave="this.style.background=''"><div class="audit-dot" style="background:var(--r)"></div><span class="audit-time">31.05.2025 14:05</span><span class="audit-action"><span class="au-tag at-stat">Статус</span><span class="au-user">Алексеев С.</span> изменил статус заявки <strong>#1038</strong>: <span class="au-old">Подписание NDA</span> → <span class="au-new">Обработка документов</span> · <em style="font-size:10px;color:var(--mut)">→ откроет этап 2 заявки</em></span><span class="audit-app-link">#1038 →</span></div>
+    </div>
+    <div style="text-align:center;padding:14px;font-size:12px;color:var(--mut)">Показано 8 из 186 · <span style="color:var(--r);cursor:pointer;font-weight:600" onclick="toast('Загрузка...','i')">Загрузить ещё →</span></div>
+  </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- ═══ MODAL: NEW APPLICATION ═══ -->
+<div class="mol" id="mol-newapp" onclick="if(event.target===this)closeM('mol-newapp')">
+  <div class="modal" style="width:640px;max-height:85vh" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <div class="mhico" style="background:#E6F0FB;font-size:18px">📋</div>
+      <div><div class="mtitle">Новая заявка</div><div class="msub" id="napp-sub">Шаг 1 из 2 — выберите тип объекта</div></div>
+      <button class="mclose" onclick="closeM('mol-newapp')">✕</button>
+    </div>
+    <div class="mbody" id="napp-body">
+      <!-- Step 0: path choice -->
+      <div id="napp-step0">
+        <div style="font-size:13px;color:var(--mut);margin-bottom:18px;text-align:center">Партнёр хочет открыть магазин. Выберите тип его ситуации:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="path-card" onclick="selectPath('own')" id="path-own">
+            <div style="font-size:36px;margin-bottom:10px">🏢</div>
+            <div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:6px">Есть свой объект</div>
+            <div style="font-size:12px;color:var(--mut);line-height:1.5">Партнёр уже нашёл помещение и хочет открыть магазин на нём</div>
+            <div style="margin-top:12px;font-size:11px;font-weight:700;color:var(--gr);background:var(--grl);padding:4px 10px;border-radius:20px;display:inline-block">📍 Назначается менеджер округа</div>
+          </div>
+          <div class="path-card" onclick="selectPath('find')" id="path-find">
+            <div style="font-size:36px;margin-bottom:10px">🔍</div>
+            <div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:6px">Нужно подобрать объект</div>
+            <div style="font-size:12px;color:var(--mut);line-height:1.5">Партнёр заинтересован, но ещё не нашёл подходящее помещение</div>
+            <div style="margin-top:12px;font-size:11px;font-weight:700;color:var(--acc);background:var(--accl);padding:4px 10px;border-radius:20px;display:inline-block">🔍 Назначается Ульяна</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step A: own object -->
+      <div id="napp-step-own" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;color:var(--mut);font-size:12px" onclick="backToStep0()">← Назад к выбору</div>
+        <div class="fgrid">
+          <div class="fg full">
+            <label class="flabel">Наименование ЮЛ / ИП <span class="req">*</span></label>
+            <input class="finput" id="napp-name" placeholder="ООО «Название» / ИП Фамилия И.О.">
+          </div>
+          <div class="fg full">
+            <label class="flabel">Адрес объекта <span class="req">*</span></label>
+            <input class="finput" id="napp-addr" placeholder="Город, улица, дом">
+          </div>
+          <div class="fg">
+            <label class="flabel">Округ <span class="req">*</span></label>
+            <select class="fselect" id="napp-district">
+              <option value="">— Выберите округ —</option>
+              <option value="ЦАО">ЦАО (Алексеев С.)</option>
+              <option value="САО">САО (Иванов П.)</option>
+              <option value="ЮАО">ЮАО (Петрова М.)</option>
+              <option value="ЮЗАО">ЮЗАО (Петрова М.)</option>
+              <option value="Приволжский">Приволжский (Алексеев С.)</option>
+              <option value="Уральский">Уральский (Козлов Д.)</option>
+              <option value="Южный">Южный (Петрова М.)</option>
+              <option value="Сибирский">Сибирский (Козлов Д.)</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="flabel">Площадь (м²) <span class="req">*</span></label>
+            <input class="finput" id="napp-area" type="number" placeholder="85" min="30" max="1000">
+          </div>
+          <div class="fg">
+            <label class="flabel">Формат магазина <span class="req">*</span></label>
+            <select class="fselect" id="napp-fmt">
+              <option value="">— Выберите формат —</option>
+              <option value="ММ">ММ (Магнит Мини)</option>
+              <option value="МК">МК (Магнит Косметик)</option>
+              <option value="Мини">Мини</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="flabel">Телефон партнёра</label>
+            <input class="finput" id="napp-phone" placeholder="+7 (___) ___-__-__">
+          </div>
+        </div>
+
+        <!-- Dropzone: Планограмма -->
+        <div style="margin-top:16px">
+          <label class="flabel" style="margin-bottom:8px;display:block">Планограмма (PDF/JPG/PNG, до 50 МБ)</label>
+          <div class="dropzone" id="dz-plano" onclick="simulateNewAppUpload('plano')">
+            <div class="dz-ico">📎</div>
+            <div class="dz-text">Загрузить планограмму</div>
+            <div class="dz-sub">PDF, JPG, PNG — перетащите или нажмите</div>
+          </div>
+          <div id="dz-plano-list"></div>
+          <div id="dz-plano-bar" style="display:none;margin-top:8px">
+            <div style="height:6px;background:var(--gray);border-radius:3px;overflow:hidden"><div id="dz-plano-prog" style="height:100%;width:0%;background:var(--r);border-radius:3px;transition:width .15s"></div></div>
+            <div style="font-size:11px;color:var(--mut);margin-top:4px" id="dz-plano-pct">0%</div>
+          </div>
+        </div>
+
+        <!-- Dropzone: Фото фасада -->
+        <div style="margin-top:14px">
+          <label class="flabel" style="margin-bottom:8px;display:block">Фото фасада и входной группы (множественная загрузка)</label>
+          <div class="dropzone" id="dz-photos" onclick="simulateNewAppUpload('photos')">
+            <div class="dz-ico">🖼️</div>
+            <div class="dz-text">Загрузить фото фасада</div>
+            <div class="dz-sub">JPG, PNG — можно выбрать несколько файлов</div>
+          </div>
+          <div id="dz-photos-list"></div>
+        </div>
+
+        <div style="background:var(--grl);border:1px solid #9FE1CB;border-radius:10px;padding:11px 14px;font-size:12px;color:#1A5C38;margin-top:14px">
+          <strong>Ответственный будет назначен автоматически</strong> по выбранному округу после отправки заявки.
+        </div>
+      </div>
+
+      <!-- Step B: find object -->
+      <div id="napp-step-find" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;color:var(--mut);font-size:12px" onclick="backToStep0()">← Назад к выбору</div>
+        <div class="fgrid">
+          <div class="fg full">
+            <label class="flabel">Наименование ЮЛ / ИП <span class="req">*</span></label>
+            <input class="finput" id="napp-find-name" placeholder="ООО «Название» / ИП Фамилия И.О.">
+          </div>
+          <div class="fg">
+            <label class="flabel">Телефон партнёра</label>
+            <input class="finput" id="napp-find-phone" placeholder="+7 (___) ___-__-__">
+          </div>
+          <div class="fg">
+            <label class="flabel">Формат магазина <span class="req">*</span></label>
+            <select class="fselect" id="napp-find-fmt">
+              <option value="">— Выберите —</option>
+              <option value="ММ">ММ (Магнит Мини)</option>
+              <option value="МК">МК (Магнит Косметик)</option>
+              <option value="Мини">Мини</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <label class="flabel" style="display:block;margin-bottom:10px">Желаемая площадь (м²)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--mut);min-width:28px" id="sl-area-min-lbl">50</span>
+            <input type="range" id="sl-area-min" min="50" max="500" value="80" style="flex:1;accent-color:var(--r)" oninput="updateSlider('area')">
+            <span style="font-size:12px;color:var(--mut)">до</span>
+            <input type="range" id="sl-area-max" min="50" max="500" value="200" style="flex:1;accent-color:var(--r)" oninput="updateSlider('area')">
+            <span style="font-size:12px;color:var(--mut);min-width:36px" id="sl-area-max-lbl">200</span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label class="flabel" style="display:block;margin-bottom:10px">Желаемая ставка аренды (₽/м²)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--mut);min-width:36px" id="sl-rent-min-lbl">200</span>
+            <input type="range" id="sl-rent-min" min="200" max="3000" value="400" style="flex:1;accent-color:var(--r)" oninput="updateSlider('rent')">
+            <span style="font-size:12px;color:var(--mut)">до</span>
+            <input type="range" id="sl-rent-max" min="200" max="3000" value="1200" style="flex:1;accent-color:var(--r)" oninput="updateSlider('rent')">
+            <span style="font-size:12px;color:var(--mut);min-width:44px" id="sl-rent-max-lbl">1200</span>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <label class="flabel" style="margin-bottom:8px;display:block">Предпочтительный район <span class="req">*</span></label>
+          <select class="fselect" id="napp-find-addr" style="width:100%">
+            <option value="">— Выберите район —</option>
+            <option>Москва, ЦАО — Тверской район</option>
+            <option>Москва, САО — Бескудниковский район</option>
+            <option>Москва, ЮАО — Чертаново Северное</option>
+            <option>Санкт-Петербург, Центральный район</option>
+            <option>Санкт-Петербург, Московский район</option>
+            <option>Казань, Вахитовский район</option>
+          </select>
+        </div>
+
+        <div style="background:#FFF7E6;border:1px solid #FAD59A;border-radius:10px;padding:11px 14px;font-size:12px;color:#B7760A;margin-top:14px">
+          <strong>Ответственный: Ульяна</strong> — все заявки на подбор объекта автоматически направляются к ней.
+        </div>
+      </div>
+    </div>
+    <div class="mfoot" id="napp-foot" style="display:none">
+      <button class="btn btn-o" onclick="closeM('mol-newapp')">Отмена</button>
+      <button class="btn btn-p" id="napp-submit-btn" onclick="submitNewApp()">✓ Отправить заявку</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: REJECT with mandatory comment ═══ -->
+<div class="mol" id="mol-rej" onclick="closeM('mol-rej')">
+  <div class="modal modal-sm" onclick="event.stopPropagation()">
+    <div class="mhdr"><div class="mhico">✕</div><div><div class="mtitle">Отказ по документу</div><div class="msub" id="mr-doc">—</div></div><button class="mclose" onclick="closeM('mol-rej')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <label class="flabel">Причина отказа <span class="req">*</span></label>
+        <textarea class="ftarea" id="rej-txt" placeholder="Обязательно укажите причину отказа и что необходимо исправить партнёру..."></textarea>
+        <div style="font-size:10px;color:var(--mut);margin-top:4px">Поле обязательное. Партнёр получит уведомление с этим комментарием.</div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-o" onclick="closeM('mol-rej')">Отмена</button><button class="btn btn-d" onclick="sendRej()">Отправить отказ</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: REJECT WHOLE APPLICATION ═══ -->
+<div class="mol" id="mol-reject-app" onclick="closeM('mol-reject-app')">
+  <div class="modal modal-sm" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <div class="mhico" style="background:var(--rl)">🚫</div>
+      <div>
+        <div class="mtitle">Отклонить заявку</div>
+        <div class="msub" id="reject-app-sub">Партнёр получит уведомление с причиной</div>
+      </div>
+      <button class="mclose" onclick="closeM('mol-reject-app')">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="fg" style="margin-bottom:14px">
+        <label class="flabel">Причина отказа <span class="req">*</span></label>
+        <select class="fselect" id="reject-app-reason" style="width:100%;margin-bottom:10px">
+          <option value="">— Выберите причину —</option>
+          <option>Площадь объекта менее допустимой (100 м²)</option>
+          <option>Объект не соответствует требованиям локации</option>
+          <option>Документы содержат критические ошибки</option>
+          <option>Партнёр не прошёл финансовую проверку</option>
+          <option>Объект в зоне конфликта интересов с другим магазином</option>
+          <option>Иная причина (укажите ниже)</option>
+        </select>
+        <textarea class="ftarea" id="reject-app-comment" placeholder="Подробный комментарий для партнёра (обязательно)..." style="min-height:80px"></textarea>
+        <div style="font-size:10px;color:var(--mut);margin-top:4px">Партнёр увидит этот комментарий в статусе заявки как «Отклонена»</div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-o" onclick="closeM('mol-reject-app')">Отмена</button>
+      <button class="btn btn-d" onclick="sendRejectApp()">🚫 Отклонить заявку</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ─── DATA ───
+const DISTRICT_MANAGERS = {
+  'ЦАО':       {name:'Алексеев С.',  av:'АС', bg:'#CECBF6', fg:'#3C3489'},
+  'САО':       {name:'Иванов П.',    av:'ИП', bg:'#F5A623', fg:'#fff'},
+  'ЮАО':       {name:'Петрова М.',   av:'ПМ', bg:'#E8F0FB', fg:'#1A5FA8'},
+  'ЮЗАО':      {name:'Петрова М.',   av:'ПМ', bg:'#E8F0FB', fg:'#1A5FA8'},
+  'Приволжский':{name:'Алексеев С.', av:'АС', bg:'#CECBF6', fg:'#3C3489'},
+  'Уральский': {name:'Козлов Д.',    av:'КД', bg:'#B5D4F4', fg:'#0C447C'},
+  'Южный':     {name:'Петрова М.',   av:'ПМ', bg:'#E8F0FB', fg:'#1A5FA8'},
+  'Сибирский': {name:'Козлов Д.',    av:'КД', bg:'#B5D4F4', fg:'#0C447C'},
+  'СЗФО':      {name:'Петрова М.',   av:'ПМ', bg:'#E8F0FB', fg:'#1A5FA8'},
+  'ЦФО':       {name:'Алексеев С.',  av:'АС', bg:'#CECBF6', fg:'#3C3489'},
+  'find':      {name:'Ульяна',       av:'УЛ', bg:'#FFF0D6', fg:'#B7760A'},
+};
+
+const DISTRICT_STATS = [
+  {name:'ЦАО',cls:'dp-cao',count:8},
+  {name:'Приволжский',cls:'dp-pfo',count:11},
+  {name:'Уральский',cls:'dp-ufo',count:7},
+  {name:'Южный',cls:'dp-yfo',count:6},
+  {name:'Сибирский',cls:'dp-sfo',count:4},
+  {name:'САО',cls:'dp-sao',count:3},
+  {name:'ЮАО',cls:'dp-cao',count:2},
+  {name:'СЗФО',cls:'dp-szfo',count:1},
+];
+
+const APPS={
+  'ООО «СеверТорг»':{id:'#1042',addr:'Москва, ул. Ленина, 42',fmt:'ММ',bud:'4 500 000 ₽',ent:'ООО',openDate:'01.06.2025',activeStage:1,district:'ЦАО',appType:'own'},
+  'ООО «РитейлПро»':{id:'#1038',addr:'Казань, пр. Победы, 15',fmt:'ММ',bud:'8 200 000 ₽',ent:'ООО',openDate:'25.05.2025',activeStage:3,district:'Приволжский',appType:'own'},
+  'ООО «ВолгаРитейл»':{id:'#1041',addr:'Самара, ул. Чапаева, 7',fmt:'МК',bud:'3 200 000 ₽',ent:'ООО',openDate:'31.05.2025',activeStage:1,district:'Приволжский',appType:'find'},
+  'ЗАО «ЮжПром»':{id:'#1039',addr:'Воронеж, пл. Ленина, 1',fmt:'Мини',bud:'2 800 000 ₽',ent:'ЗАО',openDate:'30.05.2025',activeStage:1,district:'ЦФО',appType:'own'},
+  'ООО «НевскийТрейд»':{id:'#1031',addr:'СПб, ул. Садовая, 33',fmt:'МК',bud:'5 000 000 ₽',ent:'ООО',openDate:'15.05.2025',activeStage:2,district:'СЗФО',appType:'own'},
+  'ООО «УралФуд»':{id:'#1025',addr:'Екатеринбург, ул. 8 Марта, 51',fmt:'МК',bud:'3 900 000 ₽',ent:'ООО',openDate:'05.05.2025',activeStage:5,district:'Уральский',appType:'own'},
+  'ООО «СибТорг»':{id:'#1018',addr:'Новосибирск, пр. Маркса, 9',fmt:'ММ',bud:'9 500 000 ₽',ent:'ООО',openDate:'20.04.2025',activeStage:10,district:'Сибирский',appType:'own'},
+  'ООО «ЮгТрейд»':{id:'#1012',addr:'Краснодар, ул. Красная, 77',fmt:'Мини',bud:'4 100 000 ₽',ent:'ООО',openDate:'10.04.2025',activeStage:3,district:'Южный',appType:'own'},
+  'ИП Орлов Трейд':{id:'#1040',addr:'Уфа, ул. Октябрьская, 88',fmt:'ММ',bud:'5 100 000 ₽',ent:'ИП',openDate:'30.05.2025',activeStage:1,district:'Уральский',appType:'find'},
+  'ООО «АльфаТорг»':{id:'#1037',addr:'Нижний Новгород, ул. Горького, 3',fmt:'ММ',bud:'6 200 000 ₽',ent:'ООО',openDate:'29.05.2025',activeStage:1,district:'Приволжский',appType:'find'}
+};
+
+const STAGE_DEFS=[
+  {n:1,title:'Посадка и фото объекта',actor:'partner',
+   openDate:'01.06.2025',partnerDate:null,
+   status:'В ожидании загрузки партнёром',
+   partnerFiles:[],managerFiles:[],
+   actions:['agree_mm','reject','confirm'],
+   confirmLabel:'Подтверждаю'},
+  {n:2,title:'Технический план объекта',actor:'partner',
+   openDate:null,partnerDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[]},
+  {n:3,title:'Переговоры с собственником',actor:'manager',
+   openDate:null,endDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   actions:['negotiations_done'],
+   confirmLabel:'Переговоры пройдены'},
+  {n:4,title:'Выписка из ЕГРН',actor:'partner',
+   openDate:null,partnerDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[]},
+  {n:5,title:'Бриф + Контур + ОЛ',actor:'manager_upload',
+   openDate:null,partnerAgreedDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   uploadLabel:'Загрузить 3 документа (Бриф, Контур, ОЛ)',uploadMulti:true},
+  {n:6,title:'Планограмма ММ',actor:'manager_upload',
+   openDate:null,partnerAgreedDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   uploadLabel:'Загрузить планограмму'},
+  {n:7,title:'Дизайн-макет ММ',actor:'manager_upload',
+   openDate:null,partnerAgreedDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   uploadLabel:'Загрузить дизайн-макет'},
+  {n:8,title:'Расчёт оборудования ММ',actor:'manager_upload',
+   openDate:null,partnerAgreedDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   uploadLabel:'Загрузить расчёт оборудования'},
+  {n:9,title:'Подписание договора',actor:'manager_upload',
+   openDate:null,partnerSignedDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[],
+   uploadLabel:'Загрузить договор для подписания'},
+  {n:10,title:'Постановка на налоговый учёт',actor:'partner',
+   openDate:null,partnerDate:null,
+   status:'Ожидает открытия',
+   partnerFiles:[],managerFiles:[]}
+];
+
+// Per-application stage state (keyed by app name)
+const appStageState = {};
+
+function getStageState(appName) {
+  if (!appStageState[appName]) {
+    const app = APPS[appName];
+    const active = app ? app.activeStage : 1;
+    // Deep copy defs, seed with demo data for stages < active
+    const stages = STAGE_DEFS.map(s => Object.assign({},s,{managerFiles:[...s.managerFiles],partnerFiles:[...s.partnerFiles]}));
+    // Pre-fill demo dates for completed stages
+    const demoOpenDates=['01.06.2025','03.06.2025','05.06.2025','07.06.2025','09.06.2025','11.06.2025','13.06.2025','15.06.2025','17.06.2025','19.06.2025'];
+    const demoPartnerDates=['02.06.2025','04.06.2025','06.06.2025','08.06.2025','10.06.2025','12.06.2025','14.06.2025','16.06.2025','18.06.2025','—'];
+    const demoFiles=['посадка_объект.pdf','техплан.pdf','—','ЕГРН_выписка.pdf','бриф_контур_ол.zip','планограмма.pdf','дизайн_макет.pdf','расчет_оборудования.xlsx','договор_франшизы.pdf','выписка_налог.pdf'];
+    for (let i=0;i<active-1;i++){
+      stages[i].openDate = demoOpenDates[i];
+      stages[i].done = true;
+      if(stages[i].actor==='partner'||stages[i].actor==='manager_upload'){
+        stages[i].partnerDate = demoPartnerDates[i];
+        stages[i].partnerFiles = demoFiles[i]!=='—'?[demoFiles[i]]:[];
+      }
+      if(stages[i].actor==='manager_upload'||stages[i].actor==='manager'){
+        stages[i].managerFiles = demoFiles[i]!=='—'?[demoFiles[i]]:[];
+        stages[i].partnerAgreedDate = demoPartnerDates[i];
+        stages[i].partnerSignedDate = demoPartnerDates[i];
+        stages[i].endDate = demoPartnerDates[i];
+      }
+      stages[i].status = getStatusLabel(stages[i],true);
+    }
+    // Active stage
+    if (active <= 10) {
+      stages[active-1].openDate = demoOpenDates[active-1];
+      stages[active-1].done = false;
+      stages[active-1].status = getActiveStatus(stages[active-1]);
+    }
+    appStageState[appName] = {stages, active};
+  }
+  return appStageState[appName];
+}
+
+function getStatusLabel(s, done){
+  if(!done) return getActiveStatus(s);
+  const labels={1:'Подтверждено',2:'Предоставлен',3:'Переговоры проведены',4:'Выписка ЕГРН предоставлена',5:'Бриф, Контур и ОЛ согласованы',6:'Планограмма согласована',7:'Разработан',8:'Расчёт оборудования согласован',9:'Договор подписан',10:'Выписка предоставлена'};
+  return labels[s.n]||'Завершён';
+}
+function getActiveStatus(s){
+  if(s.actor==='partner') return 'Ожидание загрузки партнёром';
+  if(s.actor==='manager') return 'Ожидает действия менеджера';
+  if(s.actor==='manager_upload'){
+    if(s.managerFiles&&s.managerFiles.length) return 'Документ загружен, ожидает согласования партнёром';
+    return 'Загрузите документ';
+  }
+  return 'В работе';
+}
+
+// ─── NAVIGATION ───
+const PGMETA={
+  dashboard:['Главная','— сводка по заявкам'],
+  applications:['Заявки','— управление заявками'],
+  inbox:['Входящие','— действия, тикеты, финансы'],
+  detail:['Заявка','— детали и этапы'],
+  documents:['Документы','— документооборот'],
+  audit:['Журнал аудита','— история действий']
+};
+let prevPage='applications';
+
+function showPage(n, el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('pg-'+n); if(pg) pg.classList.add('active');
+  const nav=el||document.querySelector('[data-pg="'+n+'"]'); if(nav) nav.classList.add('active');
+  const[t,s]=PGMETA[n]||[n,''];
+  document.getElementById('tbtitle').textContent=t;
+  document.getElementById('tbsub').textContent=s;
+}
+
+function goBack(){
+  showPage(prevPage, document.querySelector('[data-pg="'+prevPage+'"]'));
+}
+
+// ─── OPEN DETAIL ───
+let currentApp = null;
+
+function openDetail(name, id){
+  prevPage = document.querySelector('.pg.active')?.id?.replace('pg-','') || 'applications';
+  currentApp = name;
+  const app = APPS[name];
+  if(!app) return;
+
+  const state = getStageState(name);
+
+  // Determine display title: if stage 7+ completed, use store name
+  const displayTitle = getAppDisplayTitle(name, state);
+  document.getElementById('det-title').textContent = displayTitle;
+  document.getElementById('det-sub').textContent = app.ent + ' · ' + app.addr + ' · Открыта: ' + app.openDate;
+  document.getElementById('det-name').textContent = name;
+  document.getElementById('det-addr').textContent = app.addr;
+  document.getElementById('det-fmt').textContent = app.fmt + (app.district ? ' · ' + app.district : '');
+  // Type field
+  const typeEl = document.getElementById('det-type');
+  if(typeEl) typeEl.textContent = app.appType === 'find' ? '🔍 Подбор объекта' : '🏢 Свой объект';
+  // Auto-assign manager
+  const mgrSel = document.getElementById('det-mgr-select');
+  if(mgrSel){
+    const mgrKey = app.appType === 'find' ? 'find' : app.district;
+    const mgr = DISTRICT_MANAGERS[mgrKey];
+    if(mgr){
+      for(let i=0;i<mgrSel.options.length;i++){
+        if(mgrSel.options[i].text.startsWith(mgr.name)){ mgrSel.selectedIndex=i; break; }
+      }
+    }
+  }
+
+  renderStages(state);
+  showPage('detail', document.querySelector('[data-pg="applications"]'));
+}
+
+// ─── RENDER STAGES ───
+function renderStages(state){
+  const {stages, active} = state;
+  renderRail(stages, active);
+  renderProgress(active);
+  // Refresh title in case stage 7 just completed
+  if(currentApp){
+    const titleEl = document.getElementById('det-title');
+    if(titleEl) titleEl.textContent = getAppDisplayTitle(currentApp, state);
+  }
+  const cont = document.getElementById('stages-container');
+  cont.innerHTML = '';
+  stages.forEach((s,i) => {
+    const isDone = s.done === true;
+    const isActive = (i+1) === active;
+    const isLocked = !isDone && !isActive;
+    const card = buildStageCard(s, isDone, isActive, isLocked, state);
+    cont.appendChild(card);
+  });
+}
+
+function renderRail(stages, active){
+  const rail = document.getElementById('stage-rail');
+  rail.innerHTML = '';
+  stages.forEach((s,i) => {
+    const isDone = s.done===true;
+    const isActive = (i+1)===active;
+    const isLocked = !isDone && !isActive;
+    const step = document.createElement('div');
+    step.className = 'sr-step ' + (isDone?'done':isActive?'active':'locked');
+    const abbrs=['Фото','ТехПлан','Переговоры','ЕГРН','Бриф','Планогр.','Дизайн','Оборуд.','Договор','Налоговый'];
+    step.innerHTML = `<div class="sr-circle">${isDone?'✓':(i+1)}</div><div class="sr-lbl">${abbrs[i]}</div>`;
+    step.onclick = ()=>{ if(!isLocked){ scrollToStage(i); } };
+    rail.appendChild(step);
+  });
+}
+
+function renderProgress(active){
+  const pct = Math.round(((active-1)/10)*100);
+  document.getElementById('det-progress-bar').style.width = Math.max(5,pct)+'%';
+  document.getElementById('det-progress-txt').textContent = 'Этап '+active+' из 10 ('+(active>1?active-1+' завершено':'ни одного завершено')+')';
+}
+
+function scrollToStage(idx){
+  const cards = document.querySelectorAll('.stage-card');
+  if(cards[idx]) cards[idx].scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function buildStageCard(s, isDone, isActive, isLocked, state){
+  const card = document.createElement('div');
+  card.className = 'stage-card ' + (isDone?'s-done':isActive?'s-active':'s-locked');
+  card.id = 'sc-'+s.n;
+
+  const numCls  = isDone?'sc-num-done':isActive?'sc-num-active':'sc-num-locked';
+  const statCls = isDone?'sc-status-done':isActive?'sc-status-active':'sc-status-locked';
+  const numIcon = isDone?'✓':s.n;
+
+  // ── Header dates strip (always show for active + done) ──
+  let datesHtml = '';
+  const showDates = isDone || isActive;
+  if(showDates){
+    // Date 1: always "Дата открытия"
+    const openLbl = s.n===1 ? 'Дата открытия заявки' : 'Дата открытия этапа';
+    datesHtml += `<div class="sc-date-item"><div class="sc-date-lbl">${openLbl}</div><div class="sc-date-val">${s.openDate||'—'}</div></div>`;
+
+    // Date 2: context-sensitive second date
+    if(s.actor==='partner'||s.n===1){
+      const partnerDate = s.partnerDate||s.partnerAgreedDate||null;
+      const lbl = s.n===1?'Дата загрузки партнёром':'Дата загрузки партнёром';
+      datesHtml += `<div class="sc-date-item"><div class="sc-date-lbl">${lbl}</div><div class="sc-date-val">${partnerDate||'— ожидается —'}</div></div>`;
+    }
+    if(s.actor==='manager'){
+      datesHtml += `<div class="sc-date-item"><div class="sc-date-lbl">Дата начала</div><div class="sc-date-val">${s.openDate||'—'}</div></div>`;
+      datesHtml += `<div class="sc-date-item"><div class="sc-date-lbl">Дата окончания</div><div class="sc-date-val">${s.endDate||'— ожидается —'}</div></div>`;
+    }
+    if(s.actor==='manager_upload'){
+      const agreeDate = s.partnerAgreedDate||s.partnerSignedDate||null;
+      const lbl = s.n===9 ? 'Дата подписания партнёром' : 'Дата согласования партнёром';
+      datesHtml += `<div class="sc-date-item"><div class="sc-date-lbl">${lbl}</div><div class="sc-date-val">${agreeDate||'— ожидается —'}</div></div>`;
+    }
+  }
+
+  card.innerHTML = `
+    <div class="sc-head" onclick="toggleStageBody(${s.n})">
+      <div class="sc-num ${numCls}">${numIcon}</div>
+      <div class="sc-title">${s.title}</div>
+      <span class="sc-status ${statCls}">${s.status}</span>
+      <div class="sc-dates">${datesHtml}</div>
+      <div class="sc-chevron" id="chev-${s.n}">${isActive?'▲':'▼'}</div>
+    </div>
+    <div class="sc-body ${isActive?'open':''}" id="scb-${s.n}">
+      ${buildStageBody(s, isDone, isActive, state)}
+    </div>`;
+  return card;
+}
+
+function buildStageBody(s, isDone, isActive, state){
+  // ── DONE: collapsed summary ──
+  if(isDone){
+    let html = '<div style="padding-top:4px">';
+    if(s.managerFiles && s.managerFiles.length){
+      html += `<div class="info-row"><div class="ir-item"><div class="ir-lbl">📂 Загружено менеджером</div><div class="ir-val">${s.managerFiles.join(', ')}</div></div></div>`;
+    }
+    if(s.partnerFiles && s.partnerFiles.length){
+      html += `<div class="info-row"><div class="ir-item"><div class="ir-lbl">📤 Загружено партнёром</div><div class="ir-val">${s.partnerFiles.join(', ')}</div></div></div>`;
+    }
+    if(s.actor==='manager' && s.endDate){
+      html += `<div class="info-row"><div class="ir-item"><div class="ir-lbl">✅ Дата завершения</div><div class="ir-val">${s.endDate}</div></div></div>`;
+    }
+    if(s.actor==='manager_upload'){
+      const agreeDate = s.partnerAgreedDate||s.partnerSignedDate;
+      if(agreeDate){
+        const lbl = s.n===9?'📝 Дата подписания партнёром':'✅ Дата согласования партнёром';
+        html += `<div class="info-row"><div class="ir-item"><div class="ir-lbl">${lbl}</div><div class="ir-val">${agreeDate}</div></div></div>`;
+      }
+    }
+    html += `<div style="margin-top:10px"><span class="badge b-appr">✓ ${s.status}</span></div>`;
+    html += '</div>';
+    return html;
+  }
+
+  // ── LOCKED ──
+  if(!isActive) return '<div style="font-size:12px;color:var(--mut);padding:10px 0 4px">🔒 Этап недоступен до завершения предыдущего.</div>';
+
+  // ── ACTIVE ──
+  let html = '<div style="margin-top:8px">';
+
+  // ─ Dates info panel ─
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;background:var(--gray);border-radius:10px;padding:12px 14px;margin-bottom:14px">`;
+  const openLbl = s.n===1 ? 'Дата открытия заявки' : 'Дата открытия этапа';
+  html += `<div class="ir-item"><div class="ir-lbl">${openLbl}</div><div class="ir-val">${s.openDate||'—'}</div></div>`;
+
+  if(s.actor==='partner'){
+    const partnerLbl = s.n===1 ? 'Дата загрузки партнёром' : 'Дата загрузки партнёром';
+    const partnerVal = s.partnerDate||'<span style="color:var(--mut);font-style:italic">— ожидается —</span>';
+    html += `<div class="ir-item"><div class="ir-lbl">${partnerLbl}</div><div class="ir-val">${partnerVal}</div></div>`;
+  }
+  if(s.actor==='manager'){
+    html += `<div class="ir-item"><div class="ir-lbl">Дата начала</div><div class="ir-val">${s.openDate||'—'}</div></div>`;
+    const endVal = s.endDate||'<span style="color:var(--mut);font-style:italic">— ожидается —</span>';
+    html += `<div class="ir-item"><div class="ir-lbl">Дата окончания</div><div class="ir-val">${endVal}</div></div>`;
+  }
+  if(s.actor==='manager_upload'){
+    const agreeDate = s.partnerAgreedDate||s.partnerSignedDate;
+    const lbl = s.n===9 ? 'Дата подписания партнёром' : 'Дата согласования партнёром';
+    const val  = agreeDate||'<span style="color:var(--mut);font-style:italic">— ожидается —</span>';
+    html += `<div class="ir-item"><div class="ir-lbl">${lbl}</div><div class="ir-val">${val}</div></div>`;
+  }
+  html += `</div>`;
+
+  // ─ Stage 1: Partner files + action buttons ─
+  if(s.n===1){
+    const files1 = s.partnerFiles||[];
+    html += `<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📸 Посадка и фото объекта (от партнёра)</div>`;
+    if(files1.length){
+      files1.forEach(f=>{
+        html += `<div class="partner-file"><span style="font-size:16px">🖼️</span><span class="partner-file-name">${f}</span><span class="partner-file-date">${s.partnerDate||'сегодня'}</span><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div>`;
+      });
+      html += `
+        <div style="margin:12px 0 4px">
+          <label style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Комментарий менеджера <span style="font-weight:400;color:var(--mut)">(необязательно)</span></label>
+          <textarea id="mgr-comment-s1" placeholder="Добавьте комментарий для партнёра или внутреннюю заметку..." style="width:100%;padding:8px 10px;border:1px solid var(--bor);border-radius:9px;font-size:12px;font-family:var(--fn);resize:none;height:64px;outline:none;transition:border .15s" onfocus="this.style.borderColor='var(--r)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+        </div>
+        <div class="action-row" style="margin-top:10px">
+          <button class="btn btn-warn btn-sm" onclick="stageAction(1,'agree_mm')">🔄 Согласование ММ мини/УК</button>
+          <button class="btn btn-d btn-sm" onclick="stageAction(1,'reject')">✕ Отказ</button>
+          <button class="btn btn-p btn-sm" onclick="stageAction(1,'confirm')">✓ Подтверждаю</button>
+        </div>`;
+    } else {
+      html += `<div style="background:#FAFBFD;border:2px dashed var(--bor);border-radius:10px;padding:18px;text-align:center;color:var(--mut);font-size:12px;margin-bottom:10px">
+        <div style="font-size:24px;margin-bottom:6px">🖼️</div>
+        <div style="font-weight:600">Партнёр ещё не загрузил посадку и фото объекта</div>
+        <div style="font-size:11px;margin-top:3px">Действия менеджера доступны после загрузки</div>
+      </div>`;
+      html += `<button class="btn btn-o btn-sm" onclick="simulatePartnerUpload(1)">📸 Смоделировать загрузку партнёром</button>`;
+    }
+  }
+
+  // ─ Stage 2: partner uploads tech plan ─
+  if(s.n===2){
+    const files = s.partnerFiles||[];
+    html += `<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📐 Технический план (от партнёра)</div>`;
+    if(files.length){
+      files.forEach(f=>{
+        html += `<div class="partner-file"><span style="font-size:16px">📄</span><span class="partner-file-name">${f}</span><span class="partner-file-date">${s.partnerDate||'сегодня'}</span><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div>`;
+      });
+      html += `<div class="alert as" style="margin-top:10px">✓ Документ получен — статус будет присвоен автоматически</div>`;
+    } else {
+      html += `<div style="background:#FAFBFD;border:2px dashed var(--bor);border-radius:10px;padding:18px;text-align:center;color:var(--mut);font-size:12px;margin-bottom:10px">
+        <div style="font-size:24px;margin-bottom:6px">📐</div>
+        <div style="font-weight:600">Ожидается технический план от партнёра</div>
+        <div style="font-size:11px;margin-top:3px">Этап завершится автоматически после загрузки</div>
+      </div>`;
+      html += `<button class="btn btn-o btn-sm" onclick="simulatePartnerUpload(2)">📄 Смоделировать загрузку партнёром</button>`;
+    }
+  }
+
+  // ─ Stage 3: Manager conducts negotiations ─
+  if(s.n===3){
+    html += `<div style="background:var(--bll);border:1px solid #A8C9F0;border-radius:10px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--bl)">
+      <strong>Действие менеджера:</strong> Проведите переговоры с собственником объекта и нажмите кнопку ниже для фиксации результата. Дата окончания будет записана автоматически.
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Итог переговоров <span style="font-weight:400">(необязательно)</span></label>
+      <textarea id="mgr-comment-s3" placeholder="Условия аренды, ключевые договорённости с собственником..." style="width:100%;padding:8px 10px;border:1px solid var(--bor);border-radius:9px;font-size:12px;font-family:var(--fn);resize:none;height:64px;outline:none;transition:border .15s" onfocus="this.style.borderColor='var(--r)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-p btn-sm" onclick="stageAction(3,'negotiations_done')">✓ Переговоры пройдены</button>
+    </div>`;
+  }
+
+  // ─ Stage 4: Partner uploads EGRN ─
+  if(s.n===4){
+    const files = s.partnerFiles||[];
+    html += `<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📋 Выписка из ЕГРН (от партнёра)</div>`;
+    if(files.length){
+      files.forEach(f=>{
+        html += `<div class="partner-file"><span style="font-size:16px">📄</span><span class="partner-file-name">${f}</span><span class="partner-file-date">${s.partnerDate||'сегодня'}</span><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div>`;
+      });
+      html += `<div class="alert as" style="margin-top:10px">✓ Выписка получена — переход к следующему этапу</div>`;
+    } else {
+      html += `<div style="background:#FAFBFD;border:2px dashed var(--bor);border-radius:10px;padding:18px;text-align:center;color:var(--mut);font-size:12px;margin-bottom:10px">
+        <div style="font-size:24px;margin-bottom:6px">📋</div>
+        <div style="font-weight:600">Ожидается выписка из ЕГРН от партнёра</div>
+        <div style="font-size:11px;margin-top:3px">Этап завершится автоматически после загрузки</div>
+      </div>`;
+      html += `<button class="btn btn-o btn-sm" onclick="simulatePartnerUpload(4)">📄 Смоделировать загрузку партнёром</button>`;
+    }
+  }
+
+  // ─ Stages 5–9: Manager uploads, partner agrees/signs ─
+  if(s.actor==='manager_upload'){
+    const uploadedMgr = s.managerFiles||[];
+    const isStage9 = s.n===9;
+    const uploadSectionLbl = {
+      5:'📂 Загрузите 3 документа: Бриф, Контур и ОЛ',
+      6:'📂 Загрузите планограмму ММ',
+      7:'📂 Загрузите дизайн-макет ММ',
+      8:'📂 Загрузите расчёт оборудования ММ',
+      9:'📂 Загрузите договор для подписания партнёром'
+    }[s.n]||'📂 Загрузите файл';
+
+    html += `<div style="font-size:11px;font-weight:700;color:var(--txt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${uploadSectionLbl}</div>`;
+
+    // Dropzone
+    html += `<div class="dropzone" onclick="simulateUpload(${s.n})">
+      <div class="dz-ico">📎</div>
+      <div class="dz-text">${s.uploadLabel||'Нажмите или перетащите файл'}</div>
+      <div class="dz-sub">PDF, DOCX, XLSX, ZIP — до 50 МБ</div>
+    </div>`;
+
+    // Uploaded files list
+    if(uploadedMgr.length){
+      html += `<div class="dz-file-list" style="margin-top:4px">`;
+      uploadedMgr.forEach(f=>{
+        html += `<div class="dz-file-item">
+          <span style="font-size:15px">📄</span>
+          <span class="dz-fname">${f}</span>
+          <span class="dz-fsz">Загружен сегодня</span>
+          <button class="dbtn ddl" style="margin-left:auto" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button>
+        </div>`;
+      });
+      html += `</div>`;
+
+      html += `
+        <div style="margin:12px 0 4px">
+          <label style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Комментарий менеджера <span style="font-weight:400">(необязательно)</span></label>
+          <textarea id="mgr-comment-s${s.n}" placeholder="Инструкции, уточнения или пожелания к партнёру..." style="width:100%;padding:8px 10px;border:1px solid var(--bor);border-radius:9px;font-size:12px;font-family:var(--fn);resize:none;height:64px;outline:none;transition:border .15s" onfocus="this.style.borderColor='var(--r)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+        </div>`;
+
+      // Waiting for partner
+      const waitLbl = isStage9
+        ? '⏳ Файл загружен. Ожидается подпись партнёра в его личном кабинете.'
+        : '⏳ Файл загружен. Ожидается согласование партнёра в его личном кабинете.';
+      html += `<div class="alert ai" style="margin-top:8px">${waitLbl}</div>`;
+
+      // Simulate partner action
+      const simLbl = isStage9
+        ? '🖊 Смоделировать подписание партнёром'
+        : '✅ Смоделировать согласование партнёром';
+      html += `<button class="btn btn-o btn-sm" style="margin-top:6px" onclick="simulatePartnerAgree(${s.n})">${simLbl}</button>`;
+    } else {
+      html += `<div class="alert aw" style="margin-top:4px">⚠ Загрузите файл, чтобы партнёр мог ${isStage9?'подписать':'согласовать'} документ.</div>`;
+    }
+  }
+
+  // ─ Stage 10: Partner uploads tax registration ─
+  if(s.n===10){
+    const files = s.partnerFiles||[];
+    html += `<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">🏛 Выписка о постановке на налоговый учёт (от партнёра)</div>`;
+    if(files.length){
+      files.forEach(f=>{
+        html += `<div class="partner-file"><span style="font-size:16px">📄</span><span class="partner-file-name">${f}</span><span class="partner-file-date">${s.partnerDate||'сегодня'}</span><button class="dbtn ddl" onclick="toast('⬇ Скачан','s')">⬇ Скачать</button></div>`;
+      });
+      html += `<div class="alert as" style="margin-top:10px">✓ Выписка получена — все этапы завершены!</div>`;
+    } else {
+      html += `<div style="background:#FAFBFD;border:2px dashed var(--bor);border-radius:10px;padding:18px;text-align:center;color:var(--mut);font-size:12px;margin-bottom:10px">
+        <div style="font-size:24px;margin-bottom:6px">🏛</div>
+        <div style="font-weight:600">Ожидается выписка о постановке на налоговый учёт</div>
+        <div style="font-size:11px;margin-top:3px">Этап завершится автоматически после загрузки партнёром</div>
+      </div>`;
+      html += `<button class="btn btn-o btn-sm" onclick="simulatePartnerUpload(10)">📄 Смоделировать загрузку партнёром</button>`;
+    }
+  }
+
+  html += '</div>';
+  return html;
+}
+
+// ─── INTERACTIONS ───
+function toggleStageBody(n){
+  const body = document.getElementById('scb-'+n);
+  const chev = document.getElementById('chev-'+n);
+  if(!body) return;
+  body.classList.toggle('open');
+  if(chev) chev.textContent = body.classList.contains('open')?'▲':'▼';
+}
+
+function simulateUpload(stageN){
+  const state = getStageState(currentApp);
+  const s = state.stages[stageN-1];
+  const names = {5:'бриф_контур_ол.zip',6:'планограмма.pdf',7:'дизайн_макет.pdf',8:'расчет_оборудования.xlsx',9:'договор_франшизы.pdf'};
+  const fname = names[stageN]||'файл.pdf';
+  s.managerFiles = s.managerFiles||[];
+  if(!s.managerFiles.includes(fname)) s.managerFiles.push(fname);
+  s.status = getActiveStatus(s);
+  toast('📎 Файл «'+fname+'» загружен','s');
+  renderStages(state);
+  // re-open the card body
+  setTimeout(()=>{
+    const body = document.getElementById('scb-'+stageN);
+    if(body) body.classList.add('open');
+    const chev = document.getElementById('chev-'+stageN);
+    if(chev) chev.textContent='▲';
+  },50);
+}
+
+function simulatePartnerUpload(stageN){
+  const state = getStageState(currentApp);
+  const s = state.stages[stageN-1];
+  const names = {1:'посадка_фото.zip',2:'техплан.pdf',4:'выписка_ЕГРН.pdf',10:'налоговая_выписка.pdf'};
+  const fname = names[stageN]||'документ.pdf';
+  s.partnerFiles = s.partnerFiles||[];
+  if(!s.partnerFiles.includes(fname)) s.partnerFiles.push(fname);
+  s.partnerDate = nowStr();
+  // trigger for 2,4,10
+  if(stageN===2||stageN===4||stageN===10) completeStage(state,stageN);
+  else { s.status = getActiveStatus(s); renderStages(state); setTimeout(()=>openCard(stageN),50); }
+  toast('📤 Партнёр загрузил «'+fname+'»','s');
+}
+
+function simulatePartnerAgree(stageN){
+  const state = getStageState(currentApp);
+  const s = state.stages[stageN-1];
+  if(!(s.managerFiles&&s.managerFiles.length)){toast('Сначала загрузите файл','e');return;}
+  const lbl = stageN===9?'подписание':'согласование';
+  s.partnerAgreedDate = nowStr();
+  s.partnerSignedDate = nowStr();
+  completeStage(state, stageN);
+  toast('✅ Партнёр подтвердил '+lbl,'s');
+}
+
+function stageAction(stageN, action){
+  const state = getStageState(currentApp);
+  const s = state.stages[stageN-1];
+  if(action==='confirm'){
+    completeStage(state, stageN);
+    toast('✓ Этап '+stageN+' завершён','s');
+  } else if(action==='agree_mm'){
+    toast('🔄 Согласование ММ мини/УК инициировано','i');
+  } else if(action==='reject'){
+    toast('✕ Отказ зафиксирован. Партнёр уведомлён.','e');
+  } else if(action==='negotiations_done'){
+    s.endDate = nowStr();
+    completeStage(state, stageN);
+    toast('✓ Переговоры с собственником завершены','s');
+  }
+}
+
+function completeStage(state, stageN){
+  const s = state.stages[stageN-1];
+  s.done = true;
+  s.status = getStatusLabel(s, true);
+  if(stageN < 10){
+    const next = state.stages[stageN];
+    next.openDate = nowStr();
+    state.active = stageN+1;
+  } else {
+    state.active = 10;
+  }
+  addAudit('Иванов П.','<span class="au-tag at-stat">Этап</span> завершён этап <strong>'+stageN+'. '+s.title+'</strong> по заявке '+APPS[currentApp].id);
+  // Stage 5 (Бриф+Контур+ОЛ) completed → rename application title (mirrors partner LK: stageReached>=5)
+  if((stageN === 5 || stageN === 7) && currentApp && STORE_NAMES[currentApp]){
+    const newTitle = 'Заявка «' + STORE_NAMES[currentApp] + '»';
+    const titleEl = document.getElementById('det-title');
+    if(titleEl && stageN===5) titleEl.textContent = newTitle;
+    if(stageN===5){
+      toast('🏪 Заявка получила название: ' + newTitle, 'i');
+      addAudit('Система','<span class="au-tag at-crt">Переименование</span> Заявка <strong>' + APPS[currentApp].id + '</strong> → <span class="au-new">' + newTitle + '</span> (этап 5 завершён)');
+    }
+  }
+  renderStages(state);
+  setTimeout(()=>{ if(stageN<10) openCard(stageN+1); },80);
+}
+
+function openCard(n){
+  const body = document.getElementById('scb-'+n);
+  if(body){ body.classList.add('open'); }
+  const chev = document.getElementById('chev-'+n);
+  if(chev) chev.textContent='▲';
+  const card = document.getElementById('sc-'+n);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function nowStr(){
+  const d=new Date();
+  return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ─── DOC TABS ───
+function switchDocTab(id){
+  ['1038','1031','1025'].forEach(t=>{
+    const tab=document.getElementById('dtab-'+t);
+    const pnl=document.getElementById('docs-'+t);
+    if(t===id){tab.classList.add('atab');tab.querySelector('div').style.fontWeight='700';if(pnl)pnl.style.display='block';}
+    else{tab.classList.remove('atab');tab.querySelector('div').style.fontWeight='';if(pnl)pnl.style.display='none';}
+  });
+}
+
+// ─── REJECT DOC MODAL ───
+let rDocId,rStatId,rActId,rDocName;
+function openRejectM(dId,sId,aId,dName){
+  rDocId=dId;rStatId=sId;rActId=aId;rDocName=dName;
+  document.getElementById('mr-doc').textContent=dName+' — будет отмечен «На доработке»';
+  document.getElementById('rej-txt').value='';
+  document.getElementById('rej-txt').style.borderColor='var(--bor)';
+  document.getElementById('mol-rej').classList.add('open');
+}
+function sendRej(){
+  const c=document.getElementById('rej-txt').value.trim();
+  if(!c){document.getElementById('rej-txt').style.borderColor='var(--r)';document.getElementById('rej-txt').focus();toast('⚠ Поле обязательно','e');return;}
+  closeM('mol-rej');
+  const sb=document.getElementById(rStatId);
+  if(sb){sb.className='badge b-rej';sb.textContent='✕ На доработке';sb.style.fontSize='10px';sb.style.padding='3px 8px';}
+  const ab=document.getElementById(rActId);
+  if(ab){
+    const rb=ab.querySelector('.drej');if(rb)rb.remove();
+    // Add "Открыть заявку" link — try to find associated app from current doc tab
+    const activeTab = ['1038','1031','1025'].find(t=>document.getElementById('docs-'+t)&&document.getElementById('docs-'+t).style.display!=='none');
+    if(activeTab){
+      const appMap={'1038':['ООО «РитейлПро»','#1038'],'1031':['ООО «НевскийТрейд»','#1031'],'1025':['ООО «УралФуд»','#1025']};
+      const [aName,aId]=appMap[activeTab]||[];
+      if(aName){
+        const lnk=document.createElement('span');
+        lnk.textContent='Открыть заявку →';
+        lnk.style.cssText='color:var(--bl);font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0 4px;white-space:nowrap';
+        lnk.onclick=()=>openDetail(aName,aId);
+        ab.appendChild(lnk);
+      }
+    }
+  }
+  addAudit('Иванов П.','<span class="au-tag at-doc">Документ</span> отклонил <strong>'+rDocName+'</strong> — «'+c.substring(0,55)+(c.length>55?'...':'')+'»');
+  toast('📩 Отказ отправлен партнёру','e');
+}
+function approveDoc(dId,sId,aId,dName,appName,appId){
+  const sb=document.getElementById(sId);
+  if(sb){sb.className='badge b-appr';sb.textContent='✓ Одобрено';sb.style.fontSize='10px';sb.style.padding='3px 8px';}
+  const ab=document.getElementById(aId);
+  if(ab){
+    ['dok','drej'].forEach(c=>{const b=ab.querySelector('.'+c);if(b)b.remove();});
+    if(appName&&appId){
+      const lnk=document.createElement('span');
+      lnk.textContent='Открыть заявку →';
+      lnk.style.cssText='color:var(--bl);font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0 4px;white-space:nowrap';
+      lnk.onclick=()=>openDetail(appName,appId);
+      ab.appendChild(lnk);
+    }
+  }
+  addAudit('Иванов П.','<span class="au-tag at-doc">Документ</span> утвердил <strong>'+dName+'</strong> — <span class="au-new">Одобрено</span>'+(appId?' · заявка '+appId:''));
+  toast('✓ «'+dName+'» одобрен','s');
+}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+
+// ─── UTILS ───
+function exportExcel(){toast('⏳ Формирование файла...','i');setTimeout(()=>toast('✓ Файл заявки_export.xlsx скачан','s'),1400);}
+function toast(msg,type){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast'+(type==='s'?' ts':type==='e'?' te':type==='i'?' ti':'');
+  t.innerHTML=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .4s,transform .4s';t.style.opacity='0';t.style.transform='translateX(40px)';setTimeout(()=>t.remove(),400);},3200);
+}
+// ─── OPEN DETAIL AT SPECIFIC STAGE ───
+// Navigates to the app detail page and then scrolls to / highlights the target stage card
+function openDetailAtStage(appName, appId, stageN){
+  openDetail(appName, appId);
+  // After the detail page renders, scroll to the stage card
+  setTimeout(()=>{
+    const card = document.getElementById('sc-'+stageN);
+    if(card){
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      // Flash highlight
+      card.style.transition='box-shadow .2s';
+      card.style.boxShadow='0 0 0 3px var(--r), 0 4px 20px rgba(208,2,27,.25)';
+      setTimeout(()=>{ card.style.boxShadow=''; }, 2000);
+    }
+  }, 320);
+}
+
+function addAudit(user,action){
+  const ts=new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const list=document.getElementById('audit-list');
+  const row=document.createElement('div');
+  row.className='audit-row';
+  row.style.cursor='pointer';
+  row.onmouseenter=()=>row.style.background='var(--rxl)';
+  row.onmouseleave=()=>row.style.background='';
+  // Try to extract app link from action text
+  const appMatch = action.match(/заявк[иу]\s+<strong>(#\d+)<\/strong>/);
+  const appId = appMatch ? appMatch[1] : null;
+  const appMap={'#1042':'ООО «СеверТорг»','#1038':'ООО «РитейлПро»','#1031':'ООО «НевскийТрейд»','#1025':'ООО «УралФуд»','#1018':'ООО «СибТорг»','#1012':'ООО «ЮгТрейд»'};
+  const appName = appId ? appMap[appId] : null;
+  if(appName && appId) row.onclick = ()=>openDetail(appName, appId);
+  const chipHtml = appId ? `<span class="audit-app-link">${appId} →</span>` : '';
+  row.innerHTML=`<div class="audit-dot" style="background:var(--r)"></div><span class="audit-time">${ts}</span><span class="audit-action"><span class="au-user">${user}</span> ${action}</span>${chipHtml}`;
+  list.insertBefore(row,list.firstChild);
+}
+// ─── STORE NAMES (assigned at stage 7 — Дизайн-макет) ───
+const STORE_NAMES = {
+  'ООО «СеверТорг»':    'Магнит Свежесть',
+  'ООО «РитейлПро»':    'Магнит Казань Центр',
+  'ООО «ВолгаРитейл»':  'Магнит Волжский',
+  'ЗАО «ЮжПром»':       'Магнит Воронеж Юг',
+  'ООО «НевскийТрейд»': 'Магнит Нева',
+  'ООО «УралФуд»':      'Магнит Урал Сити',
+  'ООО «СибТорг»':      'Магнит Новосибирск',
+  'ООО «ЮгТрейд»':      'Магнит Краснодарский',
+  'ИП Орлов Трейд':     'Магнит Уфа Восток',
+  'ООО «АльфаТорг»':    'Магнит НН Горький',
+};
+
+function getAppDisplayTitle(appName, state){
+  const app = APPS[appName];
+  if(!app) return 'Заявка';
+  // Mirror partner LK: shopName appears when stage 5 (Бриф+Контур+ОЛ) is done (stageReached >= 5)
+  // In our model: stage 5 index = 4. Check if stage 5 is done.
+  const stage5 = state && state.stages && state.stages[4];
+  if(stage5 && stage5.done && STORE_NAMES[appName]){
+    return 'Заявка «' + STORE_NAMES[appName] + '»';
+  }
+  return 'Заявка ' + app.id;
+}
+
+// ─── DISTRICT BARS (dashboard) ───
+function renderDistrictBars(){
+  const el = document.getElementById('district-bars');
+  if(!el) return;
+  const max = Math.max(...DISTRICT_STATS.map(d=>d.count));
+  el.innerHTML = DISTRICT_STATS.map(d=>`
+    <div style="text-align:center">
+      <div style="font-size:18px;font-weight:900;color:var(--r)">${d.count}</div>
+      <div style="height:40px;background:var(--gray);border-radius:6px;margin:6px 4px;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;left:0;right:0;height:${Math.round((d.count/max)*100)}%;background:var(--r);opacity:.7;border-radius:4px 4px 0 0;transition:height .4s"></div>
+      </div>
+      <div class="dist-pill ${d.cls}" style="font-size:9px">${d.name}</div>
+    </div>`).join('');
+}
+document.addEventListener('DOMContentLoaded', renderDistrictBars);
+setTimeout(renderDistrictBars, 100);
+
+// ─── NEW APP MODAL ───
+let currentPath = null;
+let newAppUploads = {plano: false, photos: false};
+
+function openNewAppModal(){
+  currentPath = null;
+  newAppUploads = {plano:false, photos:false};
+  document.getElementById('napp-step0').style.display = '';
+  document.getElementById('napp-step-own').style.display = 'none';
+  document.getElementById('napp-step-find').style.display = 'none';
+  document.getElementById('napp-foot').style.display = 'none';
+  document.getElementById('napp-sub').textContent = 'Шаг 1 из 2 — выберите тип объекта';
+  document.getElementById('dz-plano-list').innerHTML = '';
+  document.getElementById('dz-photos-list').innerHTML = '';
+  document.getElementById('dz-plano-bar').style.display = 'none';
+  document.getElementById('mol-newapp').classList.add('open');
+}
+
+function backToStep0(){
+  currentPath = null;
+  document.getElementById('napp-step0').style.display = '';
+  document.getElementById('napp-step-own').style.display = 'none';
+  document.getElementById('napp-step-find').style.display = 'none';
+  document.getElementById('napp-foot').style.display = 'none';
+  document.getElementById('napp-sub').textContent = 'Шаг 1 из 2 — выберите тип объекта';
+}
+
+function selectPath(p){
+  currentPath = p;
+  document.getElementById('napp-step0').style.display = 'none';
+  document.getElementById('napp-step-own').style.display = p==='own'?'':'none';
+  document.getElementById('napp-step-find').style.display = p==='find'?'':'none';
+  document.getElementById('napp-foot').style.display = 'flex';
+  document.getElementById('napp-sub').textContent = p==='own'
+    ? 'Шаг 2 — данные объекта партнёра'
+    : 'Шаг 2 — параметры подбора объекта';
+}
+
+function updateSlider(type){
+  if(type==='area'){
+    document.getElementById('sl-area-min-lbl').textContent = document.getElementById('sl-area-min').value;
+    document.getElementById('sl-area-max-lbl').textContent = document.getElementById('sl-area-max').value + ' м²';
+  } else {
+    document.getElementById('sl-rent-min-lbl').textContent = document.getElementById('sl-rent-min').value;
+    document.getElementById('sl-rent-max-lbl').textContent = document.getElementById('sl-rent-max').value + ' ₽';
+  }
+}
+
+function simulateNewAppUpload(type){
+  if(type==='plano'){
+    const bar = document.getElementById('dz-plano-bar');
+    const prog = document.getElementById('dz-plano-prog');
+    const pct = document.getElementById('dz-plano-pct');
+    bar.style.display = 'block';
+    let p = 0;
+    const iv = setInterval(()=>{
+      p = Math.min(100, p+30);
+      prog.style.width = p+'%';
+      pct.textContent = p+'%';
+      if(p>=100){
+        clearInterval(iv);
+        newAppUploads.plano = true;
+        document.getElementById('dz-plano-list').innerHTML = `
+          <div class="dz-file-item" style="margin-top:8px">
+            <span style="font-size:15px">📄</span>
+            <span class="dz-fname">планограмма.pdf</span>
+            <span class="dz-fsz">2.4 МБ</span>
+            <span style="color:var(--gr);font-size:12px;font-weight:700;margin-left:auto">✓ Загружен</span>
+          </div>`;
+        bar.style.display = 'none';
+      }
+    }, 150);
+  } else {
+    newAppUploads.photos = true;
+    document.getElementById('dz-photos-list').innerHTML = `
+      <div class="dz-file-item" style="margin-top:8px"><span style="font-size:15px">🖼️</span><span class="dz-fname">фасад_01.jpg</span><span class="dz-fsz">1.2 МБ</span><span style="color:var(--gr);font-size:12px;font-weight:700;margin-left:auto">✓</span></div>
+      <div class="dz-file-item" style="margin-top:4px"><span style="font-size:15px">🖼️</span><span class="dz-fname">вход_группа.jpg</span><span class="dz-fsz">980 КБ</span><span style="color:var(--gr);font-size:12px;font-weight:700;margin-left:auto">✓</span></div>`;
+  }
+}
+
+function submitNewApp(){
+  // Delegated to tracker version below
+}
+// ─── INBOX TAB SWITCHER ───
+function switchInboxTab(tab){
+  ['waiting','tickets','finance'].forEach(t=>{
+    document.getElementById('inbox-'+t).style.display = t===tab ? '' : 'none';
+    const el = document.getElementById('itab-'+t);
+    if(!el) return;
+    if(t===tab){
+      el.style.background='var(--rxl)'; el.style.color='var(--r)'; el.style.fontWeight='700';
+    } else {
+      el.style.background=''; el.style.color='var(--mut)'; el.style.fontWeight='600';
+    }
+  });
+}
+
+// ─── INBOX BADGE COUNT ───
+function updateInboxBadge(){
+  const waiting = document.querySelectorAll('#inbox-waiting .inbox-card:not([style*="display:none"])').length;
+  const tickets = document.querySelectorAll('#ticket-list-mgr .ticket-row').length;
+  const finance = document.querySelectorAll('#inbox-finance .inbox-card:not([style*="display:none"])').length;
+  const total = waiting + finance;
+  const badge = document.getElementById('bell-badge');
+  const ibadge = document.getElementById('inbox-badge');
+  if(badge) badge.textContent = total || '';
+  if(ibadge) ibadge.textContent = total || '';
+}
+
+// ─── CONFIRM WAITING (stage partner upload) ───
+function confirmWaiting(cardId, partnerName, appId, stageName){
+  const card = document.getElementById(cardId);
+  if(card){
+    card.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:4px 0">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--grl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--gr)">${partnerName} — этап «${stageName}» подтверждён</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:2px">Партнёр уведомлён. Следующий этап разблокирован.</div>
+      </div>
+      <span onclick="openDetail('${partnerName}','${appId}')" style="color:var(--bl);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;white-space:nowrap;flex-shrink:0">Открыть заявку →</span>
+    </div>`;
+    card.style.border = '1px solid #9FE1CB';
+    card.style.background = 'var(--grl)';
+  }
+  addAudit('Иванов П.', `<span class="au-tag at-stat">Этап</span> подтвердил загрузку партнёра по заявке <strong>${appId}</strong> — этап «${stageName}» → <span class="au-new">Завершён</span>`);
+  toast(`✓ Этап «${stageName}» по заявке ${appId} подтверждён. Партнёр уведомлён.`, 's');
+  // Update waiting count
+  const cnt = document.getElementById('waiting-cnt');
+  if(cnt){ const n = Math.max(0,(parseInt(cnt.textContent)||1)-1); cnt.textContent=n; }
+  updateInboxBadge();
+}
+
+// ─── REJECT WHOLE APP ───
+let rejectAppTarget = {name:'', id:''};
+function openRejectAppModal(name, id){
+  rejectAppTarget = {name, id};
+  document.getElementById('reject-app-sub').textContent = `${name} · ${id} — партнёр получит уведомление`;
+  document.getElementById('reject-app-reason').value = '';
+  document.getElementById('reject-app-comment').value = '';
+  document.getElementById('mol-reject-app').classList.add('open');
+}
+function sendRejectApp(){
+  const reason = document.getElementById('reject-app-reason').value;
+  const comment = document.getElementById('reject-app-comment').value.trim();
+  if(!reason){ toast('⚠ Выберите причину отказа','e'); return; }
+  if(!comment){ document.getElementById('reject-app-comment').style.borderColor='var(--r)'; toast('⚠ Комментарий обязателен','e'); return; }
+  closeM('mol-reject-app');
+  addAudit('Иванов П.', `<span class="au-tag at-stat">Отказ</span> отклонил заявку <strong>${rejectAppTarget.id}</strong> (${rejectAppTarget.name}) — «${comment.substring(0,60)}»`);
+  toast(`🚫 Заявка ${rejectAppTarget.id} отклонена. Партнёр уведомлён.`, 'e');
+}
+
+// ─── FINANCE APPROVAL ───
+function approveFinance(cardId, partnerName){
+  const card = document.getElementById(cardId);
+  if(card){
+    card.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:4px 0">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--grl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--gr)">${partnerName} — чеки одобрены (254 900 ₽)</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Платежи зафиксированы в системе. Партнёр уведомлён.</div></div>
+    </div>`;
+    card.style.border = '1px solid #9FE1CB';
+    card.style.background = 'var(--grl)';
+  }
+  const cnt = document.getElementById('finance-cnt');
+  if(cnt){ const n = Math.max(0,(parseInt(cnt.textContent)||1)-1); cnt.textContent=n; }
+  addAudit('Иванов П.', `<span class="au-tag at-doc">Финансы</span> одобрил чеки партнёра <strong>${partnerName}</strong> на сумму <span class="au-new">254 900 ₽</span>`);
+  toast(`✓ Чеки ${partnerName} одобрены. Платежи зафиксированы.`, 's');
+  updateInboxBadge();
+}
+
+// ─── TICKET CHAT ───
+const TICKET_DATA = {
+  'T081': {
+    id:'#T-081', title:'Не синхронизируется касса #3', status:'В работе',
+    partner:'ООО «РитейлПро»', category:'Техническая', priority:'Высокий',
+    messages:[
+      {from:'partner',text:'Касса #3 не синхронизируется с системой с 27 мая. Зависает при закрытии смены.',time:'28.05 10:14'},
+      {from:'support',text:'Проблема зафиксирована, передана инженеру. Ориентировочное решение — 1-2 рабочих дня.',time:'28.05 10:42'},
+      {from:'partner',text:'Хорошо, жду. Но это критично — касса №3 основная.',time:'28.05 10:45'},
+    ]
+  },
+  'T088': {
+    id:'#T-088', title:'Запрос доступа для нового сотрудника', status:'Открыт',
+    partner:'ООО «УралФуд»', category:'Доступы', priority:'Низкий',
+    messages:[
+      {from:'partner',text:'Прошу создать доступ к системе учёта для нового управляющего — Козлова Дмитрия Романовича. Email: d.kozlov@uralfood.ru',time:'01.06 08:55'},
+    ]
+  },
+  'T079': {
+    id:'#T-079', title:'Ошибка в акте за апрель', status:'Решено',
+    partner:'ООО «СибТорг»', category:'Документы', priority:'Средний',
+    messages:[
+      {from:'partner',text:'В акте за апрель неверно указана сумма — 312 000 вместо 298 500 ₽.',time:'19.05 09:30'},
+      {from:'support',text:'Проверено. Ошибка подтверждена — счётная ошибка в строке "молочная продукция". Исправленный акт загружен в ЭДО.',time:'19.05 14:15'},
+      {from:'partner',text:'Спасибо, получил исправленный акт.',time:'19.05 15:02'},
+    ]
+  },
+  'T074': {
+    id:'#T-074', title:'Вопрос по агентской ставке Q2', status:'Решено',
+    partner:'ООО «НевскийТрейд»', category:'Финансы', priority:'Низкий',
+    messages:[
+      {from:'partner',text:'Почему агентская ставка за Q2 снизилась с 20% до 18.3%?',time:'03.05 11:00'},
+      {from:'support',text:'Снижение на 1.7% связано с недовыполнением плана по категории "Свежее" — фактически 17% при плане 22%. Для выхода на целевую ставку необходимо выполнить план категории минимум на 90%.',time:'03.05 15:22'},
+      {from:'partner',text:'Понял, спасибо за разъяснение.',time:'03.05 15:50'},
+    ]
+  }
+};
+
+let currentTicketId = null;
+
+function openTicketChat(ticketId){
+  currentTicketId = ticketId;
+  const t = TICKET_DATA[ticketId];
+  if(!t) return;
+  // Highlight active row
+  document.querySelectorAll('.ticket-row').forEach(r=>r.classList.remove('active-tr'));
+  const row = document.getElementById('tr-'+ticketId);
+  if(row) row.classList.add('active-tr');
+  // Update chat header
+  document.getElementById('chat-title').textContent = t.id + ' · ' + t.title;
+  document.getElementById('chat-meta').textContent = t.partner + ' · ' + t.category + ' · Приоритет: ' + t.priority;
+  // Render messages
+  const msgs = document.getElementById('chat-messages');
+  const statusColors = {'В работе':'var(--acc)','Открыт':'var(--r)','Решено':'var(--gr)'};
+  msgs.innerHTML = t.messages.map(m=>{
+    const isMgr = m.from === 'support';
+    return `<div style="display:flex;flex-direction:column;align-items:${isMgr?'flex-end':'flex-start'}">
+      <div class="${isMgr?'bubble-mgr':'bubble-partner'}">${m.text}</div>
+      <div class="bubble-time" style="text-align:${isMgr?'right':'left'}">${isMgr?'Вы (менеджер)':'Партнёр'} · ${m.time}</div>
+    </div>`;
+  }).join('');
+  // Status badge
+  const sc = statusColors[t.status] || 'var(--mut)';
+  msgs.innerHTML += `<div style="text-align:center;margin-top:6px"><span style="background:#F4F5F7;color:var(--mut);font-size:11px;padding:4px 12px;border-radius:20px">Статус тикета: <strong style="color:${sc}">${t.status}</strong></span></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  // Show/hide input
+  const inputArea = document.getElementById('chat-input-area');
+  if(inputArea) inputArea.style.display = t.status === 'Решено' ? 'none' : '';
+  document.getElementById('chat-reply').value = '';
+}
+
+function sendChatReply(){
+  const input = document.getElementById('chat-reply');
+  const text = input.value.trim();
+  if(!text || !currentTicketId) return;
+  const t = TICKET_DATA[currentTicketId];
+  if(!t) return;
+  const now = new Date();
+  const timeStr = String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  t.messages.push({from:'support',text,time:timeStr});
+  // Re-render
+  openTicketChat(currentTicketId);
+  toast('✓ Ответ отправлен партнёру', 's');
+  addAudit('Иванов П.', `<span class="au-tag at-doc">Тикет</span> ответил по тикету <strong>${t.id}</strong> (${t.partner}) — «${text.substring(0,50)}${text.length>50?'...':''}»`);
+}
+
+// ─── TRACKER DATA ───
+// Columns: [key, label] — order matches table headers
+const TRACKER_COLS = [
+  'date','mgr_dev','mgr_sup','partner','ul','format','district','branch',
+  'subject','address','name','status','s_total','s_tz','noe','df_odo',
+  'mik','nda','agreement','dkk','rsr','opening','comment','rto_forecast','rto_fact','rto_day1'
+];
+
+// Pre-seeded rows enriched from APPS data
+let TRACKER_ROWS = [
+  {id:'R1', date:'01.06.2025', mgr_dev:'Иванов Павел', mgr_sup:'', partner:'Сидоров К.В.', ul:'ООО «СеверТорг»', format:'ММ', district:'ЦАО', branch:'Москва-Центр', subject:'г. Москва', address:'Москва, ул. Ленина, 42', name:'', status:'Новая', s_total:'85', s_tz:'', noe:'', df_odo:'', mik:'', nda:'', agreement:'', dkk:'', rsr:'', opening:'', comment:'', rto_forecast:'', rto_fact:'', rto_day1:'', appId:'#1042', autoFields:['date','ul','format','district','address','partner']},
+  {id:'R2', date:'25.05.2025', mgr_dev:'Алексеев Сергей', mgr_sup:'', partner:'РитейлПро', ul:'ООО «РитейлПро»', format:'ММ', district:'Приволжский', branch:'Казань', subject:'Респ. Татарстан', address:'Казань, пр. Победы, 15', name:'Магнит Казань Центр', status:'Обработка документов', s_total:'142', s_tz:'135', noe:'', df_odo:'Смирнов А.В.', mik:'', nda:'25.05.2025', agreement:'', dkk:'', rsr:'', opening:'01.09.2025', comment:'Договор аренды на доработке', rto_forecast:'2 400 000', rto_fact:'', rto_day1:'', appId:'#1038', autoFields:['date','ul','format','district','address','partner','nda']},
+  {id:'R3', date:'15.05.2025', mgr_dev:'Петрова Мария', mgr_sup:'', partner:'НевскийТрейд', ul:'ООО «НевскийТрейд»', format:'МК', district:'СЗФО', branch:'Санкт-Петербург', subject:'г. Санкт-Петербург', address:'СПб, ул. Садовая, 33', name:'Магнит Нева', status:'Подписание NDA', s_total:'90', s_tz:'', noe:'', df_odo:'', mik:'', nda:'', agreement:'', dkk:'', rsr:'', opening:'15.10.2025', comment:'', rto_forecast:'1 800 000', rto_fact:'', rto_day1:'', appId:'#1031', autoFields:['date','ul','format','district','address','partner']},
+  {id:'R4', date:'05.05.2025', mgr_dev:'Козлов Дмитрий', mgr_sup:'', partner:'УралФуд', ul:'ООО «УралФуд»', format:'МК', district:'Уральский', branch:'Екатеринбург', subject:'Свердловская обл.', address:'Екатеринбург, ул. 8 Марта, 51', name:'Магнит Урал Сити', status:'Подбор помещения', s_total:'55', s_tz:'52', noe:'Орлов П.П.', df_odo:'Тихонов В.А.', mik:'20.05.2025', nda:'10.05.2025', agreement:'12.05.2025', dkk:'', rsr:'', opening:'01.08.2025', comment:'Документы все одобрены', rto_forecast:'1 200 000', rto_fact:'', rto_day1:'', appId:'#1025', autoFields:['date','ul','format','district','address','partner','nda']},
+  {id:'R5', date:'20.04.2025', mgr_dev:'Алексеев Сергей', mgr_sup:'Волкова И.Р.', partner:'СибТорг', ul:'ООО «СибТорг»', format:'ММ', district:'Сибирский', branch:'Новосибирск', subject:'Новосибирская обл.', address:'Новосибирск, пр. Маркса, 9', name:'Магнит Новосибирск', status:'Завершено', s_total:'155', s_tz:'148', noe:'Кравченко Д.С.', df_odo:'Яковлев С.П.', mik:'01.03.2025', nda:'22.04.2025', agreement:'25.04.2025', dkk:'05.05.2025', rsr:'10.05.2025', opening:'20.04.2025', comment:'Магазин открыт', rto_forecast:'3 100 000', rto_fact:'2 980 000', rto_day1:'148 000', appId:'#1018', autoFields:['date','ul','format','district','address','partner','nda','opening']},
+];
+
+let trackerEditTimeout = null;
+
+// ─── RENDER TRACKER ───
+function renderTracker(){
+  const tbody = document.getElementById('tracker-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  TRACKER_ROWS.forEach((row,ri) => {
+    const tr = document.createElement('tr');
+    tr.id = 'trow-'+row.id;
+    tr.dataset.rowId = row.id;
+
+    TRACKER_COLS.forEach(col => {
+      const td = document.createElement('td');
+      const isAuto = row.autoFields && row.autoFields.includes(col);
+      const isMoney = ['rto_forecast','rto_fact','rto_day1'].includes(col);
+      const isStatus = col === 'status';
+      const isComment = col === 'comment';
+      const val = row[col] || '';
+
+      let cls = 'tc';
+      if(isAuto) cls += ' auto-fill';
+      if(isMoney && val) cls += ' money-cell';
+      if(isStatus && val === 'Завершено') cls += ' status-done';
+      if(isStatus && val && val !== 'Завершено') cls += ' status-active';
+
+      if(isComment){
+        td.innerHTML = `<textarea class="${cls}" rows="1" data-col="${col}" data-rid="${row.id}" oninput="saveTrackerCell(this)">${val}</textarea>`;
+      } else {
+        td.innerHTML = `<input class="${cls}" type="text" data-col="${col}" data-rid="${row.id}" value="${val.replace(/"/g,'&quot;')}" oninput="saveTrackerCell(this)" title="${isAuto?'Автозаполнено из заявки '+row.appId:'Нажмите для редактирования'}">`;
+      }
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── SAVE CELL ───
+function saveTrackerCell(el){
+  const rid = el.dataset.rid;
+  const col = el.dataset.col;
+  const val = el.value;
+  const row = TRACKER_ROWS.find(r=>r.id===rid);
+  if(row){
+    row[col] = val;
+    // Remove auto-fill styling if user edits it
+    el.classList.remove('auto-fill');
+    // Show saved indicator
+    clearTimeout(trackerEditTimeout);
+    trackerEditTimeout = setTimeout(()=>{ toast('💾 Изменения сохранены','s'); }, 1200);
+  }
+}
+
+// ─── FILTERS ───
+function applyTrackerFilters(){
+  const fDate    = (document.getElementById('tf-date')?.value||'').toLowerCase();
+  const fMgrDev  = (document.getElementById('tf-mgr-dev')?.value||'').toLowerCase();
+  const fPartner = (document.getElementById('tf-partner')?.value||'').toLowerCase();
+  const fUl      = (document.getElementById('tf-ul')?.value||'').toLowerCase();
+  const fFormat  = (document.getElementById('tf-format')?.value||'').toLowerCase();
+  const fDist    = (document.getElementById('tf-district')?.value||'').toLowerCase();
+  const fStatus  = (document.getElementById('tf-status')?.value||'').toLowerCase();
+  const fName    = (document.getElementById('tf-name')?.value||'').toLowerCase();
+  const fSubject = (document.getElementById('tf-subject')?.value||'').toLowerCase();
+
+  TRACKER_ROWS.forEach(row => {
+    const tr = document.getElementById('trow-'+row.id);
+    if(!tr) return;
+    const visible = (
+      (!fDate    || (row.date||'').toLowerCase().includes(fDate)) &&
+      (!fMgrDev  || (row.mgr_dev||'').toLowerCase().includes(fMgrDev)) &&
+      (!fPartner || (row.partner||'').toLowerCase().includes(fPartner)) &&
+      (!fUl      || (row.ul||'').toLowerCase().includes(fUl)) &&
+      (!fFormat  || (row.format||'').toLowerCase().includes(fFormat)) &&
+      (!fDist    || (row.district||'').toLowerCase().includes(fDist)) &&
+      (!fStatus  || (row.status||'').toLowerCase().includes(fStatus)) &&
+      (!fName    || (row.name||'').toLowerCase().includes(fName)) &&
+      (!fSubject || (row.subject||'').toLowerCase().includes(fSubject))
+    );
+    tr.classList.toggle('filtered-out', !visible);
+  });
+}
+
+function clearTrackerFilters(){
+  ['tf-date','tf-mgr-dev','tf-partner','tf-ul','tf-format','tf-district','tf-status','tf-name','tf-subject']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.querySelectorAll('#tracker-tbody tr').forEach(tr=>tr.classList.remove('filtered-out'));
+}
+
+// ─── ADD ROW ───
+function addTrackerRow(){
+  const now = new Date();
+  const date = now.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const newId = 'R'+(TRACKER_ROWS.length+1)+'_'+Date.now();
+  TRACKER_ROWS.push({
+    id:newId, date, mgr_dev:'Иванов Павел', mgr_sup:'', partner:'', ul:'',
+    format:'', district:'', branch:'', subject:'', address:'', name:'',
+    status:'Новая', s_total:'', s_tz:'', noe:'', df_odo:'', mik:'', nda:'',
+    agreement:'', dkk:'', rsr:'', opening:'', comment:'', rto_forecast:'',
+    rto_fact:'', rto_day1:'', autoFields:[]
+  });
+  renderTracker();
+  // Scroll to new row and focus first cell
+  const newRow = document.getElementById('trow-'+newId);
+  if(newRow){
+    newRow.scrollIntoView({behavior:'smooth',block:'center'});
+    const first = newRow.querySelector('input,textarea');
+    if(first) setTimeout(()=>first.focus(), 300);
+  }
+  toast('✓ Новая строка добавлена','s');
+}
+
+// ─── ENRICH FROM APP (called when new app is created/confirmed) ───
+function enrichTrackerFromApp(appName, appId, appData){
+  // Check if row for this app already exists
+  const existing = TRACKER_ROWS.find(r=>r.appId===appId);
+  if(existing){
+    // Update relevant fields
+    if(appData.date)     existing.date     = appData.date;
+    if(appData.address)  existing.address  = appData.address;
+    if(appData.district) existing.district = appData.district;
+    if(appData.format)   existing.format   = appData.format;
+    if(appData.ul)       existing.ul       = appData.ul;
+    if(appData.status)   existing.status   = appData.status;
+    if(appData.opening)  existing.opening  = appData.opening;
+    if(appData.nda)      existing.nda      = appData.nda;
+    renderTracker();
+    return;
+  }
+  // Create new row
+  const now = new Date();
+  const date = now.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+  TRACKER_ROWS.push({
+    id:'R_'+appId.replace('#',''),
+    date: appData.date || date,
+    mgr_dev: appData.mgr || 'Иванов Павел',
+    mgr_sup: '',
+    partner: appData.partner || '',
+    ul: appData.ul || appName,
+    format: appData.format || '',
+    district: appData.district || '',
+    branch: appData.branch || '',
+    subject: appData.subject || '',
+    address: appData.address || '',
+    name: appData.name || '',
+    status: appData.status || 'Новая',
+    s_total: appData.area || '',
+    s_tz: '', noe:'', df_odo:'', mik:'',
+    nda: appData.nda || '',
+    agreement:'', dkk:'', rsr:'',
+    opening: appData.opening || '',
+    comment:'', rto_forecast:'', rto_fact:'', rto_day1:'',
+    appId, autoFields:['date','ul','format','district','address','partner']
+  });
+  renderTracker();
+}
+
+// ─── EXCEL EXPORT ───
+function exportTrackerExcel(){
+  toast('⏳ Формирование Excel...','i');
+  const headers = [
+    'Дата внесения','Менеджер (развитие)','Менеджер (поддержки)','Партнёр',
+    'ЮЛ','Формат','Округ','Филиал','Субъект','Адрес','Наименование',
+    'Статус','S общ, м²','S ТЗ, м²','НОЭ','ДФ/ОДО','МИК','NDA',
+    'Соглашение о намерениях','ДКК, АГД','РСР','Открытие',
+    'Комментарий','Прогноз РТО, ₽','Факт РТО полн. мес, ₽','РТО первый день, ₽'
+  ];
+  let csv = '\uFEFF' + headers.join(';') + '\n';
+  const visibleRows = TRACKER_ROWS.filter(r=>{
+    const tr = document.getElementById('trow-'+r.id);
+    return !tr || !tr.classList.contains('filtered-out');
+  });
+  visibleRows.forEach(row => {
+    const vals = TRACKER_COLS.map(col => {
+      const v = (row[col]||'').replace(/;/g,' ').replace(/\n/g,' ');
+      return '"'+v+'"';
+    });
+    csv += vals.join(';') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'сводная_таблица_объектов.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  setTimeout(()=>toast(`✓ Выгружено ${visibleRows.length} строк`,'s'), 800);
+}
+
+// ─── HOOK: unified submitNewApp — tracker + applications table + audit ───
+const _origSubmitNewApp = null; // placeholder kept for clarity
+function submitNewApp(){
+  const now = new Date();
+  const date = now.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const time = now.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+
+  if(currentPath==='own'){
+    const name     = document.getElementById('napp-name')?.value?.trim();
+    const addr     = document.getElementById('napp-addr')?.value?.trim();
+    const district = document.getElementById('napp-district')?.value;
+    const fmt      = document.getElementById('napp-fmt')?.value;
+    const phone    = document.getElementById('napp-phone')?.value?.trim();
+    if(!name||!addr||!district||!fmt){ toast('⚠ Заполните все обязательные поля','e'); return; }
+
+    const mgr = DISTRICT_MANAGERS[district];
+    const mgrName = mgr ? mgr.name : '—';
+    const mgrAv   = mgr ? mgr.av : '??';
+    const mgrBg   = mgr ? mgr.bg : '#ccc';
+    const mgrFg   = mgr ? mgr.fg : '#fff';
+    const newId   = '#' + (1050 + TRACKER_ROWS.length);
+    const distClass = {
+      'ЦАО':'dp-cao','САО':'dp-sao','ЮАО':'dp-yfo','ЮЗАО':'dp-yfo',
+      'Приволжский':'dp-pfo','Уральский':'dp-ufo','Южный':'dp-yfo','Сибирский':'dp-sfo','ЦФО':'dp-cfo','СЗФО':'dp-szfo'
+    }[district] || 'dp-cao';
+
+    closeM('mol-newapp');
+
+    // 1 — Add to Tracker (Excel table on dashboard)
+    enrichTrackerFromApp(name, newId, {
+      date, ul:name, partner:name, address:addr,
+      district, format:fmt, mgr:mgrName, status:'Новая'
+    });
+
+    // 2 — Add row to "Новые заявки" table on Applications page
+    addNewAppTableRow({
+      id: newId, ul: name, ent: name.startsWith('ООО')? 'ООО' : name.startsWith('ИП')? 'ИП' : 'ЮЛ',
+      addr, district, distClass, fmt,
+      date, dateTime: date + ', ' + time,
+      appType: 'own', mgrName, mgrAv, mgrBg, mgrFg
+    });
+
+    // 3 — Audit log
+    addAudit('Иванов П.', `<span class="au-tag at-crt">Создание</span> создал заявку <strong>${newId}</strong> от <strong>${name}</strong> (${district}) — тип: Свой объект — назначен: <span class="au-new">${mgrName}</span>`);
+    toast(`✓ Заявка ${newId} создана · добавлена в таблицу и в раздел «Новые заявки»`, 's');
+
+  } else {
+    const name = document.getElementById('napp-find-name')?.value?.trim();
+    const fmt  = document.getElementById('napp-find-fmt')?.value;
+    if(!name){ toast('⚠ Укажите наименование','e'); return; }
+
+    const newId = '#' + (1050 + TRACKER_ROWS.length);
+    closeM('mol-newapp');
+
+    // 1 — Add to Tracker
+    enrichTrackerFromApp(name, newId, {
+      date, ul:name, partner:name, mgr:'Ульяна', format: fmt||'', status:'Новая'
+    });
+
+    // 2 — Add to Applications table
+    addNewAppTableRow({
+      id: newId, ul: name, ent: name.startsWith('ООО')? 'ООО' : name.startsWith('ИП')? 'ИП' : 'ЮЛ',
+      addr: '— уточняется при подборе —', district: '—', distClass: 'dp-cao', fmt: fmt||'—',
+      date, dateTime: date + ', ' + time,
+      appType: 'find', mgrName: 'Ульяна', mgrAv: 'УЛ', mgrBg: '#FFF0D6', mgrFg: '#B7760A'
+    });
+
+    // 3 — Audit
+    addAudit('Иванов П.', `<span class="au-tag at-crt">Создание</span> создал заявку <strong>${newId}</strong> от <strong>${name}</strong> — тип: Подбор объекта — назначена: <span class="au-new">Ульяна</span>`);
+    toast(`✓ Заявка ${newId} на подбор создана · добавлена в таблицу и в «Новые заявки»`, 's');
+  }
+}
+
+// ─── ADD ROW TO NEW-APPS TABLE ON APPLICATIONS PAGE ───
+function addNewAppTableRow(d){
+  const tbody = document.getElementById('new-apps-tbody');
+  if(!tbody) return;
+
+  const typeHtml = d.appType === 'find'
+    ? `<span class="badge" style="background:#FFF0D6;color:#B7760A;font-size:10px">🔍 Нужен подбор</span>`
+    : `<span class="badge" style="background:var(--grl);color:var(--gr);font-size:10px">🏢 Свой объект</span>`;
+
+  const tr = document.createElement('tr');
+  tr.className = 'rc';
+  tr.style.animation = 'fadeIn .3s ease';
+  tr.innerHTML = `
+    <td><span style="color:var(--mut);font-weight:700">${d.id}</span></td>
+    <td><div><strong>${d.ul}</strong><br><span style="font-size:10px;color:var(--mut)">${d.ent}</span></div></td>
+    <td>${d.addr}</td>
+    <td><span class="dist-pill ${d.distClass}">${d.district}</span></td>
+    <td><span class="fmt-pill">${d.fmt||'—'}</span></td>
+    <td style="color:var(--mut)">${d.date}</td>
+    <td><span style="font-size:11px;color:var(--mut)">${d.dateTime}<br><span style="font-size:10px;color:var(--bl)">Заявка создана</span></span></td>
+    <td>${typeHtml}</td>
+    <td><span class="badge b-new"><span class="bd"></span>Новая</span></td>`;
+
+  // Make row clickable — open detail page
+  tr.onclick = () => openDetail(d.ul, d.id);
+
+  // Insert at top
+  tbody.insertBefore(tr, tbody.firstChild);
+
+  // Update "Новые заявки" section counter
+  const cnt = document.getElementById('new-apps-cnt');
+  if(cnt) cnt.textContent = parseInt(cnt.textContent||'0') + 1;
+
+  // Update sidebar "Заявки" badge
+  const navBadge = document.getElementById('nav-badge-apps');
+  if(navBadge) navBadge.textContent = parseInt(navBadge.textContent||'0') + 1;
+}
+
+// Init tracker on load
+setTimeout(renderTracker, 200);
+// Init inbox tabs
+setTimeout(()=>{ switchInboxTab('waiting'); updateInboxBadge(); }, 150);
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape') ['mol-rej','mol-newapp','mol-reject-app'].forEach(closeM);});
+</script>
+</body>
+</html>
