@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Магнит Аренда — кабинет менеджера</title>
+<link href="https://fonts.cdnfonts.com/css/inter" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="rmCabinetApp" class="magnit-opt-app">
+<div class="rc-layout">
+    <aside class="rc-sidebar">
+        <div class="rc-logo">
+            <div class="rc-logo-badge">МА</div>
+            <div><div class="rc-logo-text">Магнит Аренда</div><div class="rc-logo-sub">Кабинет менеджера</div></div>
+        </div>
+        <nav class="rc-nav">
+            <div class="rc-nav-item rc-active" id="rmNavHome" onclick="rmShowPage('home')"><span class="rc-nav-icon">📊</span><span>Главная</span></div>
+            <div class="rc-nav-item" id="rmNavLeaseIn" onclick="rmShowPage('leasein')"><span class="rc-nav-icon">🛒</span><span>Взять в аренду</span><span class="rc-nav-badge" id="rmNavLeaseInBadge" style="display:none"></span></div>
+            <div class="rc-nav-item" id="rmNavContracts" onclick="rmShowPage('contracts')"><span class="rc-nav-icon">📄</span><span>Мои договоры</span><span class="rc-nav-badge" id="rmNavContractsBadge" style="display:none"></span></div>
+            <div class="rc-nav-item" id="rmNavObjects" onclick="rmShowPage('objects')"><span class="rc-nav-icon">🏢</span><span>Объекты</span></div>
+            <div class="rc-nav-item" id="rmNavExternal" onclick="rmShowPage('external')"><span class="rc-nav-icon">💬</span><span>Внешние обращения</span></div>
+            <div class="rc-nav-item" id="rmNavInternal" onclick="rmShowPage('internal')"><span class="rc-nav-icon">🗂️</span><span>Внутренние обращения</span></div>
+        </nav>
+        <div class="rc-profile">
+            <div class="rc-profile-av">ВМ</div>
+            <div><div class="rc-profile-name">Виктория Морозова</div><div class="rc-profile-role">Менеджер по коммерческой недвижимости</div></div>
+        </div>
+        <div class="rc-logout-wrap">
+            <button class="rc-logout-btn" onclick="rmExit()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Выйти
+            </button>
+        </div>
+    </aside>
+    <main class="rc-main">
+        <div class="rc-header"><h1 id="rmHeaderTitle">Главная</h1></div>
+        <div class="rc-content">
+
+            <div class="rc-page rc-active" id="rmPageHome">
+                <div class="rc-card" style="margin-bottom:20px">
+                    <h3 style="margin:0 0 14px">Витрина рисков</h3>
+                    <table class="rc-table">
+                        <thead><tr><th style="width:26%">Индикатор</th><th style="width:34%">Расчёт</th><th>Действие</th></tr></thead>
+                        <tbody id="rmRiskBody"></tbody>
+                    </table>
+                </div>
+                <div class="rc-card" style="margin-bottom:20px">
+                    <h3 style="margin:0 0 14px">Статусная доска пролонгации</h3>
+                    <div class="rm-kanban" id="rmProlongationBoardEl"></div>
+                </div>
+                <div class="rc-card" style="margin-bottom:20px">
+                    <h3 style="margin:0 0 14px">Статусная доска по запросам от контрагента</h3>
+                    <div class="rm-kanban" id="rmRequestsBoardEl"></div>
+                </div>
+                <div class="rc-charts-grid">
+                    <div class="rc-card">
+                        <h3>Пролонгация по статусам</h3>
+                        <div id="rmProlongationChartEl"></div>
+                    </div>
+                    <div class="rc-card">
+                        <h3>Запросы КА по статусам</h3>
+                        <div id="rmRequestsChartEl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rc-page" id="rmPageLeaseIn">
+                <div class="rc-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+                        <h3 style="margin:0">Заявки от контрагентов на «Взять в аренду»</h3>
+                        <input type="text" class="rc-search-input" id="rmLeaseInSearch" placeholder="Поиск по компании или № заявки..." oninput="rmRenderLeaseIn()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px;min-width:240px">
+                        <select class="rc-search-input" id="rmLeaseInStatusFilter" onchange="rmRenderLeaseIn()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px">
+                            <option value="">Все статусы</option>
+                            <option value="Принять в работу">Принять в работу</option>
+                            <option value="На согласовании">На согласовании</option>
+                            <option value="Действует">Действует</option>
+                            <option value="Отказано">Отказано</option>
+                        </select>
+                    </div>
+                    <table class="rc-table">
+                        <thead><tr><th>№ заявки</th><th>Контрагент</th><th>Объект</th><th>ФЭБ</th><th>Срок отработки</th><th>Статус</th></tr></thead>
+                        <tbody id="rmLeaseInBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rc-page" id="rmPageContracts">
+                <div class="rc-card" id="rmContractsRemindersCard" style="display:none">
+                    <div onclick="rcToggleRemindersList('rmContractsRemindersList','rmContractsRemindersChevron')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+                        <h3 style="margin:0;display:flex;align-items:center;gap:8px">⏰ Ознакомиться <span class="rc-reminder-count-badge" id="rmContractsReminderCountBadge"></span></h3>
+                        <span id="rmContractsRemindersChevron" style="color:#ADB5BD;font-size:12px;white-space:nowrap">▼ показать</span>
+                    </div>
+                    <div id="rmContractsRemindersList" style="display:none;margin-top:10px"></div>
+                </div>
+                <div class="rc-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+                        <h3 style="margin:0">Мои договоры</h3>
+                        <input type="text" class="rc-search-input" id="rmContractsSearch" placeholder="Поиск по № договора или объекту..." oninput="rmRenderContracts()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px;min-width:240px">
+                        <select class="rc-search-input" id="rmContractsStatusFilter" onchange="rmRenderContracts()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px">
+                            <option value="">Все статусы</option>
+                            <option value="Действующий">Действующий</option>
+                            <option value="Окончивший срок действия">Окончивший срок действия</option>
+                            <option value="Расторгнут">Расторгнут</option>
+                        </select>
+                    </div>
+                    <table class="rc-table">
+                        <thead><tr><th>№ договора</th><th>Объект</th><th>Дата начала</th><th>Дата окончания</th><th>Статус</th></tr></thead>
+                        <tbody id="rmContractsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rc-page" id="rmPageObjects">
+                <div class="rc-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+                        <h3 style="margin:0">Объекты</h3>
+                        <input type="text" class="rc-search-input" id="rmObjectsSearch" placeholder="Поиск по названию или адресу..." oninput="rmRenderObjects()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px;min-width:240px">
+                        <select class="rc-search-input" id="rmObjectsStatusFilter" onchange="rmRenderObjects()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px">
+                            <option value="">Все статусы</option>
+                            <option value="В аренде">В аренде</option>
+                            <option value="Свободно">Свободно</option>
+                        </select>
+                    </div>
+                    <table class="rc-table">
+                        <thead><tr><th>Наименование ТО</th><th>Адрес</th><th>Площадь</th><th>Расположение</th><th>Статус</th><th>№ договора</th></tr></thead>
+                        <tbody id="rmObjectsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rc-page" id="rmPageExternal">
+                <div class="rc-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+                        <h3 style="margin:0">Внешние обращения</h3>
+                        <input type="text" class="rc-search-input" id="rmExternalSearch" placeholder="Поиск по № обращения, теме или контрагенту..." oninput="rmRenderExternal()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px;min-width:260px">
+                        <select class="rc-search-input" id="rmExternalStatusFilter" onchange="rmRenderExternal()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px">
+                            <option value="">Все статусы</option>
+                            <option value="Зарегистрировано">Зарегистрировано</option>
+                            <option value="В работе">В работе</option>
+                            <option value="Отказано">Отказано</option>
+                            <option value="Принято">Принято</option>
+                        </select>
+                    </div>
+                    <table class="rc-table">
+                        <thead><tr><th>№ обращения</th><th>Тематика</th><th>Контрагент</th><th>Дата создания</th><th>Срок ответа</th><th>Статус</th></tr></thead>
+                        <tbody id="rmExternalBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rc-page" id="rmPageInternal">
+                <div class="rc-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+                        <h3 style="margin:0">Внутренние обращения — задачи от ТРКН</h3>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <input type="text" class="rc-search-input" id="rmInternalSearch" placeholder="Поиск по № или теме задачи..." oninput="rmRenderInternal()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px;min-width:240px">
+                            <select class="rc-search-input" id="rmInternalStatusFilter" onchange="rmRenderInternal()" style="padding:7px 12px;border:1px solid #DEE2E6;border-radius:8px;font-size:13px">
+                                <option value="">Все статусы</option>
+                                <option value="Зарегистрировано">Зарегистрировано</option>
+                                <option value="В работе">В работе</option>
+                                <option value="Выполнено">Выполнено</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="rc-table">
+                        <thead><tr><th>№ обращения</th><th>Тематика</th><th>Дата создания</th><th>Срок ответа</th><th>Статус</th></tr></thead>
+                        <tbody id="rmInternalList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Application detail modal -->
+<div class="rc-modal-overlay" id="rmAppDetailOverlay">
+    <div class="rc-modal">
+        <div class="rc-modal-hdr">
+            <div><div class="rc-modal-title" id="rmAppDetailTitle"></div><div class="rc-modal-sub" id="rmAppDetailSub"></div></div>
+            <button class="rc-modal-close" onclick="rmCloseAppDetail()">✕</button>
+        </div>
+        <div class="rc-modal-body" id="rmAppDetailBody"></div>
+    </div>
+</div>
+
+<!-- External appeal detail modal -->
+<div class="rc-modal-overlay" id="rmExternalDetailOverlay">
+    <div class="rc-modal">
+        <div class="rc-modal-hdr">
+            <div><div class="rc-modal-title" id="rmExternalDetailTitle"></div><div class="rc-modal-sub" id="rmExternalDetailSub"></div></div>
+            <button class="rc-modal-close" onclick="rmCloseExternalDetail()">✕</button>
+        </div>
+        <div class="rc-modal-body" id="rmExternalDetailBody"></div>
+    </div>
+</div>
+
+<!-- Internal task detail modal -->
+<div class="rc-modal-overlay" id="rmInternalDetailOverlay">
+    <div class="rc-modal">
+        <div class="rc-modal-hdr">
+            <div><div class="rc-modal-title" id="rmInternalDetailTitle"></div><div class="rc-modal-sub" id="rmInternalDetailSub"></div></div>
+            <button class="rc-modal-close" onclick="rmCloseInternalDetail()">✕</button>
+        </div>
+        <div class="rc-modal-body" id="rmInternalDetailBody"></div>
+    </div>
+</div>
+
+<!-- Contract document modal -->
+<div class="rc-modal-overlay" id="rmContractDocOverlay">
+    <div class="rc-modal" style="width:680px">
+        <div class="rc-modal-hdr">
+            <div><div class="rc-modal-title" id="rmContractDocTitle"></div><div class="rc-modal-sub" id="rmContractDocSub"></div></div>
+            <button class="rc-modal-close" onclick="rmCloseContractDoc()">✕</button>
+        </div>
+        <div class="rc-modal-body" id="rmContractDocBody"></div>
+    </div>
+</div>
+
+<div class="rc-toast-container" id="rmToastContainer"></div>
+</div>
+
+
+<script src="shared.js"></script>
+<script>
+// ===== RENT — INTERNAL MANAGER CABINET (login 333/333) =====
+// Requests from counterparties to lease a "Взять в аренду" object. The FEB
+// (Служба Безопасности) check is tracked separately from the workflow status,
+// since a request can be "Принять в работу" only once FEB has cleared it.
+var rmApplications = [
+    { id: 'ЗК-3301', contactName: 'Смирнова Ольга Викторовна', phone: '+7 (916) 402-18-56', email: 'o.smirnova@coffeetogo.ru',
+      companyName: 'ООО «Кофе с собой»', inn: '7726458901', brandName: 'CoffeeGo', category: 'Общественное питание / кафе',
+      comment: 'Интересует прикассовая зона под кофейню самообслуживания, готовы заехать в течение месяца.',
+      febResult: 'Пройдена', status: 'Принять в работу', createdDate: '05.08.2026', dueDate: '12.08.2026', listingId: 1 },
+    { id: 'ЗК-3298', contactName: 'Ковалёв Дмитрий Сергеевич', phone: '+7 (925) 771-30-42', email: 'd.kovalev@bakerypro.ru',
+      companyName: 'ООО «БейкериПро»', inn: '7719044567', brandName: 'Пекарня №1', category: 'Продукты питания',
+      comment: 'Нужна точка с готовым ремонтом и вентиляцией под мини-пекарню полного цикла.',
+      febResult: 'Пройдена', status: 'На согласовании', createdDate: '28.07.2026', dueDate: '11.08.2026', listingId: 6 },
+    { id: 'ЗК-3290', contactName: 'Егоров Артём Павлович', phone: '+7 (903) 556-24-19', email: 'a.egorov@vending-service.ru',
+      companyName: 'ИП Егоров А.П.', inn: '772345678901', brandName: 'VendService', category: 'Другое',
+      comment: 'Хотим разместить кофейный вендинговый аппарат на 1 кв.м у входа.',
+      febResult: 'Не пройдена', status: 'Отказано', createdDate: '20.07.2026', dueDate: '27.07.2026', listingId: 4 },
+    { id: 'ЗК-3305', contactName: 'Никитина Елена Игоревна', phone: '+7 (999) 214-77-03', email: 'e.nikitina@medplus.ru',
+      companyName: 'ООО «МедПлюс Фарма»', inn: '7731209845', brandName: 'МедПлюс', category: 'Аптека / медицинские товары',
+      comment: 'Ищем помещение с отдельным входом под аптечный пункт, площадь от 40 м².',
+      febResult: 'Пройдена', status: 'Действует', createdDate: '02.06.2026', dueDate: '16.06.2026', listingId: 3, daNum: 'ГМ161/4500/26' },
+    { id: 'ЗК-3307', contactName: 'Волков Игорь Николаевич', phone: '+7 (985) 630-91-27', email: 'i.volkov@shoestyle.ru',
+      companyName: 'ООО «ШузСтайл»', inn: '7718556234', brandName: 'ShoesStyle', category: 'Одежда и обувь',
+      comment: 'Рассматриваем формат «магазин в магазине», интересна площадь внутри зала.',
+      febResult: 'На проверке', status: 'Принять в работу', createdDate: '08.08.2026', dueDate: '15.08.2026', listingId: 2 },
+    { id: 'ЗК-3286', contactName: 'Соколова Марина Валерьевна', phone: '+7 (926) 448-05-63', email: 'm.sokolova@beautyline.ru',
+      companyName: 'ООО «БьютиЛайн»', inn: '7705991123', brandName: 'BeautyLine', category: 'Косметика и парфюмерия',
+      comment: 'Нужна точка под шоу-рум косметики, готовы к долгосрочному договору.',
+      febResult: 'Пройдена', status: 'Действует', createdDate: '15.05.2026', dueDate: '29.05.2026', listingId: 5, daNum: 'ГМ161/4501/26' },
+    { id: 'ЗК-3310', contactName: 'Фролов Максим Олегович', phone: '+7 (903) 217-64-08', email: 'm.frolov@sportzona.ru',
+      companyName: 'ООО «СпортЗона»', inn: '7733120456', brandName: 'SportZona', category: 'Другое',
+      comment: 'Интересует площадь под мини-магазин спортивных товаров, готовы к переговорам по срокам.',
+      febResult: 'Пройдена', status: 'Принять в работу', createdDate: '10.08.2026', dueDate: '17.08.2026', listingId: 7 },
+    { id: 'ЗК-3312', contactName: 'Тарасова Юлия Андреевна', phone: '+7 (916) 340-22-91', email: 'y.tarasova@floralshop.ru',
+      companyName: 'ИП Тарасова Ю.А.', inn: '773456789012', brandName: 'Цветочная лавка', category: 'Другое',
+      comment: 'Ищем небольшую точку у входа под цветочный магазин.',
+      febResult: 'Пройдена', status: 'На согласовании', createdDate: '25.07.2026', dueDate: '08.08.2026', listingId: 9 },
+    { id: 'ЗК-3315', contactName: 'Гришин Олег Вячеславович', phone: '+7 (925) 118-40-73', email: 'o.grishin@quickfix.ru',
+      companyName: 'ООО «КвикФикс»', inn: '7740098123', brandName: 'QuickFix', category: 'Бытовые услуги',
+      comment: 'Хотели разместить мастерскую по ремонту обуви и одежды.',
+      febResult: 'Не пройдена', status: 'Отказано', createdDate: '18.07.2026', dueDate: '25.07.2026', listingId: 11 }
+];
+// Contracts renewal reminders: 90 days before end → green, 60 days → yellow,
+// 30 days (or already past end date) → red. Reference "today" is fixed to
+// match the app's current in-universe date so the demo data stays consistent.
+var rmContracts = [
+    { num: 'ГМ161/4401/26', object: 'Прикассовая зона — Магнит #1247, Москва, Берзарина, 23к2', startDate: '02.04.2026', endDate: '02.03.2027', status: 'Действующий', rent: 198000 },
+    { num: 'ГМ161/4412/26', object: 'Площадь в зале — Магнит #2204, Москва, Ленинский пр., 78', startDate: '15.05.2026', endDate: '05.11.2026', status: 'Действующий', rent: 274400 },
+    { num: 'ГМ161/4420/26', object: 'Отдельный вход — Магнит #1893, Москва, Кутузовский пр., 34', startDate: '10.05.2026', endDate: '10.10.2026', status: 'Действующий', rent: 324000 },
+    { num: 'ГМ161/4444/22', object: 'Прикассовая зона — Магнит #2041, Москва, Профсоюзная ул., 104', startDate: '12.12.2022', endDate: '10.09.2026', status: 'Действующий', rent: 126000 },
+    { num: 'ГМ161/4390/25', object: 'Внутри зала — Магнит #1765, Москва, Севастопольский пр., 42', startDate: '01.06.2025', endDate: '15.07.2026', status: 'Окончивший срок действия', rent: 201600 },
+    { num: 'ГМ161/4370/24', object: 'Отдельный вход — Магнит #2117, Москва, Пресненская наб., 6', startDate: '08.06.2024', endDate: '08.06.2026', status: 'Расторгнут', rent: 469000 },
+    { num: 'ГМ161/4455/26', object: 'Прикассовая зона — Магнит #1502, Москва, Открытое ш., 12', startDate: '19.06.2026', endDate: '19.05.2027', status: 'Действующий', rent: 133200 }
+];
+var rmObjects = [
+    { name: 'Прикассовая зона — Магнит #1247', address: 'Москва, ул. Берзарина, 23к2', area: 12, location: 'Прикассовая зона', status: 'В аренде', contractNum: 'ГМ161/4401/26' },
+    { name: 'Площадь в зале — Магнит #2204', address: 'Москва, Ленинский пр., 78', area: 28, location: 'Внутри зала', status: 'В аренде', contractNum: 'ГМ161/4412/26' },
+    { name: 'Отдельный вход — Магнит #1893', address: 'Москва, Кутузовский пр., 34', area: 45, location: 'Отдельный вход', status: 'В аренде', contractNum: 'ГМ161/4420/26' },
+    { name: 'Прикассовая зона — Магнит #2041', address: 'Москва, Профсоюзная ул., 104', area: 6, location: 'Прикассовая зона', status: 'В аренде', contractNum: 'ГМ161/4444/22' },
+    { name: 'Внутри зала — Магнит #1765', address: 'Москва, Севастопольский пр., 42', area: 18, location: 'Внутри зала', status: 'В аренде', contractNum: 'ГМ161/4390/25' },
+    { name: 'Отдельный вход — Магнит #2117', address: 'Москва, Пресненская наб., 6', area: 35, location: 'Отдельный вход', status: 'Свободно', contractNum: null },
+    { name: 'Прикассовая зона — Магнит #1502', address: 'Москва, Открытое ш., 12', area: 9, location: 'Прикассовая зона', status: 'В аренде', contractNum: 'ГМ161/4455/26' },
+    { name: 'Внутри зала — Магнит #1988', address: 'Москва, Каширское ш., 55', area: 22, location: 'Внутри зала', status: 'Свободно', contractNum: null },
+    { name: 'Отдельный вход — Магнит #1622', address: 'Москва, Осенний бул., 14', area: 30, location: 'Отдельный вход', status: 'Свободно', contractNum: null }
+];
+
+// ---- Kanban: Статусная доска пролонгации (drag-and-drop, home page) ----
+var rmProlongationColumns = ['На переговорах', 'На подписании', 'Подписано', 'Согласовано', 'Отказ'];
+var rmProlongationItems = [
+    { id: 'PL-1', tt: 'Магнит #1893', da: 'ГМ161/4420/26', area: 45, rent: 324000, column: 'На переговорах' },
+    { id: 'PL-2', tt: 'Магнит #2078', da: 'ГМ161/4490/26', area: 33, rent: 267300, column: 'На переговорах' },
+    { id: 'PL-3', tt: 'Магнит #2041', da: 'ГМ161/4444/22', area: 6, rent: 126000, column: 'На подписании' },
+    { id: 'PL-4', tt: 'Магнит #1247', da: 'ГМ161/4401/26', area: 12, rent: 198000, column: 'На подписании' },
+    { id: 'PL-5', tt: 'Магнит #1355', da: 'ГМ161/4340/25', area: 10, rent: 156000, column: 'Подписано' },
+    { id: 'PL-6', tt: 'Магнит #1502', da: 'ГМ161/4455/26', area: 9, rent: 133200, column: 'Подписано' },
+    { id: 'PL-7', tt: 'Магнит #1988', da: 'ГМ161/4460/26', area: 22, rent: 224400, column: 'Подписано' },
+    { id: 'PL-8', tt: 'Магнит #1622', da: 'ГМ161/4470/26', area: 30, rent: 261000, column: 'Согласовано' },
+    { id: 'PL-9', tt: 'Магнит #2310', da: 'ГМ161/4480/26', area: 12, rent: 152000, column: 'Согласовано' },
+    { id: 'PL-10', tt: 'Магнит #2117', da: 'ГМ161/4370/24', area: 35, rent: 469000, column: 'Отказ', reason: 'Расторжение по инициативе арендатора' },
+    { id: 'PL-11', tt: 'Магнит #1765', da: 'ГМ161/4390/25', area: 18, rent: 201600, column: 'Отказ', reason: 'Истечение срока без продления' }
+];
+
+var rmExternalTopics = ['Оплата по договору', 'Акт сверки', 'Индексация АП', 'Изменение реквизитов', 'Смена стороны по договору', 'Расторжение договора', 'Изменение вида занятости КА (ИП, самозанятость)', 'Статус заявки', 'Предоставление документов'];
+var rmExternalAppeals = [
+    { id: 'ВО-901', topic: 'Оплата по договору', createdDate: '05.08.2026', dueDate: '12.08.2026', status: 'Зарегистрировано',
+      contragent: 'ООО «Кофе с собой»', contractNum: 'ГМ161/4401/26', description: 'Просит уточнить сумму августовского платежа — расхождение с актом на 1 200 ₽.', comments: [
+        { author: 'Смирнова О.В. (КА)', text: 'Прошу уточнить сумму к оплате за август, в ЛК указана другая сумма.', time: '05.08, 09:20' }
+      ] },
+    { id: 'ВО-897', topic: 'Акт сверки', createdDate: '01.08.2026', dueDate: '08.08.2026', status: 'В работе',
+      contragent: 'ООО «БейкериПро»', contractNum: 'ГМ161/4412/26', description: 'Запрошен акт сверки взаиморасчётов за 2 квартал 2026 года.', comments: [
+        { author: 'Ковалёв Д.С. (КА)', text: 'Нужен акт сверки за 2 квартал для внутренней отчётности.', time: '01.08, 11:00' },
+        { author: 'Морозова В. (менеджер)', text: 'Акт формируется в бухгалтерии, направим до 08.08.', time: '02.08, 15:40' }
+      ] },
+    { id: 'ВО-889', topic: 'Индексация АП', createdDate: '20.07.2026', dueDate: '27.07.2026', status: 'Принято',
+      contragent: 'ООО «МедПлюс Фарма»', contractNum: 'ГМ161/4420/26', description: 'Согласован размер плановой индексации арендной платы на 2027 год.', comments: [
+        { author: 'Морозова В. (менеджер)', text: 'Индексация на 4,5% согласована, допсоглашение направлено на подпись.', time: '27.07, 10:15' }
+      ] },
+    { id: 'ВО-882', topic: 'Изменение реквизитов', createdDate: '15.07.2026', dueDate: '22.07.2026', status: 'Отказано',
+      contragent: 'ИП Егоров А.П.', contractNum: null, description: 'Заявлена смена банка получателя платежей — отклонено из-за неполного пакета документов.', comments: [
+        { author: 'Морозова В. (менеджер)', text: 'Отказано: нужен оригинал заявления с подписью и печатью, скан не принимается.', time: '22.07, 16:05' }
+      ] },
+    { id: 'ВО-878', topic: 'Смена стороны по договору', createdDate: '10.07.2026', dueDate: '24.07.2026', status: 'В работе',
+      contragent: 'ООО «ШузСтайл»', contractNum: 'ГМ161/4444/22', description: 'Планируется передача прав по договору дочернему юрлицу группы компаний.', comments: [
+        { author: 'Волков И.Н. (КА)', text: 'Планируем передать права по договору другому юрлицу нашей группы.', time: '10.07, 09:15' },
+        { author: 'Морозова В. (менеджер)', text: 'Комплект документов передан на согласование юридическому отделу.', time: '14.07, 13:50' }
+      ] },
+    { id: 'ВО-870', topic: 'Расторжение договора', createdDate: '02.07.2026', dueDate: '09.07.2026', status: 'Принято',
+      contragent: 'ООО «БьютиЛайн»', contractNum: 'ГМ161/4390/25', description: 'Контрагент уведомил о расторжении в связи с закрытием точки.', comments: [
+        { author: 'Соколова М.В. (КА)', text: 'Просим расторгнуть договор досрочно, точка закрывается.', time: '02.07, 12:30' },
+        { author: 'Морозова В. (менеджер)', text: 'Соглашение о расторжении подписано, договор закрыт.', time: '09.07, 17:00' }
+      ] },
+    { id: 'ВО-865', topic: 'Изменение вида занятости КА (ИП, самозанятость)', createdDate: '28.06.2026', dueDate: '05.07.2026', status: 'Принято',
+      contragent: 'ИП Егоров А.П.', contractNum: null, description: 'Переход с ИП на самозанятость, требуется переоформление договора.', comments: [
+        { author: 'Морозова В. (менеджер)', text: 'Новый статус подтверждён, договор переоформлен на самозанятого.', time: '05.07, 14:20' }
+      ] },
+    { id: 'ВО-902', topic: 'Статус заявки', createdDate: '06.08.2026', dueDate: '09.08.2026', status: 'Зарегистрировано',
+      contragent: 'ООО «ШузСтайл»', contractNum: null, description: 'Уточняет статус заявки ЗК-3307 на размещение — как долго ожидать ответ.', comments: [
+        { author: 'Волков И.Н. (КА)', text: 'Подскажите, пожалуйста, статус нашей заявки ЗК-3307.', time: '06.08, 10:05' }
+      ] },
+    { id: 'ВО-895', topic: 'Предоставление документов', createdDate: '30.07.2026', dueDate: '06.08.2026', status: 'В работе',
+      contragent: 'ООО «Кофе с собой»', contractNum: 'ГМ161/4401/26', description: 'Запрошены копии страхового полиса и СЭЗ на помещение.', comments: [
+        { author: 'Смирнова О.В. (КА)', text: 'Нужны копии страхового полиса и СЭЗ на помещение для нашей проверки.', time: '30.07, 16:40' }
+      ] }
+];
+var rmInternalTasks = [
+    { id: 'ТРКН-114', topic: 'Проверить актуальность реквизитов по договору ГМ161/4390/25 перед пролонгацией', status: 'Зарегистрировано', date: '08.08.2026',
+      source: 'ТРКН', assignee: 'Морозова В.', dueDate: '15.08.2026', contractNum: 'ГМ161/4390/25',
+      description: 'Перед пролонгацией договора необходимо запросить у контрагента актуальную выписку из ЕГРЮЛ и подтверждение банковских реквизитов.' },
+    { id: 'ТРКН-109', topic: 'Согласовать индексацию ставки по блоку объектов ЦФО за август', status: 'В работе', date: '02.08.2026',
+      source: 'ТРКН', assignee: 'Морозова В.', dueDate: '20.08.2026', contractNum: null,
+      description: 'Подготовить расчёт плановой индексации для всех действующих договоров по ЦФО и направить на согласование руководителю направления.' },
+    { id: 'ТРКН-102', topic: 'Актуализировать перечень свободных объектов на портале «Взять в аренду»', status: 'Выполнено', date: '25.07.2026',
+      source: 'ТРКН', assignee: 'Морозова В.', dueDate: '28.07.2026', contractNum: null,
+      description: 'Сверить список объектов на публичной странице с фактическим состоянием (сданы/свободны), обновить карточки и фото.' },
+    { id: 'ТРКН-098', topic: 'Сверить статусы заявок ФЭБ за июль', status: 'Выполнено', date: '20.07.2026',
+      source: 'ТРКН', assignee: 'Морозова В.', dueDate: '24.07.2026', contractNum: null,
+      description: 'Сопоставить решения службы безопасности по заявкам контрагентов за июль с их текущим статусом в системе.' },
+    { id: 'ТРКН-116', topic: 'Подготовить отчёт по расторгнутым договорам за 2 квартал', status: 'В работе', date: '10.08.2026',
+      source: 'ТРКН', assignee: 'Морозова В.', dueDate: '18.08.2026', contractNum: 'ГМ161/4370/24',
+      description: 'Собрать причины расторжения и финансовые итоги по всем договорам, закрытым во 2 квартале, для отчёта руководству.' }
+];
+
+function rmEnter() {
+    rmApplications = rcDB.load('rm:applications', rmApplications);
+    rmProlongationItems = rcDB.load('rm:prolongationItems', rmProlongationItems);
+    rmRenderLeaseIn();
+    rmRenderContracts();
+    rmRenderObjects();
+    rmRenderExternal();
+    rmRenderInternal();
+    rmRenderRiskTable();
+    rmRenderProlongationBoard();
+    rmRenderRequestsBoard();
+    rmRenderProlongationChart();
+    rmRenderRequestsChart();
+    rmShowPage('home');
+    document.getElementById('rmCabinetApp').classList.add('active');
+    document.body.style.background = '#F8F9FA';
+    window.scrollTo(0, 0);
+    rmShowToast('Добро пожаловать, Виктория!');
+}
+function rmExit() {
+    if (window.parent && window.parent.rmExitCabinet) { window.parent.rmExitCabinet(); }
+}
+function rmShowPage(page) {
+    var map = { home: ['rmPageHome', 'rmNavHome', 'Главная'], leasein: ['rmPageLeaseIn', 'rmNavLeaseIn', 'Взять в аренду'], contracts: ['rmPageContracts', 'rmNavContracts', 'Мои договоры'], objects: ['rmPageObjects', 'rmNavObjects', 'Объекты'], external: ['rmPageExternal', 'rmNavExternal', 'Внешние обращения'], internal: ['rmPageInternal', 'rmNavInternal', 'Внутренние обращения'] };
+    document.querySelectorAll('#rmCabinetApp .rc-page').forEach(function(p) { p.classList.remove('rc-active'); });
+    document.querySelectorAll('#rmCabinetApp .rc-nav-item').forEach(function(n) { n.classList.remove('rc-active'); });
+    document.getElementById(map[page][0]).classList.add('rc-active');
+    document.getElementById(map[page][1]).classList.add('rc-active');
+    document.getElementById('rmHeaderTitle').textContent = map[page][2];
+}
+function rmShowToast(msg) {
+    var container = document.getElementById('rmToastContainer');
+    var el = document.createElement('div');
+    el.className = 'pc-toast pc-success';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 300); }, 3200);
+}
+
+// ---- Взять в аренду: заявки от контрагентов ----
+function rmRenderLeaseIn() {
+    var q = (document.getElementById('rmLeaseInSearch').value || '').trim().toLowerCase();
+    var statusFilter = (document.getElementById('rmLeaseInStatusFilter').value || '');
+    // Requests still under FEB (Служба Безопасности) review never reach the
+    // manager's queue — they only appear here once FEB has cleared them.
+    var rows = rmApplications.filter(function(a) {
+        if (a.febResult === 'На проверке') return false;
+        var matchesQ = !q || a.companyName.toLowerCase().indexOf(q) !== -1 || a.id.toLowerCase().indexOf(q) !== -1;
+        var matchesStatus = !statusFilter || a.status === statusFilter;
+        return matchesQ && matchesStatus;
+    });
+    document.getElementById('rmLeaseInBody').innerHTML = rows.length ? rows.map(function(a) {
+        var listing = ssListingsData.find(function(l) { return l.id === a.listingId; });
+        var febBadge = a.febResult === 'Пройдена' ? '<span class="rc-badge rc-b-ok">Пройдена</span>' : '<span class="rc-badge rc-b-reject">Не пройдена</span>';
+        return '<tr class="rc-doc-clickable-row" style="cursor:pointer" onclick="rmOpenAppDetail(\'' + a.id + '\')">' +
+            '<td style="font-weight:700">' + a.id + '</td>' +
+            '<td>' + a.companyName + '<div style="font-size:11px;color:#8E8E93">' + a.brandName + '</div></td>' +
+            '<td>' + (listing ? listing.address : '—') + '</td>' +
+            '<td>' + febBadge + '</td>' +
+            '<td>' + a.dueDate + '</td>' +
+            '<td>' + rcBadge(a.status) + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">Ничего не найдено</td></tr>';
+    var pendingCount = rmApplications.filter(function(a) { return a.febResult !== 'На проверке' && a.status === 'Принять в работу'; }).length;
+    var navBadge = document.getElementById('rmNavLeaseInBadge');
+    if (pendingCount > 0) { navBadge.style.display = 'inline-flex'; navBadge.textContent = pendingCount; } else { navBadge.style.display = 'none'; }
+}
+function rmOpenAppDetail(id) {
+    var a = rmApplications.find(function(x) { return x.id === id; });
+    if (!a) return;
+    var listing = ssListingsData.find(function(l) { return l.id === a.listingId; });
+    document.getElementById('rmAppDetailTitle').textContent = 'Заявка ' + a.id;
+    document.getElementById('rmAppDetailSub').textContent = 'Создана ' + a.createdDate + ' · Срок отработки — ' + a.dueDate;
+    var febBadge = a.febResult === 'Пройдена' ? '<span class="rc-badge rc-b-ok">Пройдена</span>' : a.febResult === 'Не пройдена' ? '<span class="rc-badge rc-b-reject">Не пройдена</span>' : '<span class="rc-badge rc-b-wait">На проверке</span>';
+    var statusOptions = ['Принять в работу', 'На согласовании', 'Действует', 'Отказано'];
+    document.getElementById('rmAppDetailBody').innerHTML =
+        '<div class="rc-sec-title">Контактные данные</div>' +
+        '<div class="rc-info-grid">' +
+        '<div class="rc-info-item"><label>ФИО</label><span>' + a.contactName + '</span></div>' +
+        '<div class="rc-info-item"><label>Телефон</label><span>' + a.phone + '</span></div>' +
+        '<div class="rc-info-item"><label>Почта</label><span>' + a.email + '</span></div>' +
+        '</div>' +
+        '<div class="rc-sec-title">Реквизиты контрагента</div>' +
+        '<div class="rc-info-grid">' +
+        '<div class="rc-info-item"><label>Полное наименование</label><span>' + a.companyName + '</span></div>' +
+        '<div class="rc-info-item"><label>ИНН</label><span>' + a.inn + '</span></div>' +
+        '</div>' +
+        '<div class="rc-sec-title">Дополнительные характеристики</div>' +
+        '<div class="rc-info-grid">' +
+        '<div class="rc-info-item"><label>Наименование компании / бренда</label><span>' + a.brandName + '</span></div>' +
+        '<div class="rc-info-item"><label>Группа товаров / услуг</label><span>' + a.category + '</span></div>' +
+        '<div class="rc-info-item" style="grid-column:1/-1"><label>Комментарий</label><span>' + a.comment + '</span></div>' +
+        '</div>' +
+        '<div class="rc-sec-title">Заключение проверки ФЭБ</div>' +
+        '<div style="margin-bottom:16px">' + febBadge + '</div>' +
+        (listing ? (
+            '<div class="rc-sec-title">Объявление, к которому создана заявка</div>' +
+            '<div class="rc-list-row" style="cursor:pointer" onclick="rmOpenListing(' + listing.id + ')">' +
+            '<div class="rc-row-main"><div class="rc-row-title">' + listing.address + '</div><div class="rc-row-sub">' + listing.area + ' м² · ' + listing.location + ' · метро ' + listing.metro + '</div></div>' +
+            '<button class="rc-btn rc-btn-o rc-btn-sm">Открыть объявление →</button></div>'
+        ) : '') +
+        '<div class="rc-sec-title">Статус заявки</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">' +
+        statusOptions.map(function(s) {
+            var active = s === a.status;
+            return '<button class="rc-btn ' + (active ? 'rc-btn-p' : 'rc-btn-o') + ' rc-btn-sm" onclick="rmSetAppStatus(\'' + a.id + '\', \'' + s + '\')"' + (active ? ' disabled' : '') + '>' + s + '</button>';
+        }).join('') +
+        '</div>';
+    document.getElementById('rmAppDetailOverlay').classList.add('rc-open');
+}
+function rmCloseAppDetail() { document.getElementById('rmAppDetailOverlay').classList.remove('rc-open'); }
+function rmSetAppStatus(id, status) {
+    var a = rmApplications.find(function(x) { return x.id === id; });
+    if (!a) return;
+    a.status = status;
+    rcDB.save('rm:applications', rmApplications);
+    rmRenderLeaseIn();
+    rmOpenAppDetail(id);
+    rmShowToast('Статус заявки ' + id + ' изменён на «' + status + '»');
+}
+// Jumps from an application straight to the matching listing card on the
+// public "Взять в аренду" page, reusing the same subrent detail modal tenants see.
+function rmOpenListing(listingId) {
+    document.getElementById('rmCabinetApp').classList.remove('active');
+    document.getElementById('pulseApp').classList.add('hidden');
+    document.getElementById('subrentLandingApp').classList.add('active');
+    document.body.style.background = '#F3F0ED';
+    initSubrentAnimations();
+    try { initSsListings(); } catch (err) { console.error('Map init failed:', err); }
+    setTimeout(function() { ssOpenDetailModal(listingId); }, 200);
+}
+
+// ---- Мои договоры ----
+function rmRenderContracts() {
+    var reminderBorder = { green: '#2ECC71', yellow: '#E6B800', red: '#E31E25' };
+    var reminderDot = { green: '🟢', yellow: '🟡', red: '🔴' };
+    var atRiskCount = 0;
+    var groupedReminders = [];
+    // Reminders are computed from the FULL contract list regardless of search,
+    // so the "Ознакомиться" summary and nav badge never change while filtering.
+    rmContracts.forEach(function(c) {
+        var reminder = rmContractReminder(c);
+        if (reminder) { atRiskCount++; groupedReminders.push({ num: c.num, level: reminder.level, text: reminder.text }); }
+    });
+    var q = (document.getElementById('rmContractsSearch').value || '').trim().toLowerCase();
+    var statusFilter = (document.getElementById('rmContractsStatusFilter').value || '');
+    var rows = rmContracts.filter(function(c) {
+        var matchesQ = !q || c.num.toLowerCase().indexOf(q) !== -1 || c.object.toLowerCase().indexOf(q) !== -1;
+        var matchesStatus = !statusFilter || c.status === statusFilter;
+        return matchesQ && matchesStatus;
+    });
+    document.getElementById('rmContractsBody').innerHTML = rows.length ? rows.map(function(c) {
+        var reminder = rmContractReminder(c);
+        return '<tr class="rc-doc-clickable-row" style="cursor:pointer' + (reminder ? ';border-left:4px solid ' + reminderBorder[reminder.level] : '') + '" onclick="rmOpenContractDoc(\'' + c.num + '\')">' +
+            '<td style="font-weight:700">' + c.num + '</td><td>' + c.object + '</td><td>' + c.startDate + '</td><td>' + c.endDate + '</td><td>' + rcBadge(c.status) + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">Ничего не найдено</td></tr>';
+    // Grouped view at the top of the page — same collapsed "Ознакомиться"
+    // pattern used in the counterparty cabinet — while each row below keeps
+    // its own coloured fill/banner.
+    var levelOrder = { red: 0, yellow: 1, green: 2 };
+    groupedReminders.sort(function(a, b) { return levelOrder[a.level] - levelOrder[b.level]; });
+    var remCard = document.getElementById('rmContractsRemindersCard');
+    if (groupedReminders.length > 0) {
+        remCard.style.display = 'block';
+        document.getElementById('rmContractsReminderCountBadge').textContent = groupedReminders.length + ' шт.';
+        document.getElementById('rmContractsRemindersList').innerHTML = groupedReminders.map(function(r) {
+            return '<div class="rc-reminder" style="cursor:pointer" onclick="rmOpenContractDoc(\'' + r.num + '\')">' + reminderDot[r.level] + ' <span><strong>' + r.num + ':</strong> ' + r.text + '</span></div>';
+        }).join('');
+        document.getElementById('rmContractsRemindersList').style.display = 'none';
+        document.getElementById('rmContractsRemindersChevron').textContent = '▼ показать';
+    } else {
+        remCard.style.display = 'none';
+    }
+    var navBadge = document.getElementById('rmNavContractsBadge');
+    if (atRiskCount > 0) { navBadge.style.display = 'inline-flex'; navBadge.textContent = atRiskCount; } else { navBadge.style.display = 'none'; }
+}
+
+// ---- Витрина рисков (Главная) ----
+function rmRenderRiskTable() {
+    var active = rmContracts.filter(function(c) { return c.status === 'Действующий'; });
+    function withinDays(maxDays) {
+        return active.filter(function(c) { var d = rmDaysUntil(c.endDate); return d >= 0 && d <= maxDays; });
+    }
+    var b90 = withinDays(90), b60 = withinDays(60), b30 = withinDays(30);
+    var sum = function(list) { return list.reduce(function(s, c) { return s + c.rent; }, 0); };
+
+    var pending = rmProlongationItems.filter(function(i) { return i.column === 'На переговорах' || i.column === 'На подписании'; });
+    var pendingPct = rmProlongationItems.length ? Math.round(pending.length / rmProlongationItems.length * 100) : 0;
+    var signed = rmProlongationItems.filter(function(i) { return i.column === 'Подписано'; });
+    var signedArea = signed.reduce(function(s, i) { return s + i.area; }, 0);
+    var signedRent = signed.reduce(function(s, i) { return s + i.rent; }, 0);
+    var refused = rmProlongationItems.filter(function(i) { return i.column === 'Отказ'; });
+    var refusedReasons = refused.map(function(i) { return i.reason; }).join(', ');
+
+    var rows = [
+        { indicator: 'Договор истекает ≤ 90 дней', calc: b90.length + ' шт. / ' + rcFmt(sum(b90)) + ' в мес.', color: 'ok', action: 'Обратить внимание' },
+        { indicator: 'Договор истекает ≤ 60 дней', calc: b60.length + ' шт. / ' + rcFmt(sum(b60)) + ' в мес.', color: 'wait', action: 'Средний фокус' },
+        { indicator: 'Договор истекает ≤ 30 дней', calc: b30.length + ' шт. / ' + rcFmt(sum(b30)) + ' в мес.', color: 'reject', action: 'Критический фокус' },
+        { indicator: 'Договоров без решения о пролонгации', calc: pendingPct + '% (' + pending.length + ' из ' + rmProlongationItems.length + ')', color: 'wait', action: 'Назначить ответственного' },
+        { indicator: 'Подписано пролонгаций', calc: signed.length + ' шт., ' + signedArea + ' м², ' + rcFmt(signedRent) + ' в мес.', color: 'ok', action: 'Результат' },
+        { indicator: 'Отказов / непролонгировано', calc: refused.length + ' шт. — ' + (refusedReasons || 'причины не указаны'), color: 'ok', action: 'Анализ причин' },
+        { indicator: 'Средний срок согласования', calc: '16 дней от заявки до подписания', color: 'ok', action: 'Оптимизация процесса' }
+    ];
+    document.getElementById('rmRiskBody').innerHTML = rows.map(function(r) {
+        return '<tr><td style="font-weight:600">' + r.indicator + '</td><td>' + r.calc + '</td><td><span class="rc-badge rc-b-' + r.color + '">' + r.action + '</span></td></tr>';
+    }).join('');
+}
+
+// ---- Drag-and-drop kanban infrastructure (shared by both boards) ----
+var rmDragState = null;
+function rmKanbanDragStart(ev, board, itemId) {
+    rmDragState = { board: board, itemId: itemId };
+    ev.dataTransfer.effectAllowed = 'move';
+    try { ev.dataTransfer.setData('text/plain', itemId); } catch (e) {}
+    ev.currentTarget.classList.add('rm-dragging');
+}
+function rmKanbanDragEnd(ev) { ev.currentTarget.classList.remove('rm-dragging'); }
+function rmKanbanAllowDrop(ev, colEl) { ev.preventDefault(); colEl.classList.add('rm-drag-over'); }
+function rmKanbanDragLeave(colEl) { colEl.classList.remove('rm-drag-over'); }
+function rmKanbanDrop(ev, board, column, colEl) {
+    ev.preventDefault();
+    colEl.classList.remove('rm-drag-over');
+    if (!rmDragState || rmDragState.board !== board) return;
+    if (board === 'prolongation') {
+        var item = rmProlongationItems.find(function(i) { return i.id === rmDragState.itemId; });
+        if (item) { item.column = column; rcDB.save('rm:prolongationItems', rmProlongationItems); rmRenderProlongationBoard(); rmRenderRiskTable(); rmRenderProlongationChart(); }
+    } else if (board === 'requests') {
+        var app = rmApplications.find(function(a) { return a.id === rmDragState.itemId; });
+        if (app) { app.status = column; rcDB.save('rm:applications', rmApplications); rmRenderRequestsBoard(); rmRenderLeaseIn(); rmRenderRequestsChart(); }
+    }
+    rmDragState = null;
+}
+function rmRenderProlongationBoard() {
+    document.getElementById('rmProlongationBoardEl').innerHTML = rmProlongationColumns.map(function(col) {
+        var items = rmProlongationItems.filter(function(i) { return i.column === col; });
+        var cards = items.map(function(i) {
+            return '<div class="rm-kanban-card" draggable="true" ondragstart="rmKanbanDragStart(event,\'prolongation\',\'' + i.id + '\')" ondragend="rmKanbanDragEnd(event)">' +
+                '<div class="rm-kc-tt">' + i.tt + '</div><div class="rm-kc-da">' + i.da + '</div>' +
+                (i.reason ? '<div class="rm-kc-reason">' + i.reason + '</div>' : '') + '</div>';
+        }).join('') || '<div class="rm-kanban-empty">Пусто</div>';
+        var colId = 'rmPlCol_' + col.replace(/\s+/g, '_');
+        return '<div class="rm-kanban-col" id="' + colId + '" ondragover="rmKanbanAllowDrop(event, this)" ondragleave="rmKanbanDragLeave(this)" ondrop="rmKanbanDrop(event,\'prolongation\',\'' + col + '\', this)">' +
+            '<div class="rm-kanban-col-hdr">' + col + '</div>' + cards +
+            '<div class="rm-kanban-total">Итого: ' + items.length + '</div></div>';
+    }).join('');
+}
+var rmRequestsColumns = ['Принять в работу', 'На согласовании', 'Действует', 'Отказано'];
+function rmRenderRequestsBoard() {
+    document.getElementById('rmRequestsBoardEl').innerHTML = rmRequestsColumns.map(function(col) {
+        var items = rmApplications.filter(function(a) { return a.status === col && a.febResult !== 'На проверке'; });
+        var cards = items.map(function(a) {
+            var listing = ssListingsData.find(function(l) { return l.id === a.listingId; });
+            var tt = listing ? listing.address : a.brandName;
+            var da = a.daNum || ('Заявка ' + a.id);
+            return '<div class="rm-kanban-card" draggable="true" ondragstart="rmKanbanDragStart(event,\'requests\',\'' + a.id + '\')" ondragend="rmKanbanDragEnd(event)">' +
+                '<div class="rm-kc-tt">' + tt + '</div><div class="rm-kc-da">' + da + '</div></div>';
+        }).join('') || '<div class="rm-kanban-empty">Пусто</div>';
+        var colId = 'rmReqCol_' + col.replace(/\s+/g, '_');
+        return '<div class="rm-kanban-col" id="' + colId + '" ondragover="rmKanbanAllowDrop(event, this)" ondragleave="rmKanbanDragLeave(this)" ondrop="rmKanbanDrop(event,\'requests\',\'' + col + '\', this)">' +
+            '<div class="rm-kanban-col-hdr">' + col + '</div>' + cards +
+            '<div class="rm-kanban-total">Итого: ' + items.length + '</div></div>';
+    }).join('');
+}
+
+// ---- Charts: donut for prolongation board, bar chart for requests board ----
+var RM_PROLONGATION_COLORS = { 'На переговорах': '#6C757D', 'На подписании': '#F5A623', 'Подписано': '#2ECC71', 'Согласовано': '#1A7A4A', 'Отказ': '#E31E25' };
+var RM_REQUESTS_COLORS = { 'Принять в работу': '#E31E25', 'На согласовании': '#F5A623', 'Действует': '#2ECC71', 'Отказано': '#8A2626' };
+
+function rmRenderProlongationChart() {
+    var segments = rmProlongationColumns.map(function(col) {
+        var count = rmProlongationItems.filter(function(i) { return i.column === col; }).length;
+        return { label: col, value: count, color: RM_PROLONGATION_COLORS[col] };
+    });
+    var total = segments.reduce(function(s, seg) { return s + seg.value; }, 0) || 1;
+    var legend = segments.map(function(seg) {
+        var pct = Math.round(seg.value / total * 100);
+        return '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0">' +
+            '<span style="width:10px;height:10px;border-radius:3px;background:' + seg.color + ';flex-shrink:0"></span>' +
+            '<span style="flex:1">' + seg.label + '</span><span style="font-weight:700">' + pct + '%</span></div>';
+    }).join('');
+    document.getElementById('rmProlongationChartEl').innerHTML =
+        '<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">' +
+        '<div>' + rmDonutChartSVG(segments) + '</div>' +
+        '<div style="flex:1;min-width:180px">' + legend + '</div></div>';
+}
+function rmRenderRequestsChart() {
+    var values = rmRequestsColumns.map(function(col) { return rmApplications.filter(function(a) { return a.status === col && a.febResult !== 'На проверке'; }).length; });
+    var colors = rmRequestsColumns.map(function(col) { return RM_REQUESTS_COLORS[col]; });
+    document.getElementById('rmRequestsChartEl').innerHTML = rmBarChartCountsSVG(values, rmRequestsColumns, colors);
+}
+
+
+function rmGoToContract(num) {
+    rmShowPage('contracts');
+    setTimeout(function() {
+        var rows = document.querySelectorAll('#rmContractsBody tr');
+        rows.forEach(function(r) {
+            if (r.textContent.indexOf(num) !== -1) {
+                r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                r.style.transition = 'background 0.3s';
+                r.style.background = '#FFF3CD';
+                setTimeout(function() { r.style.background = ''; }, 1600);
+            }
+        });
+    }, 100);
+}
+// Shows the contract itself as a document facsimile, same visual pattern as
+// the counterparty cabinets use for their own contract documents.
+function rmOpenContractDoc(num) {
+    var c = rmContracts.find(function(x) { return x.num === num; });
+    if (!c) return;
+    document.getElementById('rmContractDocTitle').textContent = 'Договор № ' + c.num;
+    document.getElementById('rmContractDocSub').textContent = c.object;
+    var reminder = rmContractReminder(c);
+    var reminderColors = { green: ['#EFFBF3', '#2ECC71'], yellow: ['#FFF9E6', '#E6B800'], red: ['#FDECEC', '#E31E25'] };
+    var reminderHtml = reminder ? '<div style="background:' + reminderColors[reminder.level][0] + ';border-left:4px solid ' + reminderColors[reminder.level][1] + ';padding:10px 14px;border-radius:6px;font-size:12.5px;color:#495057;margin-bottom:16px">⏰ ' + reminder.text + '</div>' : '';
+    document.getElementById('rmContractDocBody').innerHTML =
+        reminderHtml +
+        '<div class="rc-doc-page">' +
+        '<div class="rc-doc-page-hdr">ДОГОВОР АРЕНДЫ № ' + c.num + '</div>' +
+        '<div class="rc-doc-page-sub">от ' + c.startDate + '</div>' +
+        '<div class="rc-doc-page-line" style="width:100%"></div><div class="rc-doc-page-line" style="width:94%"></div><div class="rc-doc-page-line" style="width:97%"></div>' +
+        '<div class="rc-doc-page-line" style="width:88%"></div><div class="rc-doc-page-line" style="width:100%"></div><div class="rc-doc-page-line" style="width:60%"></div>' +
+        '<div class="rc-doc-page-sign"><span>Объект: ' + c.object + '</span><span>Срок: ' + c.startDate + ' — ' + c.endDate + '</span></div>' +
+        '</div>' +
+        '<div class="rc-info-grid" style="margin-top:16px">' +
+        '<div class="rc-info-item"><label>Дата начала</label><span>' + c.startDate + '</span></div>' +
+        '<div class="rc-info-item"><label>Дата окончания</label><span>' + c.endDate + '</span></div>' +
+        '<div class="rc-info-item"><label>Статус</label><span>' + rcBadge(c.status) + '</span></div>' +
+        '</div>' +
+        '<div style="margin-top:16px"><button class="rc-btn rc-btn-o rc-btn-sm" onclick="rmShowToast(\'Скачивается: ' + c.num + '.pdf\')">↓ Скачать PDF</button></div>';
+    document.getElementById('rmContractDocOverlay').classList.add('rc-open');
+}
+function rmCloseContractDoc() { document.getElementById('rmContractDocOverlay').classList.remove('rc-open'); }
+
+// ---- Объекты ----
+function rmRenderObjects() {
+    var q = (document.getElementById('rmObjectsSearch').value || '').trim().toLowerCase();
+    var statusFilter = (document.getElementById('rmObjectsStatusFilter').value || '');
+    var rows = rmObjects.filter(function(o) {
+        var matchesQ = !q || o.name.toLowerCase().indexOf(q) !== -1 || o.address.toLowerCase().indexOf(q) !== -1;
+        var matchesStatus = !statusFilter || o.status === statusFilter;
+        return matchesQ && matchesStatus;
+    });
+    document.getElementById('rmObjectsBody').innerHTML = rows.length ? rows.map(function(o) {
+        var contractCell = o.contractNum ? '<span style="cursor:pointer;color:#B0040F;font-weight:600" onclick="rmGoToContract(\'' + o.contractNum + '\')">' + o.contractNum + ' →</span>' : '—';
+        return '<tr><td style="font-weight:700">' + o.name + '</td><td>' + o.address + '</td><td>' + o.area + ' м²</td><td>' + o.location + '</td><td>' + rcBadge(o.status === 'В аренде' ? 'В аренде' : 'Свободно') + '</td><td>' + contractCell + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">Ничего не найдено</td></tr>';
+}
+
+// ---- Внешние обращения ----
+function rmRenderExternal() {
+    var q = (document.getElementById('rmExternalSearch').value || '').trim().toLowerCase();
+    var statusFilter = (document.getElementById('rmExternalStatusFilter').value || '');
+    var rows = rmExternalAppeals.filter(function(a) {
+        var matchesQ = !q || a.id.toLowerCase().indexOf(q) !== -1 || a.topic.toLowerCase().indexOf(q) !== -1 || a.contragent.toLowerCase().indexOf(q) !== -1;
+        var matchesStatus = !statusFilter || a.status === statusFilter;
+        return matchesQ && matchesStatus;
+    });
+    document.getElementById('rmExternalBody').innerHTML = rows.length ? rows.map(function(a) {
+        return '<tr class="rc-doc-clickable-row" style="cursor:pointer" onclick="rmOpenExternalDetail(\'' + a.id + '\')">' +
+            '<td style="font-weight:700">' + a.id + '</td><td>' + a.topic + '</td><td>' + a.contragent + '</td><td>' + a.createdDate + '</td><td>' + a.dueDate + '</td><td>' + rcBadge(a.status) + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">Ничего не найдено</td></tr>';
+}
+function rmOpenExternalDetail(id) {
+    var a = rmExternalAppeals.find(function(x) { return x.id === id; });
+    if (!a) return;
+    document.getElementById('rmExternalDetailTitle').textContent = a.id + ' — ' + a.topic;
+    document.getElementById('rmExternalDetailSub').textContent = 'Создано ' + a.createdDate + ' · Срок ответа — ' + a.dueDate;
+    var contractRow = a.contractNum
+        ? '<div class="rc-info-item"><label>Договор</label><span style="cursor:pointer;color:#B0040F;font-weight:600" onclick="rmCloseExternalDetail(); rmGoToContract(\'' + a.contractNum + '\')">' + a.contractNum + ' →</span></div>'
+        : '<div class="rc-info-item"><label>Договор</label><span>Не привязан</span></div>';
+    document.getElementById('rmExternalDetailBody').innerHTML =
+        '<div class="rc-info-grid">' +
+        '<div class="rc-info-item"><label>Контрагент</label><span>' + a.contragent + '</span></div>' +
+        '<div class="rc-info-item"><label>Тематика</label><span>' + a.topic + '</span></div>' +
+        '<div class="rc-info-item"><label>Дата создания</label><span>' + a.createdDate + '</span></div>' +
+        '<div class="rc-info-item"><label>Срок ответа</label><span>' + a.dueDate + '</span></div>' +
+        '<div class="rc-info-item"><label>Статус</label><span>' + rcBadge(a.status) + '</span></div>' +
+        contractRow +
+        '</div>' +
+        '<div class="rc-sec-title">Суть обращения</div>' +
+        '<div class="rc-reminder">📋 <span>' + a.description + '</span></div>' +
+        '<div class="rc-sec-title">История переписки</div>' +
+        a.comments.map(function(c) {
+            return '<div style="padding:10px 0;border-bottom:1px solid #F1F3F5"><div style="font-weight:700;font-size:12.5px">' + c.author + '</div><div style="font-size:13px;margin:3px 0">' + c.text + '</div><div style="font-size:11px;color:#8E8E93">' + c.time + '</div></div>';
+        }).join('');
+    document.getElementById('rmExternalDetailOverlay').classList.add('rc-open');
+}
+function rmCloseExternalDetail() { document.getElementById('rmExternalDetailOverlay').classList.remove('rc-open'); }
+
+// ---- Внутренние обращения (задачи от ТРКН) ----
+function rmRenderInternal() {
+    var q = (document.getElementById('rmInternalSearch').value || '').trim().toLowerCase();
+    var statusFilter = (document.getElementById('rmInternalStatusFilter').value || '');
+    var rows = rmInternalTasks.filter(function(t) {
+        var matchesQ = !q || t.id.toLowerCase().indexOf(q) !== -1 || t.topic.toLowerCase().indexOf(q) !== -1;
+        var matchesStatus = !statusFilter || t.status === statusFilter;
+        return matchesQ && matchesStatus;
+    });
+    document.getElementById('rmInternalList').innerHTML = rows.length ? rows.map(function(t) {
+        return '<tr class="rc-doc-clickable-row" style="cursor:pointer" onclick="rmOpenInternalDetail(\'' + t.id + '\')">' +
+            '<td style="font-weight:700">' + t.id + '</td><td>' + t.topic + '</td><td>' + t.date + '</td><td>' + t.dueDate + '</td><td>' + rcBadge(t.status) + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">Ничего не найдено</td></tr>';
+}
+function rmOpenInternalDetail(id) {
+    var t = rmInternalTasks.find(function(x) { return x.id === id; });
+    if (!t) return;
+    document.getElementById('rmInternalDetailTitle').textContent = t.id;
+    document.getElementById('rmInternalDetailSub').textContent = 'Источник: ' + t.source + ' · Поставлена ' + t.date;
+    var contractRow = t.contractNum
+        ? '<div class="rc-info-item"><label>Связанный договор</label><span style="cursor:pointer;color:#B0040F;font-weight:600" onclick="rmCloseInternalDetail(); rmGoToContract(\'' + t.contractNum + '\')">' + t.contractNum + ' →</span></div>'
+        : '<div class="rc-info-item"><label>Связанный договор</label><span>Не привязан</span></div>';
+    document.getElementById('rmInternalDetailBody').innerHTML =
+        '<div class="rc-info-grid">' +
+        '<div class="rc-info-item"><label>Ответственный</label><span>' + t.assignee + '</span></div>' +
+        '<div class="rc-info-item"><label>Дата постановки</label><span>' + t.date + '</span></div>' +
+        '<div class="rc-info-item"><label>Срок исполнения</label><span>' + t.dueDate + '</span></div>' +
+        '<div class="rc-info-item"><label>Статус</label><span>' + rcBadge(t.status) + '</span></div>' +
+        contractRow +
+        '</div>' +
+        '<div class="rc-sec-title">Описание задачи</div>' +
+        '<div class="rc-reminder">📋 <span>' + t.description + '</span></div>';
+    document.getElementById('rmInternalDetailOverlay').classList.add('rc-open');
+}
+function rmCloseInternalDetail() { document.getElementById('rmInternalDetailOverlay').classList.remove('rc-open'); }
+
+
+rmEnter();
+</script>
+</body>
+</html>
